@@ -1,0 +1,2061 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rooms Management UI</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/CTU-logo-BH.png' %}" />
+    
+  <style>
+    /* Reset and global styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Hero section */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #007bff;
+      color: #ffffff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease;
+      background-image: url("{% static 'img/BH-logo.png' %}");
+      background-size: cover;
+      background-position: center;
+      min-height: 400px;
+      gap: 20px;
+    }
+
+    .hidden-rooms-card,
+.statistics-card {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.hidden-rooms-card h2,
+.statistics-card h2 {
+    margin-bottom: 10px;
+}
+
+.statistics {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    animation: bounce 1s infinite alternate;
+}
+
+.stat-circle.available {
+    background-color: #4caf50;
+}
+
+.stat-circle.not-available {
+    background-color: #f44336;
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-10px);
+    }
+}
+
+    .hero-content {
+      text-align: center;
+      margin-top: 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 8px; 
+    border: 1px solid #ddd;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #ffffff;
+      color: #007bff;
+      padding: 12px 30px;
+      text-decoration: none;
+      border-radius: 50px;
+      font-size: 16px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #007bff;
+      color: #ffffff;
+    }
+
+     
+
+    /* Animations */
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      0% {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .rooms-listing-container {
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.rooms-listing-container h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.rooms-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+}
+
+.room-card {
+    display: flex;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.room-image {
+    width: 200px;
+    min-width: 200px;
+    height: 150px;
+    position: relative;
+    border-right: 1px solid #e5e7eb;
+}
+
+.room-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.room-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    width: 100%;
+}
+
+.room-details h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.room-details p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Status indicators */
+.status-aircon {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-aircon.yes {
+    background-color: #03a6e6;
+    color: #bdfff8;
+}
+
+.status-aircon.no {
+    background-color: #0be8f8;
+    color: #041ec6;
+}
+
+/* Price styling */
+.price-tag {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+/* Column headers */
+.rooms-header {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    color: #4b5563;
+    margin-left: 200px; /* Align with room details */
+}
+
+.rooms-header span {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+    /* Media queries */
+    @media (min-width: 768px) {
+      .hero {
+        flex-direction: row;
+        background-image: url("{% static 'img/hero-image.jpg' %}");
+        min-height: 100px;
+      }
+
+      .hero-content {
+        text-align: left;
+        margin-top: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 40px;
+      }
+
+      .hero h1 {
+        font-size: 48px;
+      }
+
+      .hero p {
+        font-size: 20px;
+      }
+
+      .hero-image {
+        display: none;
+      }
+      .studentRequestRemoval-request-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .studentRequestRemoval-student-info {
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        .studentRequestRemoval-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+        .action-buttons {
+          top: 0.75rem;
+          right: 0.75rem;
+      }
+      
+    }
+
+
+    /* Removal Request Button */
+    .removal-request-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: 45px;
+    padding: 0.75rem 1.25rem;
+    background: #dc2626;  /* Rich red background */
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 50px;
+    color: #ffffff;  /* Pure white text for better contrast */
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+.removal-request-btn:hover {
+    background: #b91c1c;  /* Darker red on hover */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.removal-request-btn:active {
+    transform: translateY(0);
+    background: #991b1b;  /* Even darker red when clicked */
+}
+
+/* Pending Animation */
+.pending-indicator {
+    position: relative;
+    width: 18px;
+    height: 18px;
+}
+
+.pending-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #fecaca;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+.pending-ring::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border-radius: 50%;
+    border: 2px dotted #fecaca;
+    border-top-color: transparent;
+    animation: spin 2s linear infinite reverse;
+}
+
+/* Counter Badge */
+.counter-badge {
+    background: #f40808;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 1.25rem;
+    text-align: center;
+}
+.counter-badge-hidden{
+  background: #089ef4;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 1.25rem;
+    text-align: center;
+}
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+.studentRequestRemoval-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.studentRequestRemoval-modal.active {
+    opacity: 1;
+}
+
+.studentRequestRemoval-modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.studentRequestRemoval-modal.active .studentRequestRemoval-modal-content {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+.studentRequestRemoval-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+.studentRequestRemoval-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.studentRequestRemoval-modal-title-pending {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: #ef4444;
+    font-weight: 500;
+}
+
+.studentRequestRemoval-close-btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.studentRequestRemoval-close-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.studentRequestRemoval-modal-body {
+    padding: 1.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.studentRequestRemoval-request-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+ 
+.studentRequestRemoval-request-item:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-color: #d1d5db;
+}
+
+.studentRequestRemoval-profile-picture {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+}
+
+.studentRequestRemoval-student-info {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+}
+
+.studentRequestRemoval-student-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    grid-column: 1 / -1;
+}
+
+.studentRequestRemoval-request-date,
+.studentRequestRemoval-request-reason,
+.studentRequestRemoval-room-info,
+.studentRequestRemoval-boardinghouse-info {
+    font-size: 0.875rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.studentRequestRemoval-request-date::before {
+    content: "🕒";
+}
+
+.studentRequestRemoval-request-id::before {
+    content: "🪪";
+}
+
+.studentRequestRemoval-request-reason::before {
+    content: "📝";
+}
+
+.studentRequestRemoval-room-info::before {
+    content: "🏠";
+}
+
+.studentRequestRemoval-boardinghouse-info::before {
+    content: "🏢";
+}
+
+.studentRequestRemoval-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+
+.studentRequestRemoval-approve-btn,
+.studentRequestRemoval-reject-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.studentRequestRemoval-approve-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+}
+
+.studentRequestRemoval-approve-btn:hover {
+    background: #059669;
+}
+
+.studentRequestRemoval-reject-btn {
+    background: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.studentRequestRemoval-reject-btn:hover {
+    background: #fee2e2;
+}
+
+.studentRequestRemoval-request-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.studentRequestRemoval-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.studentRequestRemoval-request-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.studentRequestRemoval-student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.studentRequestRemoval-student-name {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.studentRequestRemoval-request-date {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.studentRequestRemoval-request-reason {
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.studentRequestRemoval-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.studentRequestRemoval-approve-btn,
+.studentRequestRemoval-reject-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.studentRequestRemoval-approve-btn {
+    background: #22c55e;
+    color: white;
+}
+
+.studentRequestRemoval-approve-btn:hover {
+    background: #16a34a;
+}
+
+.studentRequestRemoval-reject-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.studentRequestRemoval-reject-btn:hover {
+    background: #dc2626;
+}
+
+/* Scrollbar Styles */
+.studentRequestRemoval-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.studentRequestRemoval-modal-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.studentRequestRemoval-modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.studentRequestRemoval-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.addRoomsButton {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    border: none;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.addRoomsButton::before {
+    content: '+';
+    color: white;
+    font-size: 2rem;
+    font-weight: 300;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.addRoomsButton:hover {
+    transform: translateY(-2px) rotate(90deg);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    background: linear-gradient(145deg, #1d4ed8, #1e40af);
+}
+
+/* Click effect */
+.addRoomsButton:active {
+    transform: translateY(0) scale(0.95);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* Optional pulse animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    }
+}
+
+.addRoomsButton {
+    animation: pulse 2s infinite;
+}
+
+/* Optional ripple effect on click */
+.addRoomsButton::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    transition: transform 0.3s ease;
+}
+
+.addRoomsButton:active::after {
+    transform: scale(1.5);
+    opacity: 0;
+}
+
+/* Optional focus state for accessibility */
+.addRoomsButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3), 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .addRoomsButton {
+        animation: none;
+        transition: none;
+    }
+    
+    .addRoomsButton:hover {
+        transform: none;
+    }
+}
+
+/* Modal Container & Overlay */
+.addRooms-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1001;
+}
+
+.addRooms-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.addRooms-modal {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.addRooms-overlay.active .addRooms-modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* Modal Header */
+.addRooms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.addRooms-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.addRooms-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.addRooms-close:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+/* Form Elements */
+.addRooms-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.addRooms-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.addRooms-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.addRooms-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.addRooms-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.addRooms-input:hover {
+    border-color: #d1d5db;
+}
+
+/* Number Input Specific */
+.addRooms-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.addRooms-input[type="number"]::-webkit-outer-spin-button,
+.addRooms-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Toggle Switch */
+.addRooms-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.addRooms-switch {
+    position: relative;
+    width: 3rem;
+    height: 1.5rem;
+}
+
+.addRooms-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.addRooms-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    transition: .3s;
+    border-radius: 1.5rem;
+}
+
+.addRooms-slider:before {
+    position: absolute;
+    content: "";
+    height: 1.25rem;
+    width: 1.25rem;
+    left: 0.125rem;
+    bottom: 0.125rem;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.addRooms-switch input:checked + .addRooms-slider {
+    background-color: #2563eb;
+}
+
+.addRooms-switch input:checked + .addRooms-slider:before {
+    transform: translateX(1.5rem);
+}
+
+/* File Upload */
+.addRooms-upload {
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.addRooms-upload:hover {
+    border-color: #2563eb;
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.addRooms-upload input[type="file"] {
+    display: none;
+}
+
+.addRooms-upload-icon {
+    color: #6b7280;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Submit Button */
+.addRooms-submit {
+    background: #2563eb;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+.addRooms-submit:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.addRooms-submit:active {
+    transform: translateY(0);
+}
+
+/* Dropdown Select Styling */
+.addRooms-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
+
+.addRooms-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.addRooms-select:hover {
+    border-color: #d1d5db;
+}
+
+/* Style the dropdown options */
+.addRooms-select option {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+}
+.successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+.action-buttons {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem; 
+}
+
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+    background-color: #f9fafb;
+    color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.updatingRoomModal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.updatingRoomModal-overlay.updatingRoomModal-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.updatingRoomModal-container {
+    width: 95%;
+    max-width: 500px;
+    background: white;
+    border-radius: 12px;
+    transform: scale(0.95);
+    transition: transform 0.3s ease-in-out;
+}
+
+.updatingRoomModal-overlay.updatingRoomModal-active .updatingRoomModal-container {
+    transform: scale(1);
+}
+
+.updatingRoomModal-content {
+    position: relative;
+}
+
+.updatingRoomModal-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.updatingRoomModal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.updatingRoomModal-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.updatingRoomModal-close:hover {
+    color: #111827;
+}
+
+.updatingRoomModal-form {
+    padding: 1.25rem;
+}
+
+.updatingRoomModal-formGroup {
+    margin-bottom: 1.25rem;
+}
+
+.updatingRoomModal-formGroup label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.updatingRoomModal-formGroup input[type="text"],
+.updatingRoomModal-formGroup input[type="number"] {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+}
+
+.updatingRoomModal-formGroup input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+/* Toggle Switch */
+.updatingRoomModal-airconToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+.updatingRoomModal-toggleSwitch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+}
+
+.updatingRoomModal-toggleSwitch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.updatingRoomModal-toggleSlider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.updatingRoomModal-toggleSlider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.updatingRoomModal-toggleSwitch input:checked + .updatingRoomModal-toggleSlider {
+    background-color: #4f46e5;
+}
+
+.updatingRoomModal-toggleSwitch input:checked + .updatingRoomModal-toggleSlider:before {
+    transform: translateX(20px);
+}
+
+.updatingRoomModal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 1.5rem;
+}
+
+.updatingRoomModal-btnPrimary,
+.updatingRoomModal-btnSecondary {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.updatingRoomModal-btnPrimary {
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+}
+
+.updatingRoomModal-btnPrimary:hover {
+    background-color: #4338ca;
+}
+
+.updatingRoomModal-btnSecondary {
+    background-color: white;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.updatingRoomModal-btnSecondary:hover {
+    background-color: #f9fafb;
+}
+
+.updatingRoomModal-hidden {
+    display: none;
+}
+
+.updatingRoomModal-roomType {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.updatingRoomModal-roomType label {
+    font-size: 1rem !important;
+    margin-bottom: 0.75rem !important;
+    color: #1e293b !important;
+}
+
+.updatingRoomModal-roomTypeWrapper {
+    position: relative;
+}
+
+.updatingRoomModal-roomType select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: white;
+    appearance: none;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* Select wrapper and icon styles */
+.updatingRoomModal-selectWrapper {
+    position: relative;
+}
+
+.updatingRoomModal-selectIcon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #64748b;
+}
+
+/* Styled select inputs */
+.updatingRoomModal-formGroup select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    appearance: none;
+    background-color: white;
+    color: #374151;
+}
+
+/* Focus states for selects */
+.updatingRoomModal-roomType select:focus,
+.updatingRoomModal-formGroup select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+/* Hover states */
+.updatingRoomModal-roomType select:hover,
+.updatingRoomModal-formGroup select:hover {
+    border-color: #cbd5e1;
+}
+
+/* Update existing form group styles */
+.updatingRoomModal-formGroup {
+    margin-bottom: 1.25rem;
+}
+
+.updatingRoomModal-formGroup label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+/* Remove previous toggle switch styles as we're using a dropdown now */
+.updatingRoomModal-airconToggle,
+.updatingRoomModal-toggleSwitch,
+.updatingRoomModal-toggleSlider {
+    display: none;
+}
+
+/* HiddenRooms Modal background */
+.hiddenRooms-modal {
+    display: none; /* Set to block for testing, change to 'none' for default hidden */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding-top: 60px;
+}
+
+/* HiddenRooms Modal content box */
+.hiddenRooms-modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Close button */
+.hiddenRooms-close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.hiddenRooms-close-btn:hover,
+.hiddenRooms-close-btn:focus {
+    color: black;
+}
+
+/* HiddenRooms Room card styles */
+.hiddenRooms-room-card {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.hiddenRooms-room-card h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.hiddenRooms-room-card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.status-available {
+            color: green;
+            font-weight: bold;
+        }
+        .status-unavailable {
+            color: red;
+            font-weight: bold;
+        }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Rooms Management</h1>
+            <p>Efficiently manage your boarding house rooms and bookings.</p>  
+            <a href="{% url 'ownerhomepage' %}" class="btn">
+                <i class="fa fa-arrow-left"></i> Go Back
+            </a>
+            <button class="removal-request-btn" onclick="handleRemovalRequests()"> 
+              Student Removal Requests
+              <span class="counter-badge">{{ removal_requests|length }}</span>
+          </button>
+        </div> 
+
+        <!-- Small Card Box: Rooms that you hide -->
+          <div class="hidden-rooms-card">
+            <h2>Rooms That You Hide</h2>
+            <p>Manage and restore hidden rooms here.</p>
+            <center> <button class="btn btn-primary" onclick="showHiddenRooms()">View Hidden Rooms <span class="counter-badge-hidden">{{ not_shown_rooms_count }}</span></button></center>
+        </div>
+
+        <!-- Statistics Card Box -->
+        <div class="statistics-card">
+            <h2>Room Availability Statistics</h2>
+            <div class="statistics">
+                <div class="stat-item">
+                    <div class="stat-circle available"></div>
+                    <p>Available: <span class="stat-count" style="color: #16a34a; background-color: white; border-radius: 50px; padding: 5px 10px 5px 10px;">{{ available_rooms }}</span></p>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-circle not-available"></div>
+                    <p>Room Full: <span class="stat-count" style="color:#b91c1c; background-color: white; border-radius: 50px; padding: 5px 10px 5px 10px;">{{ not_available_rooms }}</span></p>
+                </div>
+            </div>
+        </div>        
+      </div>
+    </div>
+
+    <div class="rooms-listing-container">
+      <h2>Manage your rooms</h2>
+  
+      {% if rooms %}
+      <div class="rooms-header">
+          <span>Room Name</span>
+          <span>Capacity</span>
+          <span>Price</span>
+          <span>Type</span> 
+      </div>
+  
+      <div class="rooms-grid">
+          {% for room in rooms %}
+          {% if room.status != "notShown" or not room.status %}
+          <div class="room-card">
+              <div class="room-image">
+                  {% if room.images %}
+                  <img src="{{ room.images.0 }}" alt="{{ room.roomName }}">
+                  {% else %}
+                  <img src="/api/placeholder/400/300" alt="No image available">
+                  {% endif %}
+              </div>
+              <div class="room-details">
+                  <h3>{{ room.roomName }}</h3>
+                  <p data-label="Capacity">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="9" cy="7" r="4"></circle>
+                      </svg>
+                      {{ room.capacity }} persons
+                  </p>
+                  <p data-label="Price" class="price-tag">₱{{ room.price|floatformat:2 }}</p>
+                  <p data-label="Type">
+                      <span class="status-aircon {% if room.aircon == 'Aircon' %}yes{% else %}no{% endif %}">
+                          {{ room.aircon }}
+                      </span>
+                  </p>
+                  {% if room.availabilityStatus == "AVAILABLE" %}
+                                <span class="status-available">{{ room.availabilityStatus }}</span>
+                            {% else %}
+                                <span class="status-unavailable">ROOM FULL</span>
+                            {% endif %}
+              </div>
+              <div class="action-buttons">
+                <a href="#" 
+                    class="icon-button" 
+                    title="Edit Room"
+                    data-action="edit" 
+                    data-room-name="{{ room.roomName }}"
+                    data-capacity="{{ room.capacity }}"
+                    data-price="{{ room.price }}"
+                    data-aircon="{{ room.aircon }}"
+                    data-number-staying-in="{{ room.numberStayingIn }}"> <!-- Add this line -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </a>
+                
+                  <form method="POST" style="display: inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="room_name" value="{{ room.roomName }}">
+                      <button type="submit" name="hide_room" class="icon-button" title="Don't show this room to students">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                              <line x1="1" y1="1" x2="23" y2="23"></line>
+                              <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                      </button>
+                  </form>
+              </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <p>No rooms available at the moment.</p>
+      </div>
+      {% endif %}
+  </div>
+  
+
+  
+  <div id="updatingRoomModal" class="updatingRoomModal-overlay updatingRoomModal-hidden">
+    <div class="updatingRoomModal-container">
+        <div class="updatingRoomModal-content">
+            <div class="updatingRoomModal-header">
+                <h3>Update Room</h3>
+                <button class="updatingRoomModal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <form method="POST" action="{% url 'ownersRoomManagement' %}" class="updatingRoomModal-form">
+                {% csrf_token %} 
+                <input type="hidden" name="email_key" value="{{ email }}">  
+
+                <!-- New Room Type Selection -->
+                <div class="updatingRoomModal-formGroup updatingRoomModal-roomType">
+                    <label for="updatingRoomModal-type">Input here how many are currently staying here</label>
+                    <div class="updatingRoomModal-roomTypeWrapper">
+                        <input type="number" name="numberStayingIn" id="updatingRoomModal-numberStayingIn" required> 
+                    </div>
+                </div>
+                
+                <div class="updatingRoomModal-formGroup">
+                    <label for="updatingRoomModal-roomName">Room Name <i><strong>(can't be edited)</strong></i></label>
+                    <input type="text" id="updatingRoomModal-roomName" name="roomName" required readonly>
+                </div>
+
+                <div class="updatingRoomModal-formGroup">
+                    <label for="updatingRoomModal-capacity">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                        </svg>
+                        Capacity
+                    </label>
+                    <input type="number" id="updatingRoomModal-capacity" name="capacity" min="1" required>
+                </div>
+
+                <div class="updatingRoomModal-formGroup">
+                    <label for="updatingRoomModal-price">Price (₱)</label>
+                    <input type="number" id="updatingRoomModal-price" name="price" step="0.01" min="0" required>
+                </div>
+
+                <div class="updatingRoomModal-formGroup">
+                    <label for="updatingRoomModal-aircon">Air Conditioning</label>
+                    <div class="updatingRoomModal-selectWrapper">
+                        <select id="updatingRoomModal-aircon" name="aircon" required>
+                            <option value="" disabled selected>Select room type</option>
+                            <option value="Aircon">Aircon</option>
+                            <option value="Non-Aircon">Non-Aircon</option>                    
+                        </select>
+                        <div class="updatingRoomModal-selectIcon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <div class="updatingRoomModal-footer">
+                    <button type="button" class="updatingRoomModal-btnSecondary updatingRoomModal-close">Cancel</button>
+                    <button type="submit" class="updatingRoomModal-btnPrimary" name="updateRooms">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 
+
+
+
+  </div>
+  <div id="studentRequestRemovalModal" class="studentRequestRemoval-modal">
+    <div class="studentRequestRemoval-modal-content">
+        <div class="studentRequestRemoval-modal-header">
+            <div class="studentRequestRemoval-modal-title">
+                Student Removal Requests
+                <span class="studentRequestRemoval-modal-title-pending">
+                    {{ removal_requests|length }} Pending
+                </span>
+            </div>
+            <button class="studentRequestRemoval-close-btn" onclick="closeStudentRequestRemoval()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 5L5 15M5 5l10 10" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        <div class="studentRequestRemoval-modal-body">
+          <div class="studentRequestRemoval-request-list">
+            {% if removal_requests %}
+            {% for request in removal_requests %}
+                <div class="studentRequestRemoval-request-item">
+                    <img class="studentRequestRemoval-profile-picture" src="{{ request.profile_picture }}" alt="Profile Picture">
+                    <div class="studentRequestRemoval-student-info">
+                        <div class="studentRequestRemoval-student-name">{{ request.username }}</div>
+                        <div class="studentRequestRemoval-request-id">Student ID: {{ request.student_id }}</div>
+                        <div class="studentRequestRemoval-request-date">Requested on {{ request.dateRequested }}</div>
+                        <div class="studentRequestRemoval-request-reason">Reason: {{ request.removalReason }}</div>
+                        <div class="studentRequestRemoval-room-info">Room: {{ request.roomName }}</div>
+                        <div class="studentRequestRemoval-boardinghouse-info">Boardinghouse: {{ request.boardinghouseName }}</div>
+                    </div>
+                    <div class="studentRequestRemoval-actions">
+                      <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="boardinghouseName" value="{{ request.boardinghouseName }}">
+                        <input type="hidden" name="ownerEmail" value="{{ email }}">
+                        <input type="hidden" name="studentEmail" value="{{ request.email }}">
+                        <button type="submit" name="approve_request" class="studentRequestRemoval-approve-btn">Approve</button>
+                      </form>
+                    
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No removal requests found.</p>
+        {% endif %}        
+          </div>
+      </div>
+    </div>
+</div>
+
+<button class="addRoomsButton" aria-label="Add Room" title="Add Room"></button>
+ 
+
+<div class="addRooms-overlay">
+  <div class="addRooms-modal">
+      <div class="addRooms-header">
+          <h2 class="addRooms-title">Add New Room</h2>
+          <button class="addRooms-close">×</button>
+      </div>
+      
+      <form class="addRooms-form" method="POST" action="{% url 'ownersRoomManagement' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+          <div class="addRooms-form-group">
+              <label class="addRooms-label" for="roomName">Room Name</label>
+              <input type="text" name="room_name" id="roomName" class="addRooms-input" placeholder="Enter room name" required>
+          </div>
+          
+          <div class="addRooms-form-group">
+              <label class="addRooms-label" for="roomCapacity">Room Capacity</label>
+              <input type="number" name="room_capacity" id="roomCapacity" class="addRooms-input" placeholder="Enter capacity" min="1" required>
+          </div>
+          
+          <div class="addRooms-form-group">
+              <label class="addRooms-label" for="roomPrice">Room Price</label>
+              <input type="number" name="room_price" id="roomPrice" class="addRooms-input" placeholder="Enter price" min="0" step="0.01" required>
+          </div>
+          
+          <div class="addRooms-form-group">
+              <label class="addRooms-label" for="roomType">Room Type</label>
+              <select id="roomType" name="room_type" class="addRooms-select" required>
+                  <option value="" disabled selected>Select room type</option>
+                  <option value="Aircon">Aircon</option>
+                  <option value="Non-Aircon">Non-Aircon</option>
+              </select>
+          </div>
+          
+          <div class="addRooms-form-group">
+              <label class="addRooms-label">Room Image</label>
+              <label class="addRooms-upload">
+                  <input type="file" name="room_image" accept="image/*">
+                  <div class="addRooms-upload-icon">📸</div>
+                  <p>Click or drag image here to upload</p>
+              </label>
+          </div>
+          
+          <button type="submit" class="addRooms-submit">Add Room</button>
+      </form>
+  </div>
+</div>
+
+
+<div id="hiddenRoomsModal" class="hiddenRooms-modal">
+  <div class="hiddenRooms-modal-content">
+      <span class="hiddenRooms-close-btn" onclick="closeModal()">&times;</span>
+      <h2>Hidden Rooms</h2>
+      <div id="hiddenRoomsList">
+          {% with rooms|default:'' as all_rooms %}
+          {% if all_rooms %}
+            {% for room in rooms %}
+                {% if room.status == "notShown" %}
+                    <div class="hiddenRooms-room-card">
+                        <h3>{{ room.roomName }}</h3>
+                        <p>Capacity: {{ room.capacity }} persons</p>
+                        <p>Price: ₱{{ room.price|floatformat:2 }}</p>
+                        <p>Type: 
+                            <span class="{% if room.aircon == 'Aircon' %}status-aircon-yes{% else %}status-aircon-no{% endif %}">
+                                {{ room.aircon }}
+                            </span>
+                        </p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="unhideRoomName" value="{{ room.roomName }}">
+                            <button type="submit" name="unhideRoom" class="addRooms-submit">
+                                <i class="fa fa-eye" aria-hidden="true"></i> Show this room
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            {% endfor %}      
+          {% else %}
+              <p>No hidden rooms to display.</p>
+          {% endif %}
+          {% endwith %}
+      </div>
+  </div>
+</div>
+
+
+<div class="messages">
+  {% if messages %}
+      {% for message in messages %}
+          <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+              <div class="successAnderrorMessagesPoppedup-icon">
+                  {% if message.tags == 'success' %}
+                      <i class="fas fa-check-circle"></i>
+                  {% elif message.tags == 'error' %}
+                      <i class="fas fa-exclamation-circle"></i>
+                  {% endif %}
+              </div>
+              <div class="successAnderrorMessagesPoppedup-content">
+                  {{ message }}
+              </div>
+          </div>
+      {% endfor %}
+  {% endif %}
+</div>
+
+
+  <script>
+    function handleRemovalRequests() {
+    const modal = document.getElementById('studentRequestRemovalModal');
+    modal.style.display = 'block';
+    // Trigger reflow
+    modal.offsetHeight;
+    modal.classList.add('active');
+}
+
+function closeStudentRequestRemoval() {
+    const modal = document.getElementById('studentRequestRemovalModal');
+    modal.classList.remove('active');
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+function handleApprove(id) {
+    // Add your approval logic here
+    console.log(`Approved request ${id}`);
+}
+
+function handleReject(id) {
+    // Add your rejection logic here
+    console.log(`Rejected request ${id}`);
+}
+
+// Close modal when clicking outside
+document.getElementById('studentRequestRemovalModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeStudentRequestRemoval();
+    }
+});
+
+// Close modal with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeStudentRequestRemoval();
+    }
+});
+    
+document.addEventListener('DOMContentLoaded', () => {
+    const addButton = document.querySelector('.addRoomsButton');
+    const modal = document.querySelector('.addRooms-overlay');
+    const closeButton = document.querySelector('.addRooms-close');
+    const form = document.querySelector('.addRooms-form');
+    const fileUpload = document.querySelector('.addRooms-upload input[type="file"]');
+    
+    // Open modal
+    addButton.addEventListener('click', () => {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+    
+    // Close modal
+    const closeModal = () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+    
+    closeButton.addEventListener('click', closeModal);
+    
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Prevent modal close on modal content click
+    modal.querySelector('.addRooms-modal').addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    
+    // Handle file upload
+    fileUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const uploadText = e.target.parentElement.querySelector('p');
+            uploadText.textContent = file.name;
+        }
+    });
+     
+    
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+
+    const updatingRoomModal = document.getElementById('updatingRoomModal');
+    const editButtons = document.querySelectorAll('[data-action="edit"]');
+    const closeButtons = document.querySelectorAll('.updatingRoomModal-close');
+
+    editButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const roomData = this.dataset;
+
+            // Ensure the elements exist before trying to set their values
+            const roomNameInput = document.getElementById('updatingRoomModal-roomName');
+            const capacityInput = document.getElementById('updatingRoomModal-capacity');
+            const priceInput = document.getElementById('updatingRoomModal-price');
+            const airconSelect = document.getElementById('updatingRoomModal-aircon');
+            const numberStayingInInput = document.getElementById('updatingRoomModal-numberStayingIn');
+            
+            // Only set values if the elements exist
+            if (roomNameInput) roomNameInput.value = roomData.roomName;
+            if (capacityInput) capacityInput.value = roomData.capacity;
+            if (priceInput) priceInput.value = roomData.price;
+            if (numberStayingInInput) numberStayingInInput.value = roomData.numberStayingIn;
+
+            // Set Air Conditioning (Aircon or Non-Aircon)
+            if (airconSelect) {
+                airconSelect.value = roomData.aircon === 'Aircon' ? 'Aircon' : 'Non-Aircon';
+            }
+
+            // Show modal with animation
+            updatingRoomModal.classList.remove('updatingRoomModal-hidden');
+            setTimeout(() => {
+                updatingRoomModal.classList.add('updatingRoomModal-active');
+            }, 10);
+        });
+    });
+
+
+    // Close modal
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          updatingRoomModal.classList.remove('updatingRoomModal-active');
+            // Wait for animation to complete before hiding
+            setTimeout(() => {
+              updatingRoomModal.classList.add('updatingRoomModal-hidden');
+            }, 300);
+        });
+    });
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          updatingRoomModal.classList.remove('updatingRoomModal-active');
+            setTimeout(() => {
+              updatingRoomModal.classList.add('updatingRoomModal-hidden');
+            }, 300);
+        }
+    });
+});
+
+
+// Function to show the hidden rooms modal
+function showHiddenRooms() {
+    document.getElementById('hiddenRoomsModal').style.display = 'block';
+}
+
+// Function to close the hidden rooms modal
+function closeModal() {
+    document.getElementById('hiddenRoomsModal').style.display = 'none';
+}
+
+// Close the modal if the user clicks anywhere outside the modal content
+window.onclick = function(event) {
+    var modal = document.getElementById('hiddenRoomsModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
+
+
+
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+  </script>
+</body>
+</html>

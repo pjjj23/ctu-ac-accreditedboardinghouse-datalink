@@ -1,0 +1,572 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <title>CTU AC Accredited Boarding House</title>
+    <style>
+        :root {
+            --primary-color: #2A9134;
+            --secondary-color: #5BBA6F;
+            --background-color: #e0e0e0;
+            --text-color: #333;
+            --hover-color: #1e7228;
+        }
+   
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #ECF0F1;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        main {
+            padding: 60px 0;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 250px;
+        }
+
+        .button:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-5px);
+        }
+
+        .button i {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .admin-options {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.5s ease;
+            opacity: 0;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-options.show {
+            max-height: 200px;
+            opacity: 1;
+        }
+
+        .admin-option {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-option:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-3px);
+        }
+
+        .admin-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-gif {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* New styles for the popup */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .popup-step {
+            display: none;
+        }
+
+        .popup-step.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-title {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .popup-text {
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .popup-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .popup-button.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .popup-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .popup-progress {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .popup-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .progress-dot.active {
+            background-color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            h1 {
+                margin-top: 20px;
+                font-size: 20px;
+            }
+
+            .button-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button, .admin-option {
+                width: 100%;
+                max-width: none;
+            }
+
+            .admin-options {
+                position: static;
+                max-height: none;
+                opacity: 1;
+                margin-top: 10px;
+            }
+
+            .admin-options .admin-option {
+                margin-top: 10px;
+            }
+
+            .loading-gif {
+                width: 80px;
+                height: 80px;
+            }
+
+            .popup-content {
+                padding: 20px;
+            }
+
+            .popup-title {
+                font-size: 20px;
+            }
+
+            .popup-text {
+                font-size: 14px;
+            }
+
+            .popup-button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay" class="loading-overlay">
+        <img src="{% static 'img/BH-logo.png' %}" alt="Loading..." class="loading-gif">
+    </div> 
+    <header>
+        <div class="container header-content">
+            <img src="{% static 'img/CTU-logo-BH.png' %}" alt="CTU AC Logo" class="logo">
+            <h1>CTU AC Accredited Boarding House</h1>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="card">
+                <h2>Welcome to CTU AC Boarding House Portal</h2>
+                <div class="button-container">
+                    <div class="admin-group">
+                        <button id="admin-login-button" class="button">
+                            <i class="fas fa-user-shield"></i>
+                            Admin Login
+                        </button>
+                        <div id="admin-options" class="admin-options">
+                            <button id="bh-owner-login" class="admin-option">
+                                <i class="fas fa-home"></i>
+                                Boarding House Owner
+                            </button>
+                            <button id="sao-login" class="admin-option">
+                                <i class="fas fa-university"></i>
+                                SAO Login
+                            </button>
+                        </div>
+                    </div>
+                    <button id="student-login-button" class="button">
+                        <i class="fas fa-user-graduate"></i>
+                        Student Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- New popup HTML -->
+    <div id="popup-overlay" class="popup-overlay">
+        <div class="popup-content">
+            <div id="step1" class="popup-step active">
+                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="Welcome" class="popup-image">
+                <h2 class="popup-title">Welcome to CTU AC Boarding House Portal</h2>
+                <p class="popup-text">Let's take a quick tour of our features.</p>
+            </div>
+            <div id="step2" class="popup-step">
+                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="Admin Login" class="popup-image">
+                <h2 class="popup-title">Admin Login</h2>
+                <p class="popup-text">Access the admin panel for Boarding House Owners and SAO staff.</p>
+            </div>
+            <div id="step3" class="popup-step">
+                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="Student Login" class="popup-image">
+                <h2 class="popup-title">Student Login</h2>
+                <p class="popup-text">Students can log in to manage their boarding house information.</p>
+            </div>
+            <div id="step4" class="popup-step">
+                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="All Set" class="popup-image">
+                <h2 class="popup-title">You're All Set!</h2>
+                <p class="popup-text">Enjoy using the CTU AC Boarding House Portal.</p>
+            </div>
+            <div id="countdown" class="countdown"></div>
+            <button id="popup-button" class="popup-button">Next</button>
+            <div class="popup-progress">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    const adminLoginButton = document.getElementById('admin-login-button');
+    const studentLoginButton = document.getElementById('student-login-button');
+    const adminOptions = document.getElementById('admin-options');
+    const bhOwnerLogin = document.getElementById('bh-owner-login');
+    const saoLogin = document.getElementById('sao-login');
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    // Show loading overlay immediately
+    loadingOverlay.classList.remove('hidden');
+
+    // Measure network speed by loading a small image
+    const imageUrl = "{% static 'img/BH-logo.png' %}"; // Small image to test the network speed
+    const startTime = new Date().getTime();
+
+    const img = new Image();
+    img.src = imageUrl + "?t=" + startTime; // Prevent caching with a timestamp
+
+    img.onload = function() {
+        const endTime = new Date().getTime();
+        const loadTime = endTime - startTime; // Time in milliseconds
+        console.log('Image loaded in', loadTime, 'ms');
+
+        // Determine how long to display the loading screen based on load time
+        let displayTime = 1000; // Minimum display time of 1 second
+        if (loadTime > 1000) {
+            displayTime = loadTime; // If network is slow, increase display time
+        }
+
+        setTimeout(function() {
+            loadingOverlay.classList.add('hidden');
+        }, displayTime);
+    };
+
+    function toggleAdminOptions() {
+        if (window.innerWidth <= 768) {
+            adminOptions.style.display = adminOptions.style.display === 'none' ? 'flex' : 'none';
+        } else {
+            adminOptions.classList.toggle('show');
+        }
+    }
+
+    adminLoginButton.onclick = toggleAdminOptions;
+
+    studentLoginButton.onclick = function() {
+        window.location.href = "{% url 'student_login' %}";
+    };
+
+    bhOwnerLogin.onclick = function() {
+        window.location.href = "{% url 'owner_login' %}";
+    };
+
+    saoLogin.onclick = function() {
+        window.location.href = "{% url 'sao_login' %}";
+    };
+
+    // Close admin options when clicking outside on larger screens
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth > 768 && !adminOptions.contains(event.target) && event.target !== adminLoginButton) {
+            adminOptions.classList.remove('show');
+        }
+    });
+
+    // Handle resize events
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            adminOptions.classList.remove('show');
+            adminOptions.style.display = 'none';
+        } else {
+            adminOptions.style.display = '';
+        }
+    });
+
+    // Initial setup
+    if (window.innerWidth <= 768) {
+        adminOptions.style.display = 'none';
+    }
+
+    // New popup functionality
+    const popupOverlay = document.getElementById('popup-overlay');
+            const popupButton = document.getElementById('popup-button');
+            const popupSteps = document.querySelectorAll('.popup-step');
+            const progressDots = document.querySelectorAll('.progress-dot');
+            const countdownElement = document.getElementById('countdown');
+            let currentStep = 0;
+
+            function showPopup() {
+                popupOverlay.classList.add('show');
+                startCountdown();
+            }
+
+            function hidePopup() {
+                popupOverlay.classList.remove('show');
+            }
+
+            function startCountdown() {
+                let count = 3;
+                countdownElement.textContent = count;
+                
+                const countdownInterval = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        countdownElement.textContent = count;
+                    } else {
+                        clearInterval(countdownInterval);
+                        countdownElement.textContent = '';
+                        popupButton.classList.add('active');
+                    }
+                }, 1000);
+            }
+
+            function nextStep() {
+                popupSteps[currentStep].classList.remove('active');
+                progressDots[currentStep].classList.remove('active');
+                currentStep++;
+
+                if (currentStep < popupSteps.length) {
+                    popupSteps[currentStep].classList.add('active');
+                    progressDots[currentStep].classList.add('active');
+                    popupButton.classList.remove('active');
+
+                    if (currentStep === popupSteps.length - 1) {
+                        popupButton.textContent = 'Got it!';
+                    }
+
+                    startCountdown();
+                } else {
+                    hidePopup();
+                }
+            }
+
+            popupButton.addEventListener('click', nextStep);
+
+            // Check if it's the first visit
+            if (!localStorage.getItem('visitedBefore')) {
+                showPopup();
+                localStorage.setItem('visitedBefore', 'true');
+            }
+        });
+    </script>

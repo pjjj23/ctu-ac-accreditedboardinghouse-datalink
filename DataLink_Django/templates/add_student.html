@@ -1,0 +1,1196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Student Database Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2A9134;
+            --secondary-color: #5BBA6F;
+            --background-color: #e0e0e0;
+            --text-color: #333;
+            --border-color: #ddd;
+            --card-background: #fff;
+            --hover-color: #1e7228;
+            --error-color: #e74c3c;
+        } 
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 3rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--card-background);
+            color: var(--text-color);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .icon {
+            position: absolute;
+            top: 2.4rem;
+            left: 0.8rem;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary { 
+            color: #2A9134;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: #fff;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); 
+        }
+
+        #course {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a90e2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7rem top 50%;
+            background-size: 0.8rem auto;
+            padding-right: 2.5rem;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 1200px;
+            overflow: hidden;
+            overflow-y: auto;
+            border: 1px solid #ccc; 
+        }
+
+        .table-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .table-body table {
+            width: 100%;
+            border-collapse: collapse;
+            height: 100%
+        }
+
+        .table-body table thead th, 
+        .table-body table tbody td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .table-header {
+            background: #fff;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            padding-bottom: 10px;
+        }
+
+        .table-header h2 {
+            color: #1a202c;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .table-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            padding: 8px 12px 8px 36px;
+            width: 100%;
+            transition: all 0.2s ease; 
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-bar input:focus {
+            background: #fff;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+            outline: none;
+        }
+
+        .search-bar i {
+            color: #718096;
+            font-size: 0.875rem;
+            left: 30px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .minimize-btn {
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: #718096;
+            cursor: pointer;
+            padding: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .minimize-btn:hover {
+            background: #f7fafc;
+            color: #4a5568;
+        }
+
+        .table-body {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 100%;
+            opacity: 1;
+            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        #studentsTable {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        #studentsTable thead th {
+            background: #f8fafc;
+            border-bottom: 2px solid #edf2f7;
+            color: #4a5568;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 12px 24px;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .table-body.minimized {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--background-color);
+        }
+
+        tr:hover {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        #studentsTable tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        #studentsTable tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        #studentsTable td {
+            border-bottom: 1px solid #edf2f7;
+            color: #2d3748;
+            font-size: 0.875rem;
+            padding: 16px 24px;
+        }
+
+        .action-btn {
+            align-items: center;
+            background: transparent;
+            border: 1px solid;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 0.75rem;
+            font-weight: 500;
+            gap: 4px;
+            margin-right: 8px;
+            padding: 6px 12px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn i {
+            font-size: 0.875rem;
+        }
+
+        .action-btn-update {
+            border-color: #4299e1;
+            color: #4299e1;
+        }
+        .action-btn-update:hover {
+            background: #ebf8ff;
+        }
+
+        .action-btn-delete {
+            border-color: #e53e3e;
+            color: #e53e3e;
+        }
+
+        .action-btn-delete:hover {
+            background: #fff5f5;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-overlay.visible {
+            opacity: 1;
+        } 
+
+        .popup {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 550px;
+            width: 90%;
+            position: relative;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .popup-overlay.visible .popup {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .popup h2 {
+            color: var(--error-color);
+            margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .popup p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .popup .icon-wrapper {
+            background-color: var(--error-color);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        .popup .icon {
+            font-size: 3.5rem;
+            color: #ffffff;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(231, 76, 60, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+
+        .popup .countdown {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .popup .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .popup .close-btn.visible {
+            opacity: 1;
+        }
+
+        .popup .close-btn:hover {
+            color: var(--error-color);
+            transform: rotate(90deg);
+        }
+
+        .success-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .success-popup.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .success-popup i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .success-popup p {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .search-bar {
+                width: 100%;
+            }
+            #studentsTable {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+        .table-body {
+    max-height: 800px;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.table-body.minimized {
+    max-height: 0;
+}
+
+/* Modern scrollbar styling */
+.table-body::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-body::-webkit-scrollbar-track {
+    background: #f7fafc;
+}
+
+.table-body::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+.table-body::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+.change-pin-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.change-pin-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2563eb;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+}
+
+.change-pin-link:hover {
+    background: #f1f5f9;
+    border-color: #2563eb;
+}
+
+.change-pin-link i {
+    font-size: 1.1rem;
+}
+
+#changePinForm {
+    margin-top: 1.5rem;
+}
+
+.pin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+.form-group input[type="password"]:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-group i {
+    position: absolute;
+    left: 0.8rem;
+    top: 2.3rem;
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.show-password-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.show-password-container input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+}
+
+.show-password-container label {
+    font-size: 0.875rem;
+    color: #4b5563;
+    cursor: pointer;
+    user-select: none;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.submit-btn:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.pin-message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    display: none;
+}
+
+.pin-message.error {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+.pin-message.success {
+    background-color: #dcfce7;
+    color: #22c55e;
+    border: 1px solid #bbf7d0;
+}
+/* Container for messages */
+.successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+    </style>
+</head>
+<body>
+     
+    <div id="popupOverlay" class="popup-overlay">
+        <div class="popup">
+            <div class="icon-wrapper">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h2>Warning!</h2>
+            <p>You are accessing the student database. Exercise caution: deletions here are permanent. This database serves as the authoritative source for student records, facilitating efficient data management and verification processes. Your responsible handling ensures data integrity.</p>
+            <div class="countdown" id="countdown">3</div>
+            <button id="closePopup" class="close-btn">&times;</button>
+        </div>
+    </div>
+
+    <div id="successPopup" class="success-popup">
+        <i class="fas fa-check-circle"></i>
+        <p>Student Information added successfully!</p>
+    </div>
+
+    <div class="container">
+        <div class="messages">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                        <div class="successAnderrorMessagesPoppedup-icon">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="successAnderrorMessagesPoppedup-content">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <h1>Student Database Management</h1> 
+        <div class="dashboard">
+            <div class="stat-card">
+                <h3>Total Students</h3>
+                <p id="totalStudents">{{ total_students }}</p>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Most Popular Course</h3>
+                <p id="popularCourse" style="font-size: 25px;">{{ popular_course }}</p>
+            </div>
+            
+        </div>
+ 
+
+        <form id="studentForm" method="post" action="{% url 'add_student' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="student_id">Student ID</label>
+                <i class="fas fa-id-card icon"></i>
+                <input type="text" id="student_id" name="student_id" required placeholder="Enter Student ID">
+            </div>
+        
+            <div class="form-group">
+                <label for="birthday">Birthday</label>
+                <i class="fas fa-calendar-alt icon"></i>
+                <input type="date" id="birthday" name="birthday" required>
+            </div>
+        
+            <div class="form-group">
+                <label for="course">Course</label>
+                <i class="fas fa-graduation-cap icon"></i>
+                <select id="course" name="course" required>
+                    <option value="" disabled selected>-- Select your Course --</option>
+                    <option value="BACHELOR OF INDUSTRIAL TECHNOLOGY">Bachelor of Industrial Technology</option>
+                    <option value="HOSPITALITY MANAGEMENT">Hospitality Management</option>
+                    <option value="BACHELOR OF SCIENCE IN TOURISM MANAGEMENT">Bachelor of Science in Tourism Management</option>
+                    <option value="BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY">Bachelor of Science in Information Technology</option>
+                    <option value="BACHELOR OF SCIENCE IN INDUSTRIAL ENGINEERING">Bachelor of Science in Industrial Engineering</option>
+                    <option value="BACHELOR OF SCIENCE IN AGRICULTURE">Bachelor of Science in Agriculture</option>
+                    <option value="BACHELOR OF SCIENCE IN FORESTRY">Bachelor of Science in Forestry</option>
+                    <option value="BACHELOR OF SCIENCE IN ENVIRONMENTAL SCIENCE">Bachelor of Science in Environmental Science</option>
+                    <option value="BACHELOR OF ARTS IN ENGLISH LANGUAGE">Bachelor of Arts in English Language</option>
+                    <option value="BACHELOR OF ARTS IN LITERATURE">Bachelor of Arts in Literature</option>
+                    <option value="BACHELOR OF SCIENCE IN PSYCHOLOGY">Bachelor of Science in Psychology</option>
+                    <option value="BACHELOR IN TECHNOLOGY AND LIVELIHOOD EDUCATION">Bachelor in Technology and Livelihood Education</option>
+                    <option value="BACHELOR OF SECONDARY EDUCATION MAJOR IN MATHEMATICS">Bachelor of Secondary Education Major in Mathematics</option>
+                    <option value="BACHELOR OF ELEMENTARY EDUCATION">Bachelor of Elementary Education</option>
+                </select>
+            </div>
+        
+            <div class="button-group" id="buttonGroup">
+                <a href="{% url 'saohomepage' %}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                
+                <!-- Default "Add" button (Submit button) -->
+                <button type="submit" name="addingData" class="btn btn-secondary" id="submitBtn" {% if student_to_edit %} style="display: none;" {% endif %}>
+                    <i class="fas fa-save"></i> Submit
+                </button>
+                
+                <!-- Hidden "Update" button -->
+                <button type="submit" name="updateData" class="btn btn-secondary" id="updateBtn" {% if not student_to_edit %} style="display: none;" {% endif %}>
+                    <i class="fas fa-save"></i> Update
+                </button>
+            </div>
+            
+        </form> 
+        <div class="change-pin-container">
+            <div class="change-pin">
+                <a href="#" id="changePinLink" class="change-pin-link">
+                    <i class="fas fa-key"></i>
+                    Change PIN
+                </a>
+            </div>
+            
+            <div id="changePinForm" style="display:none;">
+                <form id="pinForm" method="POST" action="{% url 'add_student' %}" class="pin-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="currentPin">Current PIN</label>
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="currentPin" name="current_pin" maxlength="5" 
+                               required pattern="\d{5}" title="Please enter a 5-digit PIN">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPin">New PIN</label>
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="newPin" name="new_pin" maxlength="5" 
+                               required pattern="\d{5}" title="Please enter a 5-digit PIN">
+                    </div>
+                    
+                    <div class="show-password-container">
+                        <input type="checkbox" id="showNewPin" onclick="toggleCurrentPin()">
+                        <label for="showNewPin">Show PIN</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-check-circle"></i>
+                        Update PIN
+                    </button>
+                </form>
+                
+                <div id="pinMessage" class="pin-message"></div>
+            </div>
+        </div>
+
+        <div class="table-container" id="tableContainer">
+            <div class="table-header">
+                <h2>Student Records</h2>
+                <div class="table-controls">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search students...">
+                    </div>
+                    <button class="minimize-btn" id="minimizeBtn" title="Minimize/Maximize Table">
+                        <i class="fas fa-chevron-up" id="minimizeIcon"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="table-body" id="tableBody">
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Birthday</th>
+                            <th>Course</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if students %}
+                            {% for student in students %}
+                                <tr>
+                                    <td>{{ student.student_id }}</td>
+                                    <td>{{ student.birthday }}</td>
+                                    <td>{{ student.course }}</td>
+                                    <td>
+                                        <button type="button" class="action-btn action-btn-update" onclick="loadStudentData('{{ student.student_id }}', '{{ student.birthday }}', '{{ student.course }}')">
+                                            <i class="fas fa-edit"></i> Update
+                                        </button>
+                    
+                                        <!-- Delete Button Form -->
+                                        <form method="POST" action="{% url 'add_student' %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="delete_student" value="{{ student.student_id }}">
+                                            <button type="button" class="action-btn action-btn-delete" onclick="confirmDelete(this)">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4">No students found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messageList = document.querySelector('.message-list');
+
+
+if (messageList) {
+    setTimeout(() => {
+        messageList.style.transition = "opacity 0.5s ease"; // Transition effect
+        messageList.style.opacity = 0; // Fade out effect
+        setTimeout(() => {
+            messageList.remove(); // Remove from DOM after fading out
+        }, 500); // Match this duration with the transition time
+    }, 2000); // 2 seconds before starting to fade out
+}
+        document.getElementById('changePinLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    const form = document.getElementById('changePinForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+});
+
+function toggleCurrentPin() {
+    const currentPin = document.getElementById('currentPin');
+    const newPin = document.getElementById('newPin');
+    const showPin = document.getElementById('showNewPin');
+    
+    currentPin.type = showPin.checked ? 'text' : 'password';
+    newPin.type = showPin.checked ? 'text' : 'password';
+}
+
+// Add validation feedback
+const pinForm = document.getElementById('pinForm');
+pinForm.addEventListener('submit', function(e) {
+    const currentPin = document.getElementById('currentPin').value;
+    const newPin = document.getElementById('newPin').value;
+    const messageDiv = document.getElementById('pinMessage');
+    
+    if (!/^\d{5}$/.test(currentPin) || !/^\d{5}$/.test(newPin)) {
+        e.preventDefault();
+        messageDiv.textContent = 'Please enter valid 5-digit PINs';
+        messageDiv.className = 'pin-message error';
+        messageDiv.style.display = 'block';
+    }
+});
+        function confirmDelete(button) {
+            if (confirm("Are you sure you want to delete this student?")) {
+                button.closest('form').submit();
+            }
+        }
+        function loadStudentData(studentId, birthday, course) {
+        // Populate form fields with selected student data
+        document.getElementById('submitBtn').style.display = 'none';  // Hide "Add" button
+        document.getElementById('updateBtn').style.display = 'inline-block';
+        document.getElementById('student_id').value = studentId;
+        document.getElementById('birthday').value = birthday;
+        document.getElementById('course').value = course;
+
+        // Add hidden field to indicate update mode
+        const form = document.getElementById('studentForm');
+        let updateField = document.getElementById('update_student');
+        
+        if (!updateField) {
+            updateField = document.createElement('input');
+            updateField.type = 'hidden';
+            updateField.name = 'update_student';
+            updateField.id = 'update_student';
+            form.appendChild(updateField);
+        }
+        
+        updateField.value = studentId;
+    }
+        document.addEventListener('DOMContentLoaded', function() {
+            const popupOverlay = document.getElementById('popupOverlay');
+            const closePopupBtn = document.getElementById('closePopup');
+            const countdownElement = document.getElementById('countdown');
+            const tableContainer = document.getElementById('tableContainer');
+            const minimizeBtn = document.getElementById('minimizeBtn');
+            const minimizeIcon = document.getElementById('minimizeIcon');
+            const tableBody = document.getElementById('tableBody');
+            const searchInput = document.getElementById('searchInput');
+            const studentsTable = document.getElementById('studentsTable');
+            const studentForm = document.getElementById('studentForm');
+
+            function showPopup() {
+                if (!localStorage.getItem('popupShown')) {
+                    popupOverlay.style.display = 'flex';
+                    popupOverlay.classList.add('visible');
+                    let count = 3;
+                    const countdownInterval = setInterval(() => {
+                        countdownElement.textContent = count;
+                        count--;
+                        if (count < 0) {
+                            clearInterval(countdownInterval);
+                            closePopupBtn.classList.add('visible');
+                        }
+                    }, 1000);
+                } else {
+                    popupOverlay.style.display = 'none';
+                }
+            }
+
+            function closePopup() {
+                popupOverlay.classList.remove('visible');
+                setTimeout(() => {
+                    popupOverlay.style.display = 'none';
+                }, 300);
+                localStorage.setItem('popupShown', 'true');
+            }
+
+            closePopupBtn.addEventListener('click', closePopup);
+
+            showPopup();
+
+            // Table animation
+            setTimeout(() => {
+                tableContainer.classList.add('visible');
+            }, 500);
+
+            minimizeBtn.addEventListener('click', function() {
+                tableBody.classList.toggle('minimized');
+                if (tableBody.classList.contains('minimized')) {
+                    minimizeIcon.classList.remove('fa-chevron-up');
+                    minimizeIcon.classList.add('fa-chevron-down');
+                } else {
+                    minimizeIcon.classList.remove('fa-chevron-down');
+                    minimizeIcon.classList.add('fa-chevron-up');
+                }
+            });
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = studentsTable.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+ 
+
+            function showSuccessPopup() {
+                const popup = document.getElementById('successPopup');
+                popup.classList.add('show');
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                }, 3000);
+            }
+   
+        });
+ 
+        const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+    </script>
+</body>
+</html>

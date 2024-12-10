@@ -1,0 +1,727 @@
+{% extends 'SAO-base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="disabled-students-container">
+    <div class="header-section">
+        <h1 class="main-title">
+            <i class="fas fa-user"></i>
+            Removed Students
+            <span class="badge bg-danger ms-2">{{ removed_students|length }}</span>
+        </h1>
+        <div class="search-container">
+            <div class="search-wrapper">
+                <form class="search-form" onsubmit="return false;">
+                    <input
+                      type="text"
+                      id="search-box"
+                      class="search-box"
+                      placeholder="Search by email..."
+                      oninput="filterOwners()"
+                    >
+                  </form>                  
+              <button class="search-btn">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button> 
+            </div>
+          </div>
+    </div>
+
+    {% if removed_students %}
+    <div class="card main-card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student Information</th>
+                            <th>Course</th>
+                            <th>CTU ID</th>
+                            <th>Status</th> 
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in removed_students %}
+                        <tr class="student-row" data-email="{{ student.email }}">
+                            <td>
+                                <div class="d-flex align-items-center student-info">
+                                    <div class="profile-picture-container">
+                                        {% if student.profile_picture %}
+                                            <img src="{{ student.profile_picture }}" alt="Profile" class="profile-picture">
+                                        {% else %}
+                                            <div class="profile-placeholder">
+                                                {{ student.username|make_list|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">{{ student.username }}</h6>
+                                        <small class="text-muted">{{ student.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="course-badge">{{ student.course }}</span></td>
+                            <td><span class="student-id">{{ student.student_id }}</span></td>
+                            <td>
+                                <span class="status-badge status-rejected">
+                                    <i class="fas fa-exclamation-circle"></i> {{ student.accountStatus }}
+                                </span>
+                            </td>
+                             
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary btn-sm action-btn restore-btn"
+                                            data-student-id="{{ student.student_id }}"
+                                            data-student-name="{{ student.username }}"
+                                            data-student-email="{{ student.email }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#restoreModal"
+                                            title="Restore Account">
+                                        <i class="fas fa-undo"></i>
+                                    </button> 
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restore Modal --> 
+<div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Restore Student Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="restore-icon-container mb-4">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <h4>Restore Account Confirmation</h4>
+                <p>By confirming, you are making this account <strong>unremoved</strong> again and giving them access to the system again. Are you sure you want to restore the account of <strong id="restoreStudentName"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'removestudents' %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="email" id="restoreStudentEmail"> 
+                    <input type="hidden" name="studentRole" value="student"> 
+                    <button type="submit" class="btn btn-primary" name="action" value="restore">Confirm Restore</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+
+{% else %}
+    <div class="card empty-state-card">
+        <div class="card-body text-center">
+            <div class="empty-state-icon">
+                <i class="fas fa-users-slash"></i>
+            </div>
+            <h3>No Removed Students</h3>
+            <p class="text-muted">There are currently no removed student accounts in the system.</p>
+        </div>
+    </div>
+{% endif %} 
+</div>
+
+
+<div class="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                <div class="successAnderrorMessagesPoppedup-icon">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="successAnderrorMessagesPoppedup-content">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+
+<style>
+
+.successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+
+
+/* Container Styles */
+.rejected-students-container {
+    padding: 2rem;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Header Styles */
+.main-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Card Styles */
+.main-card {
+    background: white;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.main-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Table Styles */
+.table {
+    margin: 0;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1rem;
+}
+
+/* Profile Picture Styles */
+.profile-picture-container {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e9ecef;
+}
+
+.profile-picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #4CAF50;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Badge Styles */
+.course-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-rejected {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Empty State Styles */
+.empty-state-card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #dadde1;
+    margin-bottom: 1.5rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover Effects */
+.student-row {
+    transition: background-color 0.3s ease;
+}
+
+.student-row:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Modal Animations */
+.modal.fade .modal-dialog {
+    transform: scale(0.8);
+    opacity: 0;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+    border-radius: 15px 15px 0 0;
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem;
+    border-radius: 0 0 15px 15px;
+}
+
+/* Restore Modal Styles */
+.restore-icon-container {
+    font-size: 3rem;
+    color: #28a745;
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Update Modal Styles */
+.form-floating {
+    margin-bottom: 1rem;
+}
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+}
+
+.form-floating > label {
+    padding: 1rem 0.75rem;
+}
+
+/* Animation Keyframes */
+@keyframes bounceIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Form Animations */
+.form-control:focus,
+.form-select:focus {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Hover Effects */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .rejected-students-container {
+        padding: 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .main-title {
+        font-size: 1.5rem;
+    }
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .update-form .row {
+        margin: 0;
+    }
+    
+    .modal-header,
+    .modal-footer {
+        padding: 1rem;
+    }
+}
+
+.search-container {
+      position: fixed;
+      top: 100px;
+      right: 40px;
+      z-index: 9888;
+    }
+
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box {
+      width: 50px;
+      padding: 12px;
+      border-radius: 25px;
+      border: none;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      background: white;
+      opacity: 0.95;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-left: 12px; /* Ensure consistent padding when collapsed */
+    }
+
+    .search-box:focus {
+      width: 300px;
+      padding-left: 20px;
+      padding-right: 45px;
+      outline: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      cursor: text;
+      opacity: 1;
+    }
+
+    /* Hide placeholder when not focused */
+    .search-box:not(:focus)::placeholder {
+      color: transparent;
+    }
+
+    /* Hide text when not focused */
+    .search-box:not(:focus) {
+      color: transparent;
+    }
+
+    .search-box::placeholder {
+      transition: color 0.3s ease;
+    }
+
+    .search-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .search-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #666;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus ~ .search-btn svg {
+      stroke: #333;
+      transform: scale(0.9);
+    }
+
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 300px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: top right;
+      visibility: hidden;
+    }
+
+    .search-box:focus ~ .suggestions {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .suggestion-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .suggestion-item:first-child {
+      border-radius: 12px 12px 0 0;
+    }
+
+    .suggestion-item:last-child {
+      border-radius: 0 0 12px 12px;
+    }
+
+    .suggestion-item:hover {
+      background: #f8f9fa;
+      padding-left: 20px;
+    }
+
+    .suggestion-item svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+      stroke: #666;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .search-container {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .search-box:not(:focus):hover {
+      transform: scale(1.05);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .search-box:not(:focus) ~ .search-btn svg {
+      animation: pulse 2s infinite;
+    }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Handle Restore Modal Population
+    document.querySelectorAll(".restore-btn").forEach(button => {
+    button.addEventListener("click", function() {
+        const studentName = this.getAttribute("data-student-name");
+        const studentEmail = this.getAttribute("data-student-email");
+        
+        // Update the modal with the student's name and email
+        document.getElementById("restoreStudentName").innerText = studentName;
+        document.getElementById("restoreStudentEmail").value = studentEmail;  // Set email to the hidden input
+    });
+});
+ 
+
+});
+
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+    function filterOwners() {
+    const query = document.getElementById('search-box').value.toLowerCase();
+    const rows = document.querySelectorAll('.student-row');
+
+    rows.forEach(row => {
+      const email = row.dataset.email.toLowerCase();
+      if (email.includes(query)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+</script>
+{% endblock %}

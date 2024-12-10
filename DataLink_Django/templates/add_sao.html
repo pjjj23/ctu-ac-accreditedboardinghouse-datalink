@@ -1,0 +1,240 @@
+{% extends "sao-databasesystem-base.html" %}
+{% load static %}
+
+{% block title %}Add Superadmin - SAO Database System{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <div class="form-section"> 
+        <div class="messages">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                        <div class="successAnderrorMessagesPoppedup-icon">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="successAnderrorMessagesPoppedup-content">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+        <h2>Add Superadmin</h2>
+        <form method="post" action="{% url 'addsuperadmin' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email">Email</label>
+                <i class="fas fa-envelope icon"></i>
+                <input type="email" id="email" name="email" required placeholder="Enter a working email address">
+            </div>
+        
+            <div class="form-group">
+                <label for="birthday">Birthday</label>
+                <i class="fas fa-calendar-alt icon"></i>
+                <input type="date" id="birthday" name="birthday" required>
+            </div>
+        
+            <button type="submit" class="btn btn-secondary">
+                <i class="fas fa-user-plus"></i> Add Superadmin
+            </button>  
+        </form>  
+        <div class="change-pin-container">
+            <div class="change-pin">
+                <a href="#" id="changePinLink" class="change-pin-link">
+                    <i class="fas fa-key"></i>
+                    Change PIN
+                </a>
+            </div>
+            
+            <div id="changePinForm" style="display:none;">
+                <form id="pinForm" method="POST" action="{% url 'addsuperadmin' %}" class="pin-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="currentPin">Current PIN</label>
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="currentPin" name="current_pin" maxlength="5" 
+                               required pattern="\d{5}" title="Please enter a 5-digit PIN">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPin">New PIN</label>
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="newPin" name="new_pin" maxlength="5" 
+                               required pattern="\d{5}" title="Please enter a 5-digit PIN">
+                    </div>
+                    
+                    <div class="show-password-container">
+                        <input type="checkbox" id="showNewPin" onclick="toggleCurrentPin()">
+                        <label for="showNewPin">Show PIN</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-check-circle"></i>
+                        Update PIN
+                    </button>
+                </form>
+                
+                <div id="pinMessage" class="pin-message"></div>
+            </div>
+        </div>
+    </div>
+    <div class="image-section"></div>
+</div>
+
+<button class="show-table-btn" onclick="toggleTable()">
+    <i class="fas fa-table"></i>
+</button>
+
+<div class="table-container" id="tableContainer">
+    <div class="table-header">
+        <h2>Superadmin List</h2>
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search superadmin...">
+        </div>
+        <button class="btn btn-primary" onclick="toggleTable()">
+            <i class="fas fa-times"></i> Close
+        </button>
+    </div>
+    <table id="saoTable">
+        <thead>
+            <tr>
+                <th>SAOID</th>
+                <th>Email</th>
+                <th>Birthday</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for superadmin in superadmin_list %}
+                <tr>
+                    <td>{{ superadmin.SAOID }}</td>
+                    <td>{{ superadmin.email }}</td>
+                    <td>{{ superadmin.birthday }}</td> 
+                    <td>
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="remove_email" value="{{ superadmin.email }}">
+                            <button type="submit" class="remove-button" aria-label="Remove role" data-tooltip="Remove role">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        
+        
+    </table>
+    
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleCurrentPin() {
+                    const currentPinField = document.getElementById('currentPin');
+                    currentPinField.type = currentPinField.type === 'password' ? 'text' : 'password';
+                    const newPinField = document.getElementById('newPin');
+                    newPinField.type = newPinField.type === 'password' ? 'text' : 'password';
+                }
+             
+    const messageList = document.querySelector('.message-list');
+
+
+    if (messageList) {
+        setTimeout(() => {
+            messageList.style.transition = "opacity 0.5s ease"; // Transition effect
+            messageList.style.opacity = 0; // Fade out effect
+            setTimeout(() => {
+                messageList.remove(); // Remove from DOM after fading out
+            }, 500); // Match this duration with the transition time
+        }, 2000); // 2 seconds before starting to fade out
+    }
+
+    function toggleTable() {
+        const tableContainer = document.getElementById('tableContainer');
+        tableContainer.style.display = tableContainer.style.display === 'none' ? 'block' : 'none';
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#saoTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    function updateSAO(saoId) {
+        alert(`Update superadmin with ID: ${saoId}`);
+    }
+
+    function deleteSAO(saoId) {
+        if (confirm(`Are you sure you want to delete superadmin with ID: ${saoId}?`)) {
+            alert(`Superadmin with ID: ${saoId} deleted.`);
+        }
+    }
+    document.getElementById('changePinLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    const form = document.getElementById('changePinForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+});
+
+function toggleCurrentPin() {
+    const currentPin = document.getElementById('currentPin');
+    const newPin = document.getElementById('newPin');
+    const showPin = document.getElementById('showNewPin');
+    
+    currentPin.type = showPin.checked ? 'text' : 'password';
+    newPin.type = showPin.checked ? 'text' : 'password';
+}
+
+// Add validation feedback
+const pinForm = document.getElementById('pinForm');
+pinForm.addEventListener('submit', function(e) {
+    const currentPin = document.getElementById('currentPin').value;
+    const newPin = document.getElementById('newPin').value;
+    const messageDiv = document.getElementById('pinMessage');
+    
+    if (!/^\d{5}$/.test(currentPin) || !/^\d{5}$/.test(newPin)) {
+        e.preventDefault();
+        messageDiv.textContent = 'Please enter valid 5-digit PINs';
+        messageDiv.className = 'pin-message error';
+        messageDiv.style.display = 'block';
+    }
+});
+
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+
+</script>
+{% endblock %}

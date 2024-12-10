@@ -1,0 +1,2615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cozy Haven Boarding House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #3b82f6;
+            --accent: #60a5fa;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            position: relative;
+            height: 70vh;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .cover-photo-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .cover-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.8);
+            transition: transform 0.5s ease, filter 0.3s ease;
+        }
+
+        /* Hover effect */
+        .cover-photo-container:hover .cover-photo {
+            transform: scale(1.05);
+            filter: brightness(0.6);
+        }
+
+        /* Zoom icon overlay */
+        .zoom-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .zoom-overlay i {
+            font-size: 2.5rem;
+            background: rgba(37, 99, 235, 0.8);
+            padding: 1rem;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .zoom-text {
+            font-size: 1rem;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .cover-photo-container:hover .zoom-overlay {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90vh;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -2rem;
+            right: -2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-modal:hover {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        /* Loading animation */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+
+        .header-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 2rem;
+            scale: 1.3;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: white;
+        }
+
+        .profile-section {
+            margin-top: -75px;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .info-card {
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .additional-info {
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .additional-info h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .additional-info h3 {
+            color: var(--secondary);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+        }
+
+        .feature-status {
+            margin-left: auto;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .status-yes {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-no {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .rental-container {
+            margin: 1.5rem 0;
+        }
+
+        .rental-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .rental-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+
+        .rental-option.selected {
+            background: rgba(37, 99, 235, 0.05);
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
+            transform: translateY(-1px);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .rental-option.selected::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 0.5rem;
+            border: 1px solid var(--primary);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .rental-option input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: var(--primary);
+        }
+
+        .rental-option label {
+            font-weight: 500;
+        }
+
+        .rental-option.selected label {
+            color: var(--primary);
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 2px rgba(37, 99, 235, 0.2),
+                           0 0 4px rgba(37, 99, 235, 0.1);
+            }
+            to {
+                box-shadow: 0 0 4px rgba(37, 99, 235, 0.3),
+                           0 0 8px rgba(37, 99, 235, 0.2);
+            }
+        }
+
+        .security-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+
+         /* New Amenities Carousel Styles */
+         .amenities-section {
+            padding: 2rem;
+            background: var(--card);
+            border-radius: 1rem;
+            margin: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .amenities-section h2 { 
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 600;   
+            color: var(--secondary);
+        }
+
+        .amenities-carousel {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .amenities-carousel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .carousel-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: grab;
+        }
+
+        .carousel-inner:active {
+            cursor: grabbing;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            transform: scale(1);
+            transition: transform 0.5s ease;
+        }
+
+        .amenity-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .carousel-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .carousel-item:hover::before {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .zoom-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            color: white;
+            font-size: 2.5rem;
+            z-index: 2;
+            opacity: 0;
+            transition: all 0.3s ease;
+            background: rgba(37, 99, 235, 0.8);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .carousel-item:hover .zoom-icon {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .zoom-icon:hover {
+            background: rgba(37, 99, 235, 1);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .carousel-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 10;
+            opacity: 0;
+            backdrop-filter: blur(5px);
+        }
+
+        .amenities-carousel:hover .carousel-control {
+            opacity: 1;
+        }
+
+        .carousel-control:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-control.prev {
+            left: 20px;
+        }
+
+        .carousel-control.next {
+            right: 20px;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .indicator {
+            width: 30px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: var(--primary); 
+        }
+
+        .zoom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .zoomed-image {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .zoom-modal.active .zoomed-image {
+            transform: scale(1);
+        }
+
+        .close-zoom {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-zoom:hover {
+            transform: scale(1.1);
+            background: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                top: 35%;
+                scale: 1.1;  
+            }
+            .amenities-section {
+                padding: 2rem;
+                margin: 2rem;
+            }
+            
+            .carousel-container {
+                height: 500px;
+            }
+            
+            .zoom-icon {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            
+            .carousel-item:hover .zoom-icon {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            
+            .carousel-control {
+                opacity: 0;
+                width: 50px;
+                height: 50px;
+            }
+            
+            .amenities-carousel:hover .carousel-control {
+                opacity: 1;
+            }
+            
+            .indicator {
+                width: 30px;
+            }
+            
+            .close-zoom {
+                top: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+            }
+            .roomsectionapply-scroll-hint {
+                display: block;
+            }
+
+            .roomsectionapply-carousel-container {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+
+            .roomsectionapply-card {
+                flex: 0 0 85vw; /* Larger cards on mobile */
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+    .amenities-section {
+        padding: 1rem;
+        margin: 1rem;
+    }
+
+    .carousel-container {
+        height: 400px;
+    }
+
+    .zoom-icon {
+        padding: 8px;
+    }
+
+    .carousel-control {
+        width: 40px;
+        height: 40px;
+    }
+
+    .indicator {
+        width: 25px;
+    }
+
+    .close-zoom {
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+        .carousel-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .carousel-control:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-control.prev {
+            left: 20px;
+        }
+
+        .carousel-control.next {
+            right: 20px;
+        }
+
+        .carousel-control svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--primary);
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+ 
+
+    .button-container {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+             
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed; /* Fixed positioning */
+            top: 10px; /* Distance from the top */
+            right: 10px; /* Distance from the right */
+            z-index: 1000; 
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        } 
+
+        .btn-approve svg {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-approve:hover svg {
+            transform: scale(1.2);
+        }
+
+        .btn-approve {
+            background: linear-gradient(145deg, #34d399 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: linear-gradient(145deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 211, 153, 0.2);
+        }
+        .btn-approve:active {
+            transform: translateY(0);
+        }
+
+         
+
+        /* Button ripple effect */
+        .btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform 0.5s, opacity 1s;
+        }
+
+        .btn:active::after {
+            transform: scale(0, 0);
+            opacity: 0.3;
+            transition: 0s;
+        }
+
+        /* Modern focus styles */
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Disabled state */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .custom-dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .custom-dialog-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-dialog-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .custom-dialog-text {
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+        }
+ 
+
+        .custom-dialog-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background-color: #6b7280;
+        }
+
+        .btn-cancel:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-confirm {
+            background-color: #3b82f6;
+        }
+
+        .btn-confirm:hover {
+            background-color: #2563eb;
+        }
+
+        @media (max-width: 640px) {  
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .location-fab {
+            bottom: 1.5rem;
+            left: 1.5rem;
+            }
+
+            .location-button {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.85rem;
+            scale: 0.8;
+            left: -10%;
+            }
+        }
+        .roomsectionapply-container {
+            padding: 4rem 2rem;
+            background: #1e293b; 
+        } 
+
+        .roomsectionapply-section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #f8fafc;
+            margin-bottom: 3rem;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: roomsectionapplyFadeInUp 0.6s ease forwards;
+        }
+
+        .roomsectionapply-carousel {
+            max-width: 100%;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            scrollbar-width: none; /* Firefox */
+            padding: 1rem 0;
+        }
+
+        .roomsectionapply-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .roomsectionapply-carousel-container {
+            display: flex;
+            gap: 2rem;
+            padding: 0.5rem 1rem;
+            /* Add padding for first and last cards */
+            padding-right: calc(50% - 160px); 
+        }
+
+        .roomsectionapply-card {
+            flex: 0 0 300px; /* Fixed width for cards */
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            transition: transform 0.5s ease;
+            /* Prevent text selection during swipe */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-x; 
+        }
+
+        .roomsectionapply-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .roomsectionapply-image-container {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+
+        .roomsectionapply-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .roomsectionapply-content {
+            padding: 1.5rem;
+        }
+
+        .roomsectionapply-name {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .roomsectionapply-details {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .roomsectionapply-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+        }
+
+        .roomsectionapply-button {
+            background: linear-gradient(to right, #4f46e5, #6366f1);
+            color: white;
+            padding: .8rem .75rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer; 
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+            transform: translateY(0);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; 
+            margin-top: 15%;
+            margin-left: 10%;
+        }
+
+        /* Alternative gradient */
+.roomsectionapply-button.alt {
+    background: linear-gradient(to right, #3b82f6, #6366f1);
+}
+
+/* Success state */
+.roomsectionapply-button.success {
+    background: linear-gradient(to right, #059669, #10b981);
+}
+
+/* Add ripple effect */
+.roomsectionapply-button::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform .5s, opacity 1s;
+}
+
+.roomsectionapply-button:active::after {
+    transform: scale(0, 0);
+    opacity: .3;
+    transition: 0s;
+}
+
+        .roomsectionapply-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #4338ca, #4f46e5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Hover Effects */
+.roomsectionapply-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px -2px rgba(99, 102, 241, 0.3);
+}
+
+.roomsectionapply-button:hover::before {
+    opacity: 1;
+}
+
+/* Active/Click Effect */
+.roomsectionapply-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px -1px rgba(99, 102, 241, 0.2);
+}
+
+/* Add icon and text inside button */
+.roomsectionapply-button span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Optional loading state */
+.roomsectionapply-button.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* Add pulse animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+    }
+}
+
+.roomsectionapply-button:focus {
+    outline: none;
+    animation: pulse 1.5s infinite;
+}
+
+        .roomsectionapply-carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .roomsectionapply-scroll-hint {
+            display: none;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .roomsectionapply-carousel-button:hover {
+            background: #f1f5f9;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .roomsectionapply-prev-button {
+            left: 1rem;
+        }
+
+        .roomsectionapply-next-button {
+            right: 1rem;
+        }
+
+        @keyframes roomsectionapplyFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes roomsectionapplyFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback-card-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 350px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 1000;
+            transform: translateX(-120%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .feedback-card-container.active {
+            transform: translateX(0);
+        }
+
+        .feedback-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .feedback-card-title {
+            font-size: 1.2rem;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .feedback-card-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 1000;
+            position: absolute;
+            top: 2%;
+            left: 2%;
+        }
+
+        .feedback-card-close:hover {
+            color: #ef4444;
+        }
+
+        .feedback-card-stars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .feedback-star {
+            font-size: 2rem;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.2s ease;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .feedback-star:hover,
+        .feedback-star.active {
+            color: #fbbf24;
+            transform: scale(1.2);
+        }
+
+        .feedback-card-icon {
+            position: absolute;
+            right: -30px;
+            top: -30px;
+            width: 100px;
+            height: 100px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: wiggle 2s infinite;
+        }
+
+        .feedback-card-icon svg {
+            width: 50px;
+            height: 50px;
+            color: white;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-5deg); }
+            20%, 40%, 60%, 80% { transform: rotate(5deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @media (max-width: 600px) {
+            .feedback-card-container {
+                width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
+            }
+        }
+ 
+        .thank-you-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem;  /* Reduced from 1.5rem */
+            margin: 0.5rem 0;  /* Reduced from 1rem */
+            border: 1px solid #e5e7eb;
+            display: flex;     /* Added to help with alignment */
+            align-items: center;
+            justify-content: center;
+            height: fit-content;
+        }
+
+        .thank-you-content {
+            display: flex;
+            flex-direction: row;  /* Changed from column to row */
+            align-items: center;
+            gap: 0.5rem;         /* Reduced from 1rem */
+        }
+
+        .thank-you-icon {
+            background-color: #d1fae5;
+            color: #059669;
+            padding: 0.4rem;    /* Reduced from 0.75rem */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .check-icon {
+            width: 1rem;       /* Reduced from 1.5rem */
+            height: 1rem;
+        }
+
+        .thank-you-title {
+            color: #111827;
+            font-size: 1rem;   /* Reduced from 1.25rem */
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .icon-button {
+            padding: 0.35rem;  /* Reduced from 0.5rem */
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            color: #6b7280;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .icon-button:hover {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+
+        .icon-button:focus {
+            outline: none;
+            ring: 2px;
+            ring-offset: 2px;
+            ring-color: #3b82f6;
+        }
+
+        .successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    left: 20px;  /* Changed from right to left */
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateX(-100px);  /* Changed from 100px to -100px */
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+    z-index: 99999;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-right: 4px solid #10B981;  /* Changed from left to right */
+    border-left: none;
+}
+.successAnderrorMessagesPoppedup.error {
+    border-right: 4px solid #EF4444;  /* Changed from left to right */
+    border-left: none;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-100px);  /* Changed from 100px to -100px */
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-100px);  /* Changed from 100px to -100px */
+    }
+}
+
+ /* Click ripple effect */
+ .location-fab {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 1000;
+    font-family: 'Inter', sans-serif;
+    /* Initial state for transition */
+    opacity: 0;
+    transform: translateY(100px) scale(0.8);
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.2s; /* Slight delay for better UX */
+  }
+
+  /* Appear animation */
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(100px) scale(0.8);
+    }
+    60% {
+      transform: translateY(-10px) scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .location-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: 100px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2),
+                0 2px 4px -1px rgba(37, 99, 235, 0.1),
+                0 0 0 4px rgba(59, 130, 246, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    /* Add subtle bounce on appear */
+    animation: buttonBounce 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.8s; /* Start after parent animation */
+  }
+
+  @keyframes buttonBounce {
+    0% { transform: scale(0.9); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .location-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    transform: translateX(-100%);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .location-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px -3px rgba(37, 99, 235, 0.25),
+                0 4px 6px -2px rgba(37, 99, 235, 0.1),
+                0 0 0 6px rgba(59, 130, 246, 0.08);
+  }
+
+  .location-button:hover::before {
+    transform: translateX(100%);
+  }
+
+  .location-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px -1px rgba(37, 99, 235, 0.2),
+                0 1px 2px -1px rgba(37, 99, 235, 0.1),
+                0 0 0 4px rgba(59, 130, 246, 0.05);
+  }
+
+  .location-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    position: relative;
+    /* Icon fade in animation */
+    animation: iconFadeIn 0.3s ease forwards;
+    animation-delay: 1s;
+    opacity: 0;
+  }
+
+  @keyframes iconFadeIn {
+    from { opacity: 0; transform: rotate(-45deg); }
+    to { opacity: 1; transform: rotate(0); }
+  }
+
+  .location-icon i {
+    font-size: 1.25rem;
+  }
+
+  .location-button span {
+    /* Text fade in animation */
+    animation: textFadeIn 0.3s ease forwards;
+    animation-delay: 1.1s;
+    opacity: 0;
+  }
+
+  @keyframes textFadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .pulse {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    opacity: 0; /* Start invisible */
+    animation-delay: 1.2s; /* Start after other animations */
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.4;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  /* Tooltip */
+  .location-button .tooltip {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: #1f2937;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    background: #1f2937;
+  }
+
+  .location-button:hover .tooltip {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Click ripple effect */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  /* Hide button animation */
+  .location-fab.hide {
+    animation: fadeOutDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  @keyframes fadeOutDown {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(100px) scale(0.8);
+    }
+  }
+    </style>
+</head>
+<body>
+
+    <div class="location-fab">
+        <button class="location-button" onclick="handleLocationClick(event)" onmouseenter="handleHover()" onmouseleave="handleLeave()">
+          <div class="location-icon">
+            <div class="pulse"></div>
+            <i class="fas fa-location-dot"></i>
+          </div>
+          <span>View Location</span>
+          <span class="tooltip">Check current location</span>
+        </button>
+      </div>
+
+
+
+<div class="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                <div class="successAnderrorMessagesPoppedup-icon">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="successAnderrorMessagesPoppedup-content">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+
+    <div class="header">
+        <div class="cover-photo-container" onclick="openModal()">
+            <img src="{{ boarding_house.coverPhoto }}" alt="Cover Photo" class="cover-photo">
+            <div class="zoom-overlay">
+                <i class="fas fa-search-plus"></i>
+                <span class="zoom-text">Click to zoom</span>
+            </div>
+        </div>
+        <div class="header-content">
+            <h1>{{ boarding_house.boardinghouseName }}</h1>
+            <p>{{ boarding_house.name }}</p>
+            <p>CTU AC Accredited Boarding House</p>
+        </div>  
+    </div>
+
+    {% if not has_left_feedback %}
+    <div id="feedbackCard" class="feedback-card-container">
+        <div class="feedback-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+        </div>
+        
+        <div class="feedback-card-header">
+            <h3 class="feedback-card-title">Give My Boarding House a Feedback</h3>
+            <button class="feedback-card-close" onclick="closeFeedbackCard()">&times;</button>
+        </div> 
+        <form id="feedbackForm" method="post" action="{% url 'student_apply_now' %}">
+            {% csrf_token %}
+            <div class="feedback-card-stars">
+                <input type="hidden" name="ownerEmail" value="{{ owner_email }}">
+                <input type="hidden" name="username" value="{{ username }}">
+                <input type="hidden" name="student_id" value="{{ student_id }}">  
+                <input type="hidden" name="profile_picture" value="{{ profile_picture }}">
+                <button type="submit" class="feedback-star" name="rating1" value="1">★</button>
+                <button type="submit" class="feedback-star" name="rating2" value="2">★</button>
+                <button type="submit" class="feedback-star" name="rating3" value="3">★</button>
+                <button type="submit" class="feedback-star" name="rating4" value="4">★</button>
+                <button type="submit" class="feedback-star" name="rating5" value="5">★</button>
+            </div>  
+        </form>  
+    </div>
+    {% endif %}
+
+
+     <!-- Modal -->
+     <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <div class="loading-spinner"></div>
+            <img src="" alt="Zoomed Cover Photo" class="modal-image" id="modalImage">
+            <button class="close-modal" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="button-container"> 
+        <button type="button" class="btn btn-approve" onclick="scrollToRooms()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+            </svg>
+            Apply Rooms
+        </button>
+    </div>
+
+    <div class="profile-section">
+        <img src="{{ boarding_house.profile_picture }}" alt="Profile Photo" class="profile-photo">
+        <h2>{{ boarding_house.name }}</h2>
+    </div>
+
+    <div class="info-cards">
+        <div class="info-card">
+            <i class="fas fa-info-circle feature-icon"></i>
+            <h3>About Us</h3>
+            <p>{{ boarding_house.aboutUs }}</p>
+        </div>
+    </div> 
+    <div class="additional-info">
+        <h2>Boarding House Details</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-item">
+                <i class="fas fa-wifi"></i>
+                <span>Wi-Fi</span>
+                <span class="feature-status {% if boarding_house.wifiAvailable == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.wifiAvailable }}
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <i class="fas fa-bolt"></i>
+                <span>Free Electric Bill</span>
+                <span class="feature-status {% if boarding_house.freeElectricBill == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.freeElectricBill }}
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <i class="fas fa-water"></i>
+                <span>Free Water Bill</span>
+                <span class="feature-status {% if boarding_house.freeWaterBill == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.freeWaterBill }}
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <i class="fas fa-parking"></i>
+                <span>Parking Space</span>
+                <span class="feature-status {% if boarding_house.parkingSpace == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.parkingSpace }}
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <i class="fa-solid fa-toilet"></i>
+                <span>CR/Toilet Available</span>
+                <span class="feature-status {% if boarding_house.toiletAvailable != 'no_toilet' %}status-yes{% else %}status-no{% endif %}">
+                    {% if boarding_house.toiletAvailable == "toilets_in_each_room" %}
+                        Toilets are provided in each room
+                    {% elif boarding_house.toiletAvailable == "1_toilet" %}
+                        1 Toilet Available
+                    {% elif boarding_house.toiletAvailable == "2_toilets" %}
+                        2 Toilets Available
+                    {% elif boarding_house.toiletAvailable == "3_toilets" %}
+                        3 Toilets Available
+                    {% elif boarding_house.toiletAvailable == "4_toilets" %}
+                        4 Toilets Available
+                    {% elif boarding_house.toiletAvailable == "5_or_more_toilets" %}
+                        5 and Above Toilets Available
+                    {% else %}
+                        No Toilet Available
+                    {% endif %}
+                </span>
+            </div>
+            
+            
+        </div>
+
+        <div class="rental-container">
+            <h3>Type of Rental</h3>
+            <div class="rental-options">
+                <div class="rental-option {% if 'boardingHouse' in boarding_house.typeOfRental %}selected{% endif %}">
+                    <input type="checkbox" name="rentalType[]" value="boardingHouse" {% if "boardingHouse" in boarding_house.typeOfRental %}checked{% endif %} id="boardingHouse" disabled>
+                    <label for="boardingHouse">Boarding House</label>
+                </div>
+                <div class="rental-option {% if 'lodging' in boarding_house.typeOfRental %}selected{% endif %}">
+                    <input type="checkbox" name="rentalType[]" value="lodging" {% if "lodging" in boarding_house.typeOfRental %}checked{% endif %} id="lodging" disabled>
+                    <label for="lodging">Lodging</label>
+                </div>
+                <div class="rental-option {% if 'dormitory' in boarding_house.typeOfRental %}selected{% endif %}">
+                    <input type="checkbox" name="rentalType[]" value="dormitory" {% if "dormitory" in boarding_house.typeOfRental %}checked{% endif %} id="dormitory" disabled>
+                    <label for="dormitory">Dormitory</label>
+                </div>
+                <div class="rental-option {% if 'apartment' in boarding_house.typeOfRental %}selected{% endif %}">
+                    <input type="checkbox" name="rentalType[]" value="apartment" {% if "apartment" in boarding_house.typeOfRental %}checked{% endif %} id="apartment" disabled>
+                    <label for="apartment">Apartment</label>
+                </div>
+                <div class="rental-option {% if 'girlsBedspacer' in boarding_house.typeOfRental %}selected{% endif %}">
+                    <input type="checkbox" name="rentalType[]" value="girlsBedspacer" {% if "girlsBedspacer" in boarding_house.typeOfRental %}checked{% endif %} id="girlsBedspacer" disabled>
+                    <label for="girlsBedspacer">Girls Bedspacer</label>
+                </div>
+                <div class="rental-option {% if 'boysBedspacer' in boarding_house.typeOfRental %}selected{% endif %}">
+                    <input type="checkbox" name="rentalType[]" value="boysBedspacer" {% if "boysBedspacer" in boarding_house.typeOfRental %}checked{% endif %} id="boysBedspacer" disabled>
+                    <label for="boysBedspacer">Boys Bedspacer</label>
+                </div>
+                <div class="rental-option {% if 'bothGenderBedspacer' in boarding_house.typeOfRental %}selected{% endif %}">
+                    <input type="checkbox" name="rentalType[]" value="bothGenderBedspacer" {% if "bothGenderBedspacer" in boarding_house.typeOfRental %}checked{% endif %} id="bothGenderBedspacer" disabled>
+                    <label for="bothGenderBedspacer">Both Gender Bedspacer</label>
+                </div>
+            </div>
+        </div>
+    
+
+        <h3>Security Features</h3>
+        <div class="security-features">
+            <div class="feature-item">
+                <i class="fas fa-key"></i>
+                <span>Provided Room Keys</span>
+                <span class="feature-status {% if boarding_house.securityFeatures_keys == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.securityFeatures_keys }}
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <i class="fas fa-clock"></i>
+                <span>Curfew</span>
+                <span class="feature-status {% if boarding_house.securityFeatures_curfew == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.securityFeatures_curfew }}
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <i class="fas fa-video"></i>
+                <span>CCTV</span>
+                <span class="feature-status {% if boarding_house.securityFeatures_cctv == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.securityFeatures_cctv }}
+                </span>
+            </div>
+        </div>
+
+        <h3>Safety Protocols</h3>
+        <div class="security-features">
+            <div class="feature-item">
+                <i class="fas fa-running"></i>
+                <span>Emergency Exit</span>
+                <span class="feature-status {% if boarding_house.emergencyExit == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.emergencyExit }}
+                </span>
+            </div>
+
+            <div class="feature-item">
+                <i class="fa fa-fire-extinguisher"></i>
+                <span>Fire Extinguisher Available</span>
+                <span class="feature-status {% if boarding_house.fireExtinguishers == 'yes' %}status-yes{% else %}status-no{% endif %}">
+                    {{ boarding_house.fireExtinguishers }}
+                </span>
+            </div>
+ 
+        </div>
+    </div>
+
+    <div class="amenities-section">
+        <h2>Our Amenities</h2>
+        <div class="amenities-carousel">
+            <div class="carousel-container">
+                <div class="carousel-inner">
+                    {% for amenity in boarding_house.amenities %}
+                    <div class="carousel-item">
+                        <img src="{{ amenity }}" alt="Amenity Image" class="amenity-image" onerror="this.style.display='none'" />
+                        <div class="zoom-icon">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control prev">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carousel-control next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="carousel-indicators"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zoom Modal -->
+    <div class="zoom-modal">
+        <img src="" alt="Zoomed Amenity" class="zoomed-image">
+        <button class="close-zoom">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+     
+
+
+    <!-- Rooms Section -->
+    <section id="rooms-section" class="roomsectionapply-container">
+        <h2 class="roomsectionapply-section-title">Available Rooms</h2>
+        <div class="roomsectionapply-carousel">
+            <div class="roomsectionapply-carousel-container">
+                {% for room in boarding_house.rooms %}
+                    <div class="roomsectionapply-card">
+                        {% if room.images %}
+                            <img src="{{ room.images.0 }}" alt="{{ room.roomName }}" class="roomsectionapply-image">
+                        {% endif %}
+                        <center>
+                            <h3 class="roomsectionapply-name" 
+                                style="background-color: {% if room.availabilityStatus == 'AVAILABLE' %}green{% elif room.availabilityStatus == 'ROOM FULL' %}red{% else %}black{% endif %}; font-weight: 900; color: white">
+                                {{ room.availabilityStatus }}
+                            </h3>
+                        </center>                        
+                        <div class="roomsectionapply-content">
+                            <h3 class="roomsectionapply-name">{{ room.roomName }}</h3>
+                            
+                            <div class="roomsectionapply-details">
+                                <div class="roomsectionapply-detail-item">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                    <span>Capacity: {{ room.capacity }}</span>
+                                </div>
+                                <div class="roomsectionapply-detail-item">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                        <path d="M7 15h0M2 9.5h20"></path>
+                                    </svg>
+                                    <span>₱{{ room.price }}0</span>
+                                </div>
+                                <div class="roomsectionapply-detail-item">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                    <span>Aircon: {{ room.aircon }}</span>
+                                </div>
+                            </div>
+                            
+                            <form method="POST" action="{% url 'student_apply_now' %}#rooms-section">
+                                {% csrf_token %}
+                                <input type="hidden" name="roomName" value="{{ room.roomName }}">
+                                <input type="hidden" name="ownerEmail" value="{{ owner_email }}">
+                                <input type="hidden" name="studentEmail" value="{{ email }}">
+                                <input type="hidden" name="studentUsername" value="{{ username }}">
+                                <input type="hidden" name="studentID" value="{{ student_id }}">
+                                <input type="hidden" name="studentGender" value="{{ gender }}">
+                                <input type="hidden" name="studentCourse" value="{{ course }}">
+                                <input type="hidden" name="studentProfilePicture" value="{{ profile_picture }}">
+                                
+                                {% if room.roomName in applied_rooms %}
+                                <div class="thank-you-card">
+                                    <div class="thank-you-content">
+                                        <div class="thank-you-icon">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="check-icon">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <h1 class="thank-you-title">Your application is now pending</h1>
+                                        <a href="{% url 'studentapplication' %}" class="icon-button" title="View Applications">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <line x1="10" y1="9" x2="8" y2="9"></line>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <button class="roomsectionapply-button" type="submit" data-bs-toggle="modal" data-bs-target="#approveModal">
+                                    <span>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="button-icon">
+                                            <path d="M20 6L9 17l-5-5"/>
+                                        </svg>
+                                        <span>Apply for this Room</span>
+                                    </span>
+                                </button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    
+
+
+
+
+
+     <!-- Approve Modal -->
+     <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true" style="z-index: 9999;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approveModalLabel">Confirm Application</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="approveForm" method="POST" action="{% url 'student_apply_now' %}#rooms-section">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Enter your full name</label>
+                            <input type="text" class="form-control" id="fullName" name="fullName" required>
+                        </div>
+                        <input type="hidden" name="roomName" value="{{ room.roomName }}">
+                        <input type="hidden" name="ownerEmail" value="{{ owner_email }}">
+                        <input type="hidden" name="studentEmail" value="{{ email }}">
+                        <input type="hidden" name="studentUsername" value="{{ username }}">
+                        <input type="hidden" name="studentID" value="{{ student_id }}">
+                        <input type="hidden" name="studentGender" value="{{ gender }}">
+                        <input type="hidden" name="studentCourse" value="{{ course }}">
+                        <input type="hidden" name="studentProfilePicture" value="{{ profile_picture }}">
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+ 
+    <button onclick="backbtn()" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back
+    </button>
+
+    <script>
+        const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+        document.querySelectorAll('.roomsectionapply-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Add loading state
+                this.classList.add('loading');
+                
+                // Optional: Add loading spinner or text
+                const originalText = this.querySelector('span').textContent;
+                this.querySelector('span').textContent = 'You are now Applying...';
+                
+                // Remove loading state after form submission
+                // This is just for demo, you'll want to tie this to your actual form submission
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.querySelector('span').textContent = originalText;
+                }, 2000);
+            });
+        });
+
+
+
+         const carousel = document.querySelector('.roomsectionapply-carousel');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        carousel.addEventListener('mousedown', (e) => {
+            isDown = true;
+            carousel.style.cursor = 'grabbing';
+            startX = e.pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
+        });
+
+        carousel.addEventListener('mouseleave', () => {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+
+        carousel.addEventListener('mouseup', () => {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+
+        carousel.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - carousel.offsetLeft;
+            const walk = (x - startX) * 2;
+            carousel.scrollLeft = scrollLeft - walk;
+        });
+ 
+
+        // Hide scroll hint after user has scrolled
+        let scrollHintTimeout;
+        carousel.addEventListener('scroll', () => {
+            const scrollHint = document.querySelector('.roomsectionapply-scroll-hint');
+            scrollHint.style.opacity = '0';
+            clearTimeout(scrollHintTimeout);
+            scrollHintTimeout = setTimeout(() => {
+                scrollHint.style.display = 'none';
+            }, 1000);
+        });
+         
+ 
+        // Close dialogs when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('custom-dialog-overlay')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        function backbtn() {
+            window.location.href = "{% url 'studenthomepage' %}";
+        }
+
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const spinner = document.querySelector('.loading-spinner');
+
+        function openModal() {
+            modal.classList.add('active');
+            spinner.style.display = 'block';
+            
+            // Get the original image source
+            const originalImage = document.querySelector('.cover-photo');
+            modalImage.src = originalImage.src;
+
+            // Hide spinner when image is loaded
+            modalImage.onload = function() {
+                spinner.style.display = 'none';
+            };
+
+            // Prevent scrolling on body
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+         
+        // Close modal when clicking outside the image
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close modal with escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        function scrollToRooms() {
+            document.getElementById('rooms-section').scrollIntoView();
+        }
+        function scrollToRooms() {
+            const section = document.getElementById('rooms-section');
+            const sectionPosition = section.getBoundingClientRect().top + window.pageYOffset;
+            const startPosition = window.pageYOffset;
+            const distance = sectionPosition - startPosition;
+            const duration = 800; // Duration in milliseconds
+            let start = null;
+
+            function animation(currentTime) {
+                if (start === null) start = currentTime;
+                const timeElapsed = currentTime - start;
+                const progress = Math.min(timeElapsed / duration, 1);
+                
+                // Easing function (ease-in-out)
+                const ease = progress => {
+                    return progress < 0.5
+                        ? 2 * progress * progress
+                        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                };
+
+                window.scrollTo(0, startPosition + (distance * ease(progress)));
+
+                if (timeElapsed < duration) {
+                    requestAnimationFrame(animation);
+                }
+            }
+
+            requestAnimationFrame(animation);
+        } 
+        // Close dialogs when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('custom-dialog-overlay')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Add new carousel functionality
+        document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.carousel-inner');
+    const items = document.querySelectorAll('.carousel-item');
+    const prevBtn = document.querySelector('.prev');
+    const nextBtn = document.querySelector('.next');
+    const indicatorsContainer = document.querySelector('.carousel-indicators');
+    const modal = document.querySelector('.zoom-modal');
+    const modalImage = document.querySelector('.zoomed-image');
+    const closeModal = document.querySelector('.close-zoom');
+    
+    let currentIndex = 0;
+    let interval;
+    let startX, currentX, isDragging = false;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+    let animationID = 0;
+    const AUTOPLAY_DELAY = 2000;
+    
+    // Calculate the carousel width for smooth dragging
+    const carouselWidth = carousel.offsetWidth;
+
+    // Create indicators
+    items.forEach((_, index) => {
+        const indicator = document.createElement('div');
+        indicator.classList.add('indicator');
+        if (index === 0) indicator.classList.add('active');
+        indicator.addEventListener('click', () => {
+            goToSlide(index);
+            resetAutoPlay();
+        });
+        indicatorsContainer.appendChild(indicator);
+    });
+
+    const indicators = document.querySelectorAll('.indicator');
+
+    // Smooth animation function
+    function animation() {
+        if (isDragging) {
+            setCarouselPosition(currentTranslate);
+            requestAnimationFrame(animation);
+        }
+    }
+
+    function setCarouselPosition(position) {
+        carousel.style.transform = `translateX(${position}px)`;
+    }
+
+    // Drag functionality
+    function dragStart(e) {
+        e.preventDefault();
+        isDragging = true;
+        startX = e.type === 'mousedown' ? e.pageX : e.touches[0].pageX;
+        
+        // Get the current position from the transform
+        const transform = window.getComputedStyle(carousel).getPropertyValue('transform');
+        const matrix = new DOMMatrix(transform);
+        currentTranslate = matrix.m41;
+        prevTranslate = currentTranslate;
+        
+        stopAutoPlay();
+        cancelAnimationFrame(animationID);
+        animationID = requestAnimationFrame(animation);
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        currentX = e.type === 'mousemove' ? e.pageX : e.touches[0].pageX;
+        const diff = currentX - startX;
+        currentTranslate = prevTranslate + diff;
+    }
+
+    function dragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        cancelAnimationFrame(animationID);
+
+        const movedBy = currentTranslate - prevTranslate;
+        const slideWidth = carouselWidth;
+        
+        // Determine which slide to snap to based on drag distance
+        if (Math.abs(movedBy) > slideWidth / 4) {
+            if (movedBy > 0 && currentIndex > 0) {
+                currentIndex--;
+            } else if (movedBy < 0 && currentIndex < items.length - 1) {
+                currentIndex++;
+            }
+        }
+
+        // Add smooth transition for snap
+        carousel.style.transition = 'transform 0.3s ease-out';
+        goToSlide(currentIndex);
+        
+        // Remove transition after snap
+        setTimeout(() => {
+            carousel.style.transition = 'none';
+        }, 300);
+
+        resetAutoPlay();
+    }
+
+    // Add drag event listeners with passive: false for better touch handling
+    carousel.addEventListener('mousedown', dragStart);
+    carousel.addEventListener('mousemove', drag);
+    carousel.addEventListener('mouseup', dragEnd);
+    carousel.addEventListener('mouseleave', dragEnd);
+    carousel.addEventListener('touchstart', dragStart, { passive: false });
+    carousel.addEventListener('touchmove', drag, { passive: false });
+    carousel.addEventListener('touchend', dragEnd);
+
+    // Zoom functionality
+    items.forEach(item => {
+        const zoomIcon = item.querySelector('.zoom-icon');
+        const image = item.querySelector('.amenity-image');
+        
+        zoomIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            modalImage.src = image.src;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            stopAutoPlay();
+        });
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        resetAutoPlay();
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            resetAutoPlay();
+        }
+    });
+
+    // Carousel functionality
+    function updateIndicators() {
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentIndex);
+        });
+    }
+
+    function goToSlide(index) {
+        currentIndex = index;
+        const position = -currentIndex * carouselWidth;
+        prevTranslate = position;
+        currentTranslate = position;
+        setCarouselPosition(position);
+        updateIndicators();
+    }
+
+    function nextSlide() {
+        if (currentIndex < items.length - 1) {
+            carousel.style.transition = 'transform 0.3s ease-out';
+            currentIndex++;
+            goToSlide(currentIndex);
+            setTimeout(() => {
+                carousel.style.transition = 'none';
+            }, 300);
+        } else {
+            // Smooth return to first slide
+            carousel.style.transition = 'transform 0.3s ease-out';
+            currentIndex = 0;
+            goToSlide(currentIndex);
+            setTimeout(() => {
+                carousel.style.transition = 'none';
+            }, 300);
+        }
+    }
+
+    function prevSlide() {
+        if (currentIndex > 0) {
+            carousel.style.transition = 'transform 0.3s ease-out';
+            currentIndex--;
+            goToSlide(currentIndex);
+            setTimeout(() => {
+                carousel.style.transition = 'none';
+            }, 300);
+        } else {
+            // Smooth transition to last slide
+            carousel.style.transition = 'transform 0.3s ease-out';
+            currentIndex = items.length - 1;
+            goToSlide(currentIndex);
+            setTimeout(() => {
+                carousel.style.transition = 'none';
+            }, 300);
+        }
+    }
+
+    function startAutoPlay() {
+        if (!interval) {
+            interval = setInterval(nextSlide, AUTOPLAY_DELAY);
+        }
+    }
+
+    function stopAutoPlay() {
+        if (interval) {
+            clearInterval(interval);
+            interval = null;
+        }
+    }
+
+    function resetAutoPlay() {
+        stopAutoPlay();
+        startAutoPlay();
+    }
+
+    // Navigation button events
+    prevBtn.addEventListener('click', () => {
+        prevSlide();
+        resetAutoPlay();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        nextSlide();
+        resetAutoPlay();
+    });
+
+    // Pause autoplay on hover
+    carousel.addEventListener('mouseenter', stopAutoPlay);
+    carousel.addEventListener('mouseleave', startAutoPlay);
+
+    // Start the carousel
+    startAutoPlay();
+});
+
+function viewImage(imageUrl) {
+        // Create modal for image viewing
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            cursor: pointer;
+        `;
+
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.style.cssText = `
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+        `;
+
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+
+        // Close modal on click
+        modal.onclick = () => {
+            document.body.removeChild(modal);
+        };
+    }
+
+    // Add fade-in animation to document items
+    document.querySelectorAll('.document-item').forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.animation = `fadeIn 0.5s ease ${index * 0.1}s forwards`;
+    });
+
+    // Function to show feedback card after a delay
+    function showFeedbackCard() {
+            const feedbackCard = document.getElementById('feedbackCard');
+            setTimeout(() => {
+                feedbackCard.classList.add('active');
+            }, 2000);
+        }
+
+        // Function to close feedback card
+        function closeFeedbackCard() {
+            const feedbackCard = document.getElementById('feedbackCard');
+            feedbackCard.classList.remove('active');
+        }
+
+        // Function to set rating
+         
+
+
+        // Show feedback card on page load
+        window.onload = showFeedbackCard;
+
+
+
+        // Show/Hide button functions
+function showLocationButton() {
+  const fab = document.querySelector('.location-fab');
+  fab.classList.remove('hide');
+}
+
+function hideLocationButton() {
+  const fab = document.querySelector('.location-fab');
+  fab.classList.add('hide');
+}
+
+function handleLocationClick(event) {
+  const button = event.currentTarget;
+  
+  // Create ripple effect
+  const ripple = document.createElement('div');
+  const rect = button.getBoundingClientRect();
+  
+  ripple.className = 'ripple';
+  ripple.style.left = `${event.clientX - rect.left}px`;
+  ripple.style.top = `${event.clientY - rect.top}px`;
+  
+  button.appendChild(ripple);
+  
+  // Remove ripple after animation
+  setTimeout(() => {
+    ripple.remove();
+  }, 600);
+
+  // Add your location viewing logic here
+  console.log('Viewing location...');
+}
+
+let pulseElement;
+
+function handleHover() {
+  const icon = document.querySelector('.location-icon');
+  pulseElement = document.createElement('div');
+  pulseElement.className = 'pulse';
+  icon.appendChild(pulseElement);
+}
+
+function handleLeave() {
+  if (pulseElement) {
+    pulseElement.remove();
+  }
+}
+    </script>
+</body>
+</html>
+
+
+
+ 

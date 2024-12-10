@@ -1,0 +1,635 @@
+{% extends 'Owner-base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Welcome, Landlord</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="messages">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                            <div class="successAnderrorMessagesPoppedup-icon">
+                                {% if message.tags == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="successAnderrorMessagesPoppedup-content">
+                                {{ message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-home"></i> BH Status</h5>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <h2 class="text-success">Available</h2>
+                            <h3 id="room-stats"><span style="color:#007bff; font-weight: 900;">{{ available_rooms }}</span> <span class="text-muted">of</span> <span style="font-weight: 900; font-weight: 900;">{{ total_displayed_rooms }}</span></h3>
+                        </div>
+                        <div class="progress-circle" style="width: 100px; height: 100px; position: relative;">
+                            <svg viewBox="0 0 36 36" class="circular-chart green">
+                                <path class="circle-bg"
+                                    d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="circle"
+                                    id="progress-circle"
+                                    stroke-dasharray="0, 100"
+                                    d="M18 2.0845
+                                    a 15.9155 15.9155 0 0 1 0 31.831
+                                    a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div id="percentage-label"
+                                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px;">
+                                0%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>      
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-door-open"></i> Room Status</h5>
+                    <div class="text-center mt-3">
+                        <h2 class="text-primary">Total Rooms Shown</h2>
+                        <h1 class="display-4">{{ total_displayed_rooms }}</h1>
+                    </div>
+                    
+                </div>
+            </div>
+        </div> 
+    </div>
+    
+    <div class="row">
+        <!-- First Column: Manage your Boarding House -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Manage your Boarding House</h5>
+                    <div id="map" style="height: 200px; background-color: #eee;"> 
+                    </div>
+                    <a href="ownerSignUpSecondStep"><button class="btn btn-success btn-block mt-3">
+                        <i class="fas fa-edit"></i> Manage
+                    </button></a>   
+                </div>
+            </div>
+        </div>
+         
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-bed"></i> Room Management</h5>
+                    <p class="card-text">Manage your boarding house rooms efficiently.</p>
+                    <button class="btn btn-primary btn-block" onclick="roomManage()">
+                        <i class="fas fa-cogs"></i> Manage Rooms
+                    </button>
+                </div>
+            </div>
+     
+            <div class="card mb-4 mt-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users"></i> Tenant Management</h5>
+                    <p class="card-text">Manage your tenants efficiently.</p>
+                    <button class="btn btn-primary btn-block" onclick="manageTenants()">
+                        <i class="fas fa-user-cog"></i> Manage Tenants
+                    </button>
+                </div>
+            </div>
+        </div>  
+    </div>
+    
+</div>
+
+
+<!-- Notification Bell Container -->
+<div class="notification-bell-container">
+    <button class="notification-bell-button" aria-label="Pending Notifications" onclick="lodgergo()">
+        <div class="notification-icon-wrapper">
+            <!-- Bell Icon -->
+            <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+             
+            <!-- Notification Dot Animation -->
+            <span class="notification-dot"></span>
+        </div>
+    </button>
+</div>
+
+<a href="{% url 'message_owner' %}" class="message-icon" data-tooltip="Message">
+    <i class="fas fa-comment"></i>
+</a>  
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: 0.3s;
+    }
+    .card:hover {
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .progress {
+        position: relative;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+    .progress-bar {
+        position: absolute;
+        height: 100%;
+        transform-origin: left center;
+        transform: rotate(0deg);
+        transition: transform 1s ease;
+    }
+    .message-icon {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background-color: #007bff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        z-index: 9999; /* Ensure it's above all other elements */
+    }
+    .message-icon:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        color: white;
+    }
+    .message-icon[data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        background-color: #333;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 14px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .message-icon[data-tooltip]:hover::after {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Container for messages */
+ 
+    @media (max-width: 768px) {
+        .message-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .message-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            bottom: 10px;
+            right: 10px;
+        }
+    }
+
+    .successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+/* Container Positioning */
+.notification-bell-container {
+    position: fixed;
+    top: 7.5rem;
+    right: 1.5rem;
+    z-index: 5000;
+}
+
+/* Button Styling */
+.notification-bell-button {
+    position: relative;
+    background: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Hover Effect */
+.notification-bell-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background: #f8fafc;
+}
+
+/* Active State */
+.notification-bell-button:active {
+    transform: translateY(0);
+}
+
+/* Icon Wrapper */
+.notification-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Bell Icon */
+.bell-icon {
+    width: 24px;
+    height: 24px;
+    color: #475569;
+    transition: all 0.3s ease;
+}
+
+.notification-bell-button:hover .bell-icon {
+    color: #3b82f6;
+    transform: rotate(5deg);
+}
+
+/* Notification Counter */
+.notification-counter {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 0.3s ease-out;
+}
+
+/* Notification Dot */
+.notification-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px; 
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Ring Animation on Hover */
+@keyframes ring {
+    0% { transform: rotate(0); }
+    1% { transform: rotate(30deg); }
+    3% { transform: rotate(-28deg); }
+    5% { transform: rotate(34deg); }
+    7% { transform: rotate(-32deg); }
+    9% { transform: rotate(30deg); }
+    11% { transform: rotate(-28deg); }
+    13% { transform: rotate(26deg); }
+    15% { transform: rotate(-24deg); }
+    17% { transform: rotate(22deg); }
+    19% { transform: rotate(-20deg); }
+    21% { transform: rotate(18deg); }
+    23% { transform: rotate(-16deg); }
+    25% { transform: rotate(14deg); }
+    27% { transform: rotate(-12deg); }
+    29% { transform: rotate(10deg); }
+    31% { transform: rotate(-8deg); }
+    33% { transform: rotate(6deg); }
+    35% { transform: rotate(-4deg); }
+    37% { transform: rotate(2deg); }
+    39% { transform: rotate(-1deg); }
+    41% { transform: rotate(1deg); }
+    43% { transform: rotate(0); }
+    100% { transform: rotate(0); }
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Scale In Animation */
+@keyframes scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Add animation on hover */
+.notification-bell-button:hover .bell-icon {
+    animation: ring 4s ease-in-out infinite;
+    transform-origin: 50% 0;
+}
+
+/* Glass Effect */
+.notification-bell-button {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Focus State */
+.notification-bell-button:focus {
+    outline: none;
+    ring: 2px;
+    ring-offset: 2px;
+    ring-color: #3b82f6;
+}
+
+/* Optional: Add dark mode support */
+@media (prefers-color-scheme: dark) {
+    .notification-bell-button {
+        background: rgba(30, 41, 59, 0.9);
+    }
+    
+    .bell-icon {
+        color: #e2e8f0;
+    }
+    
+    .notification-bell-button:hover {
+        background: rgba(30, 41, 59, 0.95);
+    }
+}
+
+/* Optional: Add hover tooltip */
+.notification-bell-button::after {
+    content: 'Pending Notifications';
+    position: absolute;
+    right: 120%;
+    top: 50%;
+    transform: translateY(-50%) scale(0);
+    background: #1e293b;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.notification-bell-button:hover::after {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+}
+.circular-chart {
+        width: 100px;
+        height: 100px;
+        transform: rotate(-90deg); /* Start the circle at the top */
+    }
+
+    .circle-bg {
+        fill: none;
+        stroke: #e6e6e6;
+        stroke-width: 3.8;
+    }
+
+    .circle {
+        fill: none;
+        stroke: #4caf50;
+        stroke-width: 3.8;
+        stroke-linecap: round;
+        transition: stroke-dasharray 0.3s ease-in-out; /* Smooth update */
+    }
+
+    .green {
+        color: #4caf50;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const messageList = document.querySelector('.message-list');
+
+
+    if (messageList) {
+        setTimeout(() => {
+            messageList.style.transition = "opacity 0.5s ease"; // Transition effect
+            messageList.style.opacity = 0; // Fade out effect
+            setTimeout(() => {
+                messageList.remove(); // Remove from DOM after fading out
+            }, 500); // Match this duration with the transition time
+        }, 2000); // 2 seconds before starting to fade out
+    }
+    function updateLastActiveTime() {
+        localStorage.setItem('lastActiveTime', Date.now());
+    }
+
+    // Function to check for user inactivity
+    function checkInactivity() {
+        const lastActiveTime = localStorage.getItem('lastActiveTime');
+        const inactivityThreshold = 5 * 1000;  
+        const checkInterval = 1000; // Check every second
+        // If last active time exists and the user is inactive
+        if (lastActiveTime && (Date.now() - lastActiveTime > inactivityThreshold)) {
+            alert('You have been logged out due to inactivity.');
+            // Redirect to the logout URL
+            window.location.href = "{% url 'ownerlogout' %}"; // Adjust this URL based on your actual logout route
+        }
+        else {
+        // Calculate the remaining time before logout
+        const remainingTime = inactivityThreshold - timeSinceLastActive;
+        console.log(`Remaining time until logout: ${Math.ceil(remainingTime / 1000)} seconds`);
+    }
+    }
+
+    // Attach event listeners to reset the timer on user interaction
+    document.addEventListener('click', updateLastActiveTime);
+    document.addEventListener('keypress', updateLastActiveTime);
+    document.addEventListener('mousemove', updateLastActiveTime); // Optional: reset on mouse movement
+
+    // Check for inactivity every minute
+    setInterval(checkInactivity, 60 * 1000);
+
+    // Initialize last active time on page load
+    if (!localStorage.getItem('lastActiveTime')) {
+        updateLastActiveTime(); // Set the initial active time
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate progress bar
+        setTimeout(function() {
+            document.querySelector('.progress-bar').style.transform = 'rotate(270deg)';
+        }, 500);
+
+
+
+        const bellButton = document.querySelector('.notification-bell-button');
+    const counter = document.querySelector('.notification-counter');
+    
+    // Optional: Add click handler
+    bellButton.addEventListener('click', () => {
+        // Add subtle shake animation
+        bellButton.style.animation = 'none';
+        bellButton.offsetHeight; // Trigger reflow
+        bellButton.style.animation = 'ring 1s ease';
+        
+        // Optional: Update counter
+        const currentCount = parseInt(counter.textContent);
+        if (currentCount > 0) {
+            counter.textContent = currentCount - 1;
+            if (currentCount - 1 === 0) {
+                counter.style.display = 'none';
+            }
+        }
+    });
+
+    const percentage = {{ availability_percentage }}; // Fetch from context
+        const circle = document.getElementById('progress-circle');
+        const percentageLabel = document.getElementById('percentage-label');
+
+        let currentPercentage = 0
+        
+    // Animate the progress
+    const animateProgress = setInterval(() => {
+            currentPercentage++;
+            const progressValue = Math.min(currentPercentage, percentage); // Cap at the target percentage
+
+            // Set the stroke-dasharray for animation
+            const dashArray = `${progressValue}, 100`;
+            circle.setAttribute('stroke-dasharray', dashArray);
+
+            // Update the text percentage
+            percentageLabel.textContent = `${progressValue}%`;
+
+            if (currentPercentage >= percentage + 100) { // Allow full 360 rotation before stopping
+                clearInterval(animateProgress);
+            }
+        }, 10); // Adjust speed of animation
+    });
+
+    
+
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+    function lodgergo(){
+        window.location.href="{% url 'ownerlodger' %}"
+    }
+
+    function roomManage(){
+        window.location.href="{% url 'ownersRoomManagement' %}"
+    }
+
+    function manageTenants(){
+        window.location.href="{% url 'ownersTenantsManagement' %}"
+    } 
+</script>
+{% endblock %}

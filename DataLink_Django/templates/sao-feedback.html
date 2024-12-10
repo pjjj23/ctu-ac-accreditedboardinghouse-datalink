@@ -1,0 +1,758 @@
+{% extends 'SAO-base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-color: #6366f1;
+        --primary-light: #818cf8;
+        --primary-dark: #4f46e5;
+        --secondary-color: #f59e0b;
+        --secondary-light: #fbbf24;
+        --secondary-dark: #d97706;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --text-color: #374151;
+        --text-light: #6b7280;
+        --background-color: #f3f4f6;
+        --card-background: #ffffff;
+        --border-color: #e5e7eb;
+        --border-radius: 16px;
+        --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Base Layout */
+    .dashboard-container {
+        padding: clamp(1rem, 4vw, 2rem);
+        background-color: var(--background-color);
+        min-height: 100vh;
+    }
+
+    .table-container {
+        background-color: var(--card-background);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: clamp(1rem, 3vw, 2rem);
+        margin-bottom: 2rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid var(--border-color);
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -1rem;
+        padding: 0 1rem;
+    }
+
+    /* Report Button and Options */
+    .report-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        white-space: nowrap;
+    }
+
+    .report-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .report-options {
+        background-color: var(--card-background);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        position: absolute;
+        z-index: 1000; 
+    }
+
+    .report-options a {
+        display: block;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+        color: var(--text-color);
+    }
+
+    .report-options a:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Table Styles */
+    table {
+        width: 100%;
+        min-width: 600px;
+        border-spacing: 0;
+        border-collapse: separate;
+        border-radius: 12px;
+    }
+
+    th {
+        position: sticky;
+        top: 0;
+        background-color: var(--background-color);
+        z-index: 10;
+        padding: 1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        text-transform: uppercase;
+        font-size: clamp(0.75rem, 2vw, 0.85rem);
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    td {
+        padding: 1rem;
+        color: var(--text-light);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    /* Profile Styles */
+    .profile-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-width: 200px;
+    }
+
+    .profile-img {
+        width: clamp(32px, 8vw, 48px);
+        height: clamp(32px, 8vw, 48px);
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary-light);
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .profile-name {
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: clamp(0.875rem, 2.5vw, 1rem);
+    }
+
+    .profile-email {
+        font-size: clamp(0.75rem, 2vw, 0.85rem);
+        color: var(--text-light);
+        word-break: break-all;
+    }
+
+    /* Rating and Role Styles */
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .rating-low {
+        color: red;
+    }
+
+    .rating-high {
+        color: #10b981;
+    }
+
+    .star-icon {
+        color: var(--secondary-color);
+    }
+
+    .role-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .role-owner {
+        background-color: #fef2f2;
+        color: var(--danger-color);
+        border: 1px solid #fecaca;
+    }
+
+    .role-student {
+        background-color: #eef2ff;
+        color: var(--primary-color);
+        border: 1px solid #e0e7ff;
+    }
+
+    /* Statistics Grid */
+    .statistics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+        gap: clamp(1rem, 3vw, 1.5rem);
+        margin-top: 2rem;
+    }
+
+    .stat-card {
+        background-color: var(--card-background);
+        border-radius: var(--border-radius);
+        padding: clamp(1rem, 3vw, 1.5rem);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-light);
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-icon-purple {
+        background-color: #eef2ff;
+        color: var(--primary-color);
+    }
+
+    .stat-icon-orange {
+        background-color: #fff7ed;
+        color: var(--secondary-color);
+    }
+
+    .stat-icon-green {
+        background-color: #ecfdf5;
+        color: var(--success-color);
+    }
+
+    .stat-icon-blue {
+        background-color: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .stat-value {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 700; 
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        background-color: #f8fafc;
+    }
+
+    .trend-up {
+        color: var(--success-color);
+    }
+
+    .trend-down {
+        color: var(--danger-color);
+    }
+
+    /* Pagination */
+    .table-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .table-info {
+        text-align: center;
+        font-size: clamp(0.875rem, 2.5vw, 0.95rem);
+        color: var(--text-light);
+    }
+
+    .pagination {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .page-button {
+        width: clamp(32px, 8vw, 40px);
+        height: clamp(32px, 8vw, 40px);
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background-color: var(--card-background);
+        color: var(--text-color);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-button:hover:not(:disabled) {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .page-button.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .page-button:disabled {
+        background-color: var(--background-color);
+        color: var(--text-light);
+        cursor: not-allowed;
+    }
+
+    .page-ellipsis {
+        color: var(--text-light);
+        padding: 0 0.5rem;
+    }
+
+    /* Loading States */
+    .table-row-loading {
+        animation: pulse 1.5s infinite;
+    }
+
+    .table-row-fade {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Breakpoints */
+    @media (min-width: 768px) {
+        .table-footer {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-info {
+            text-align: left;
+        }
+
+        .pagination {
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .role-badge {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .stat-trend {
+            font-size: 0.75rem;
+        }
+
+        .report-options {
+            width: calc(100% - 2rem);
+            max-width: 300px;
+        }
+
+        .report-options a {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        #pageNumbers {
+            display: flex;
+            gap: 0.25rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        #pageNumbers::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    /* Touch Device Optimizations */
+    @media (hover: none) {
+        .report-btn,
+        .page-button,
+        .report-options a {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .table-container {
+            scrollbar-width: thin;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+    }
+
+    /* Dark Mode */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --text-color: #e5e7eb;
+            --text-light: #9ca3af;
+            --background-color: #1f2937;
+            --card-background: #111827;
+            --border-color: #374151;
+        }
+
+        .stat-trend {
+            background-color: #1f2937;
+        }
+
+        tr:hover td {
+            background-color: #1f2937;
+        }
+
+        .role-owner {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .role-student {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-container,
+        .stat-card,
+        .report-options {
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="table-container">
+        <button class="report-btn" id="reportBtn">
+            <i class="fas fa-chart-bar"></i>
+            Reports
+        </button>
+        <div class="report-options" id="reportOptions" style="display: none;">
+            <a href="{% url 'student_report' %}" id="viewStudentReports">View Student Reports</a>
+            <a href="{% url 'owner_report' %}" id="viewOwnerReports">View Owner Reports</a>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Profile</th>
+                    <th>Rating</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody"> 
+                <tbody>
+                    {% for feedback in feedback_list %}
+                    <tr class="table-row-fade">
+                        <td class="profile-cell">
+                            <img src="{{ feedback.profile_picture }}" class="profile-img" alt="Profile Picture">
+                            <div class="profile-info">
+                                <span class="profile-name">{{ feedback.name }}</span>
+                                <span class="profile-email">{{ feedback.email }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rating">
+                                <i class="fas fa-star star-icon"></i>
+                                {{ feedback.rating }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge role-{{ feedback.role|lower }}">{{ feedback.role }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </tbody>
+        </table>
+        
+        <div class="table-footer">
+            <div class="table-info">
+                Showing <span id="startRange">1</span> to <span id="endRange">10</span> of <span id="totalEntries">100</span> entries
+            </div>
+            <div class="pagination">
+                <button class="page-button" id="firstPage" title="First Page">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="page-button" id="prevPage" title="Previous Page">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <div id="pageNumbers">
+                    <!-- Page numbers will be dynamically populated -->
+                </div>
+                <button class="page-button" id="nextPage" title="Next Page">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="page-button" id="lastPage" title="Last Page">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="statistics-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon stat-icon-purple">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ total_users_count }}</div>
+            <div class="stat-label">Total Users Signup on the system</div>
+            <div class="stat-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                Users continue growing
+            </div>
+        </div>
+        
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon stat-icon-orange">
+                    <i class="fas fa-star"></i>
+                </div>
+            </div>
+            <div class="stat-value 
+                {% if average_rating <= 2 %}rating-low{% elif average_rating >= 3 %}rating-high{% endif %}">
+                {{ average_rating }}
+            </div>
+            <div class="stat-description 
+                {% if average_rating <= 2 %} rating-low 
+                {% elif average_rating >= 3 %} rating-high 
+                {% else %} rating-neutral 
+                {% endif %}">
+                {{ feedback_description }}
+            </div>
+
+            <br><div class="stat-label">Average Ratings from users</div>
+            <div class="stat-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                Feedback continue growing
+            </div>
+        </div> 
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon stat-icon-green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <div class="stat-label">Total Owners gives feedback</div>
+            <div class="stat-value">{{ total_owners_feedback_count }}</div>
+            <div class="stat-label">Total Students gives feedback</div>
+            <div class="stat-value">{{ total_students_feedback_count }}</div> 
+            <div class="stat-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                Feedback per user continue growing
+            </div>
+        </div>
+ 
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class PaginationManager {
+    constructor() {
+        this.currentPage = 1;
+        this.itemsPerPage = 10;
+        this.totalItems = 100; // This should come from your backend
+        this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+        
+        // Sample data - replace with your actual data
+        this.data = Array.from({ length: 100 }, (_, i) => ({
+            name: `User ${i + 1}`,
+            email: `user${i + 1}@example.com`,
+            rating: (Math.random() * 2 + 3).toFixed(1),
+            role: Math.random() > 0.5 ? 'Admin' : 'User'
+        }));
+
+        this.initializeElements();
+        this.setupEventListeners();
+        this.renderPage(1);
+    }
+
+    initializeElements() {
+        this.elements = {
+            tableBody: document.getElementById('userTableBody'),
+            pageNumbers: document.getElementById('pageNumbers'),
+            firstPage: document.getElementById('firstPage'),
+            prevPage: document.getElementById('prevPage'),
+            nextPage: document.getElementById('nextPage'),
+            lastPage: document.getElementById('lastPage'),
+            startRange: document.getElementById('startRange'),
+            endRange: document.getElementById('endRange'),
+            totalEntries: document.getElementById('totalEntries')
+        };
+    }
+
+    setupEventListeners() {
+            this.elements.firstPage.addEventListener('click', () => this.goToPage(1));
+            this.elements.prevPage.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+            this.elements.nextPage.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+            this.elements.lastPage.addEventListener('click', () => this.goToPage(this.totalPages));
+        }
+
+        async goToPage(page) {
+            if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+            
+            // Add loading state
+            this.elements.tableBody.innerHTML = `
+                <tr class="table-row-loading">
+                    <td colspan="3">Loading...</td>
+                </tr>
+            `;
+
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            this.currentPage = page;
+            this.renderPage(page);
+        }
+
+         
+
+        updatePaginationControls() {
+            // Update button states
+            this.elements.firstPage.disabled = this.currentPage === 1;
+            this.elements.prevPage.disabled = this.currentPage === 1;
+            this.elements.nextPage.disabled = this.currentPage === this.totalPages;
+            this.elements.lastPage.disabled = this.currentPage === this.totalPages;
+
+            // Generate page numbers
+            let pages = [];
+            const maxVisiblePages = 5;
+
+            if (this.totalPages <= maxVisiblePages) {
+                pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+            } else {
+                if (this.currentPage <= 3) {
+                    pages = [1, 2, 3, 4, '...', this.totalPages];
+                } else if (this.currentPage >= this.totalPages - 2) {
+                    pages = [1, '...', this.totalPages - 3, this.totalPages - 2, this.totalPages - 1, this.totalPages];
+                } else {
+                    pages = [1, '...', this.currentPage - 1, this.currentPage, this.currentPage + 1, '...', this.totalPages];
+                }
+            }
+
+            this.elements.pageNumbers.innerHTML = pages.map(page => {
+                if (page === '...') {
+                    return '<span class="page-ellipsis">...</span>';
+                }
+                return `
+                    <button class="page-button ${page === this.currentPage ? 'active' : ''}"
+                            onclick="paginationManager.goToPage(${page})"
+                            ${page === this.currentPage ? 'disabled' : ''}>
+                        ${page}
+                    </button>
+                `;
+            }).join('');
+        }
+    }
+
+    // Initialize pagination when document is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        const reportBtn = document.getElementById('reportBtn');
+        const reportOptions = document.getElementById('reportOptions');
+
+        reportBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Toggle the display property between 'block' and 'none'
+            if (reportOptions.style.display === 'none' || reportOptions.style.display === '') {
+                reportOptions.style.display = 'block';
+            } else {
+                reportOptions.style.display = 'none';
+            }
+        });
+
+        window.paginationManager = new PaginationManager();
+ 
+         
+
+        document.addEventListener('click', function(e) {
+            if (!reportBtn.contains(e.target) && !reportOptions.contains(e.target)) {
+                reportOptions.style.display = 'none';
+            }
+        });
+
+        document.getElementById('viewStudentReports').addEventListener('click', function(e) {
+            window.location.href="{% url 'student_report' %}";
+        });
+
+        document.getElementById('viewOwnerReports').addEventListener('click', function(e) {
+            window.location.href="{% url 'owner_report' %}";
+        });
+    });
+</script>
+{% endblock %}

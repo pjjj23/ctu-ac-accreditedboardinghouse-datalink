@@ -1,0 +1,521 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTU AC Accredited Boarding Houses</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa; 
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #000000; /* Dark Green */
+            color: white;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 16.666667%;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .sidebar .nav-link {
+            color: white;
+            padding: 15px 20px;
+            margin: 12px 0;
+            text-align: left;
+            border-radius: 0;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: darkgreen;
+            border-radius: 50px;
+        } 
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .sidebar .logo {
+            background-color: white;
+            border-radius: 50%;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .logout-btn {
+            position: absolute;
+            bottom: -70px;
+            width: 90%;
+            left: 5%;
+        }
+        .logout-btn .btn {
+            background-color: #dc3545;
+            border: none;
+            border-radius: 5px;
+        }
+        .logout-btn .btn:hover {
+            background-color: #ba222f; 
+        }
+        #sidebarCollapse {
+            display: none;
+        }
+        main {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .main-content {
+            transition: margin-left 0.3s;
+            margin-left: 16.666667%;
+            padding: 20px;
+        }
+        .nav-item {
+            margin-bottom: 10px;
+        }
+        .sidebar .nav-link {
+            background-color: #5BBA6F;
+            border-radius: 5px;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background-color: #2A9134;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .activeStatus {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 10px;
+                margin-bottom: 10px;
+                gap: 15px;
+            }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px; 
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            background-color: red;
+        }
+        .status-indicator.online {
+            background-color: green; /* When online */
+        }
+        .welcome-message {
+            flex-grow: 1;
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        .header-text {
+            color: white !important;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .profile-header {
+            flex-shrink: 0;
+        }
+        .profile-header img {
+            border-radius: 50px;
+            width: 40px;
+            height: 40px;
+        }
+        @media (max-width: 991px) {  
+            .sidebar {
+                width: 250px;
+                left: -250px;
+                transition: left 0.3s;
+            }  
+
+            .sidebar .nav {
+                display: flex;
+                flex-direction: row;
+                padding: 10px 0;
+            }
+
+            .sidebar .nav-item {
+                display: inline-block;
+                margin-right: 10px;
+            }
+
+            .sidebar .nav-link {
+                padding: 10px 15px;
+                margin: 5px 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            } 
+            .sidebar.active {
+                left: 0;
+            }
+            #sidebarCollapse {
+                display: block;
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 1001;
+            }
+            .activeStatus {
+                justify-content: flex-start;
+                padding: 5px 15px;
+            }
+            main {
+                margin-left: 0 !important;
+            }
+            .main-content.sidebar-active {
+                margin-left: 250px;
+            }
+            .welcome-message {
+                margin-left: 50px;
+            }
+        }
+
+        /* Styles for the logout verification modal */
+        .logout-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .logout-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .logout-modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .logout-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logout-modal-header h5 {
+            margin: 0;
+        }
+
+        .logout-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .logout-modal-footer button {
+            margin-left: 10px;
+        }
+
+        .fetchingAccountStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.50rem 1rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    margin: 0 0 25px 50px;
+}
+
+.fetchingAccountStatus:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fetchingAccountStatus i {
+    font-size: 1rem;
+}
+
+/* Approved State */
+.fetchingAccountStatus.approved {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.fetchingAccountStatus.approved i {
+    animation: checkmark 0.5s ease-in-out;
+}
+
+/* Pending State */
+.fetchingAccountStatus.pending {
+    background: #fef9c3;
+    color: #854d0e;
+    border: 1px solid #fde047;
+}
+
+.fetchingAccountStatus.pending i {
+    animation: spin 2s linear infinite;
+}
+
+/* Rejected State */
+.fetchingAccountStatus.rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.fetchingAccountStatus.rejected i {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Disabled State */
+.fetchingAccountStatus.disabled {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <button id="sidebarCollapse" class="btn btn-success">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebar" class="col-lg-2 d-lg-block sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <img src="{% static 'img/BH-logo.png' %}" alt="Logo" width="100" height="100" class="logo">
+                    </div>
+                    <div class="activeStatus">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">{{ active_status|upper }}</span> <!-- Display status in uppercase (ONLINE/OFFLINE) -->
+                    </div> 
+                    {% if account_status == 'approved' %}
+                        <div class="fetchingAccountStatus approved"  title="Account approved">
+                            <i class="fas fa-check-circle"></i>
+                            Account Status
+                        </div>
+                        {% elif account_status == 'pending' %}
+                        <div class="fetchingAccountStatus pending"  title="Account pending">
+                            <i class="fas fa-clock"></i>
+                            Account Status
+                        </div>
+                        {% elif account_status == 'rejected' %}
+                        <div class="fetchingAccountStatus rejected"  title="Account rejected">
+                            <i class="fas fa-times-circle"></i>
+                            Account Status
+                        </div>
+                        {% elif account_status == 'disabled' %}
+                        <div class="fetchingAccountStatus disabled"  title="Account disabled">
+                            <i class="fas fa-ban"></i>
+                            Account Status
+                        </div>
+                        {% endif %}
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'ownerhomepage' %}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'lodger' %}active{% endif %}" href="{% url 'ownerlodger' %}">
+                                <i class="fas fa-users"></i> Lodger
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'feedback' %}active{% endif %}" href="{% url 'ownerfeedback' %}">
+                                <i class="fas fa-comment-alt"></i> Feedback
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'Ownersettings' %}active{% endif %}" href="{% url 'ownersettings' %}">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="logout-btn">
+                        <button type="button" class="btn btn-danger w-100" onclick="showLogoutModal()">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <main class="col-lg-10 ms-auto p-0 main-content">
+                <div class="header">
+                    <div class="welcome-message">
+                        <h1 class="text-white mb-0 header-text">
+                            <span class="wave-emoji">👋</span> HELLO and WELCOME, 
+                            <span class="name">{{ firstname }}</span>!
+                        </h1>
+                    </div>
+                    <div class="profile-header d-flex align-items-center">
+                        <img src="{{ profile_picture }}" alt="Profile Picture" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                        <div>
+                            <h6 class="mb-0 text-white">{{ user.first_name }} {{ user.last_name }}</h6>
+                            <small class="text-white-50">Owner</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="content p-4">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Logout Verification Modal -->
+    <div class="logout-modal" id="logoutModal">
+        <div class="logout-modal-content">
+            <div class="logout-modal-header">
+                <h5><i class="fas fa-sign-out-alt mr-2"></i>Logout Confirmation</h5>
+                <button type="button" class="btn-close" onclick="hideLogoutModal()"></button>
+            </div>
+            <div class="logout-modal-body">
+                <p>Are you sure you want to logout?</p>
+            </div>
+            <div class="logout-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideLogoutModal()">Cancel</button>
+                <a href="{% url 'ownerlogout' %}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebar = document.getElementById('sidebar');
+            var sidebarCollapse = document.getElementById('sidebarCollapse');
+            var mainContent = document.querySelector('.main-content');
+            var logoutModal = document.getElementById('logoutModal');
+            var logoutButton = document.querySelector('.logout-btn .btn');
+            var statusIndicator = document.querySelector('.status-indicator');
+            var activeStatusText = document.querySelector('.activeStatus span.status-text');
+            
+            // Getting active status from Django template variable
+            var activeStatus = "{{ active_status }}";
+    
+            // Update status indicator based on active status
+            if (activeStatus === 'online') {
+                statusIndicator.classList.add('online');  // Add class to change appearance for online
+                activeStatusText.textContent = 'ONLINE';
+            } else {
+                statusIndicator.classList.remove('online');  // Remove class to show offline appearance
+                activeStatusText.textContent = 'OFFLINE';
+            }
+     
+
+            document.getElementById('sidebarCollapse').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+    
+            // Close sidebar when clicking outside on small screens
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 991) {
+                    var isClickInside = sidebar.contains(event.target) || sidebarCollapse.contains(event.target);
+                    if (!isClickInside && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                        mainContent.classList.remove('sidebar-active');
+                    }
+                }
+            });
+    
+            // Adjust visibility on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 991) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                }
+            });
+    
+            // Show the logout verification modal
+            logoutButton.addEventListener('click', function() {
+                logoutModal.classList.add('show');
+            });
+    
+            // Hide the logout verification modal
+            document.querySelector('.logout-modal .btn-close').addEventListener('click', function() {
+                hideLogoutModal();
+            });
+    
+            document.querySelector('.logout-modal .btn-secondary').addEventListener('click', function() {
+                hideLogoutModal();
+            });
+    
+            function hideLogoutModal() {
+                logoutModal.classList.remove('show');
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

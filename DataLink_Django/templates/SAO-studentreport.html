@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Feedback Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-card {
+            transition: all 0.3s ease;
+        }
+        .feedback-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+            <button onclick="goBack()" class="text-white hover:text-indigo-200 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </button>
+            <div class="flex items-center space-x-4">
+                <img src="{% static 'img/CTU-logo-BH.png' %}" alt="Logo" class="h-10 w-10 rounded-full bg-white p-1">
+                <h1 class="text-2xl font-bold">Student Report</h1>
+            </div>
+            <button style="visibility: hidden;" onclick="toggleFixedPopup()" class="bg-white text-indigo-600 px-4 py-2 rounded-full hover:bg-indigo-100 transition">
+                Fixed Items
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="feedbackGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loop through feedback_data and create feedback cards -->
+            {% if feedback_data %}
+                {% for feedback in feedback_data %}
+                    <div class="feedback-card bg-white rounded-lg shadow-md overflow-hidden" id="feedback_{{ feedback.key }}">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-800">{{ feedback.name }}</h2>
+                                    <p class="text-sm text-gray-600">{{ feedback.email }}</p>
+                                </div>
+                                <span class="text-sm text-indigo-600 font-medium">{{ feedback.date_of_report }}</span> <!-- Use date_of_report instead of date -->
+                            </div>
+                            <p class="text-gray-700 mb-4">{{ feedback.message }}</p>
+                            
+                            {% if feedback.status == "unfixed" %}
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="report_key" value="{{ feedback.key }}"> <!-- Corrected from report.key to feedback.key -->
+                                <input type="hidden" name="email" value="{{ feedback.email }}"> <!-- Corrected from report.email to feedback.email -->
+                                <button onclick="fixItem('feedback_{{ feedback.key }}', '{{ feedback.email }}')" type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition">Fix Report</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %} 
+                <p>No feedback available.</p>
+            {% endif %}
+        </div>
+    </main>
+     
+
+    <script>
+        const fixedItems = [];
+
+         function fixItem(id, email) {
+    const itemToFix = document.getElementById(id);
+    if (itemToFix) {
+        // Update fixed items in the database via AJAX
+        fetch("{% url 'student_report' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": '{{ csrf_token }}',  // Assuming CSRF is enabled in Django
+            },
+            body: JSON.stringify({
+                reportId: email,  // Sending email to identify the report
+                email: email
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Move item to fixedItems and remove from the feedback grid
+                fixedItems.push(itemToFix.cloneNode(true)); // Clone the item for fixedItems
+                itemToFix.remove(); // Remove the fixed item from the grid
+                renderFixedItems();
+            } else {
+                console.log("Error updating status.");
+            }
+        })
+        .catch(error => console.log("AJAX request failed: ", error));
+    }
+}
+
+function renderFixedItems() {
+    const fixedList = document.getElementById('fixedItemsList');
+    fixedList.innerHTML = '';
+
+    if (fixedItems.length === 0) {
+        fixedList.innerHTML = '<p class="text-gray-500 italic">No fixed items yet.</p>';
+        return;
+    }
+
+    fixedItems.forEach(item => {
+        const fixedItem = document.createElement('div');
+        fixedItem.className = 'bg-gray-100 p-4 rounded';
+        fixedItem.innerHTML = item.innerHTML;  // Copy content
+        fixedList.appendChild(fixedItem);
+    });
+}
+
+
+        
+
+        function toggleFixedPopup() {
+            const popup = document.getElementById('fixedPopup');
+            popup.classList.toggle('hidden');
+            popup.classList.toggle('flex');
+        }
+
+        function goBack() {
+            window.location.href="{% url 'sao_feedback' %}"
+        }
+    </script>
+</body>
+</html>

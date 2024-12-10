@@ -1,0 +1,933 @@
+{% extends 'SAO-base.html' %}
+{% load static %}
+
+{% block content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approved Students - SAO Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { 
+            background-color: #f0f2f5;
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .hover-trigger .hover-target {
+            display: none;
+        }
+        .hover-trigger:hover .hover-target {
+            display: flex;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn {
+            from { top: -300px; opacity: 0; }
+            to { top: 0; opacity: 1; }
+        }
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .edit-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+}
+
+.edit-modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* Could be more or less, depending on screen size */
+    max-width: 500px; /* Limit width for larger screens */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.edit-close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.edit-close-button:hover,
+.edit-close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.edit-modal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.edit-modal-field {
+    margin-bottom: 15px;
+}
+
+.edit-modal-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.edit-modal-field input,
+.edit-modal-field select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.edit-modal-field input:focus,
+.edit-modal-field select:focus {
+    border-color: #4a90e2; /* Focus color */
+    outline: none; /* Remove outline */
+}
+
+.edit-save-button {
+    background-color: #4a90e2;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.edit-save-button:hover {
+    background-color: #357ABD; /* Darker blue on hover */
+}
+
+.confirmation-popup {
+    position: fixed; /* Keeps the popup centered relative to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Darkened overlay */
+    z-index: 1000; /* Ensure it appears above all other content */
+}
+
+.confirmation-popup-content {
+    position: absolute; /* Use absolute positioning for explicit centering */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust position to center precisely */
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px; /* Rounded corners */
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Enhanced shadow for depth */
+    max-width: 400px; /* Limit the max width */
+    width: 90%; /* Responsive width */
+    animation: fadeIn 0.3s; /* Smooth fade-in effect */
+}
+
+.confirmation-popup h2 {
+    font-size: 1.5rem; /* Increased font size for the title */
+    margin-bottom: 15px; /* Space below the title */
+    color: #333; /* Darker color */
+}
+
+.confirmation-popup p {
+    font-size: 1rem; /* Standard font size */
+    margin-bottom: 20px; /* Space below the paragraph */
+    color: #555; /* Slightly lighter color */
+}
+
+.confirmation-close-button {
+    cursor: pointer;
+    position: absolute; /* Positioned relative to the .confirmation-popup-content */
+    top: 15px; /* Adjusted position for better spacing */
+    right: 15px; /* Adjusted position for better spacing */
+    background: transparent; /* Transparent background */
+    border: none; /* Remove border */
+    font-size: 1.5rem; /* Increased size for visibility */
+    color: #888; /* Light color */
+    transition: color 0.3s; /* Color change on hover */
+}
+
+.confirmation-close-button:hover {
+    color: #333; /* Darker color on hover */
+}
+
+.confirmation-close-button:hover {
+    color: #333; /* Darker color on hover */
+}
+
+.confirmation-popup select,
+.confirmation-popup button {
+    margin-top: 10px; /* Space above select and button */
+    padding: 10px; /* Consistent padding */
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 6px; /* Rounded corners */
+    width: 100%; /* Full width */
+    font-size: 1rem; /* Consistent font size */
+}
+
+.confirmation-popup button {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white; /* White text */
+    border: none; /* Remove border */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Background color transition */
+}
+
+.confirmation-popup button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+
+#disableReason {
+    display: block; /* Ensures proper block layout */
+    width: 100%; /* Make the dropdown occupy the full width of the modal content */
+    padding: 10px; /* Add padding for better usability */
+    font-size: 1rem; /* Standard font size for readability */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    margin-bottom: 20px; /* Space below the dropdown */
+}
+
+/* Style the button */
+.confirm-button {
+    display: block; /* Ensure the button is on its own line */
+    width: 100%; /* Full width for consistency */
+    padding: 12px; /* Adequate padding for usability */
+    font-size: 1rem; /* Readable font size */
+    color: #fff; /* White text color */
+    background-color: #007bff; /* Primary button color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    margin-top: 10px; /* Add spacing above the button */
+}
+
+.confirm-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Optional fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+
+/* Centered modal styles */
+#studentsBoardingApplied {
+    display: none; /* Hidden by default */
+    position: fixed;
+    inset: 0;
+    z-index: 1000; /* Ensure it appears on top */
+    backdrop-filter: blur(4px); /* Add a subtle blur effect */
+}
+
+/* Smooth animation for modal appearance */
+#studentsBoardingApplied .bg-white {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollable body styling */
+#studentsList {
+    max-height: 24rem;
+    overflow-y: auto;
+}
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-4">
+            <a href="{% url 'saohomepage' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            </a>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Approved Owners</h1>
+        <div class="mb-4 flex justify-between items-center">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    placeholder="Search owners..." 
+                    class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            
+            <div class="messages">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                            <div class="successAnderrorMessagesPoppedup-icon">
+                                {% if message.tags == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="successAnderrorMessagesPoppedup-content">
+                                {{ message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+        </div>
+        <div class="table-container bg-white overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owners</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Boarding House Name/Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr> 
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="ownerTableBody">
+                    {% for owner in owners %}
+                    <tr class="hover-trigger" data-firstname="{{ owner.firstname }}" data-lastname="{{ owner.lastname }}" data-boardinghouse-name="{{ owner.boardinghouseName }}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    {% if owner.profile_picture %}
+                                        <img class="h-10 w-10 rounded-full object-cover" src="{{ owner.profile_picture }}" alt="{{ owner.firstname }} {{ owner.lastname }}">
+                                    {% else %}
+                                        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-500"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ owner.firstname }} {{ owner.lastname }}</div>
+                                    <div class="text-sm text-gray-500">Address: {{ owner.address }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ owner.email }}</div>
+                            <div class="text-sm text-gray-500">{{ owner.phone_number }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-900">{{ owner.boardinghouseName }}</div>
+                            <div class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-green-400">{{ owner.boardinghouseStatus }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if owner.active_status == 'online' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Online
+                                </span>
+                            {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Offline
+                                </span>
+                            {% endif %}
+                        </td> 
+                
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="text-indigo-600 hover:text-indigo-900" 
+                                        onclick="openEditModal(
+                                            '{{ owner.firstname }}',
+                                            '{{ owner.middlename }}',
+                                            '{{ owner.lastname }}',
+                                            '{{ owner.phone_number }}',
+                                            '{{ owner.address }}',
+                                            '{{ owner.gender }}',
+                                            '{{ owner.birthday }}',
+                                            '{{ owner.email }}'
+                                        )">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                                                 
+                                <button class="text-yellow-600 hover:text-yellow-900" onclick="openConfirmationPopup('{{ owner.email }}')">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+
+                                <!-- Confirmation Popup --> 
+                                <div id="confirmationPopup" class="confirmation-popup" style="display: none;">
+                                    <div class="confirmation-popup-content">
+                                        <span class="confirmation-close-button" onclick="closeConfirmationPopup()">&times;</span>
+                                        <h2>Confirm Disable Account</h2>
+                                        <p>Are you sure you want to disable this account?</p>
+                                        <form id="confirmationForm" method="POST" action="{% url 'view_owners' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="email" id="confirmEmail">
+                                            
+                                            <label for="disableReason">Reason for Disabling:</label>
+                                            <select name="disableReason" id="disableReason" required>
+                                                <option value="" selected disabled>Select a reason</option>
+                                                <option value="Terms of Service Violation">Terms of Service Violation</option>
+                                                <option value="Incomplete Information">Incomplete Information</option>
+                                                <option value="Duplicate Account">Duplicate Account</option>
+                                                <option value="Account doesn't exist in database">Account doesn't exist in database</option>
+                                                <option value="Invalid or False Information">Invalid or False Information</option>
+                                                <option value="Failure to Meet Eligibility Criteria">Failure to Meet Eligibility Criteria</option>
+                                                <option value="Security Concerns">Security Concerns</option>
+                                                <option value="Suspicious or Fraudulent Activity">Suspicious or Fraudulent Activity</option>
+                                                <option value="Unverified Email">Unverified Email</option>
+                                                <option value="Multiple Attempts with Incorrect Information">Multiple Attempts with Incorrect Information</option>
+                                                <option value="Violation of Privacy Policies">Violation of Privacy Policies</option>
+                                                <option value="Incomplete Application">Incomplete Application</option>
+                                                <option value="Inconsistent Data with Registered Records">Inconsistent Data with Registered Records</option>
+                                                <option value="Suspended by Administration">Suspended by Administration</option>
+                                                <option value="Inactivity">Inactivity</option>
+                                                <option value="Previous Account Ban">Previous Account Ban</option>
+                                                <option value="Abuse of Platform Rules">Abuse of Platform Rules</option>
+                                            </select> 
+                                            <button type="submit" name="disable_account" class="confirm-button">Confirm Disable</button>
+                                        </form>
+                                    </div>
+                                </div>  
+                            <button class="text-red-600 hover:text-red-900" onclick="confirmRemoval('{{ owner.email }}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="hover-target bg-gray-50">
+                        <td colspan="5" class="px-6 py-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm text-gray-600">
+                                        <strong>Last Login:</strong> <span class="formatted-time" data-loggedout="{{ owner.timeLoggedOut }}">Calculating...</span>
+                                    </p>
+                                    <p class="text-sm text-gray-600"><strong>Register Date and Time: </strong>{{ owner.signup_time }}</p>
+                                </div>
+                                <div>
+                                    <button onclick="openProfileModal({{ owner }})" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                                        View Full Profile
+                                    </button>
+                                    <button 
+                                        onclick="filterStudentsByOwner('{{ owner.boardinghouseName }}')" 
+                                        class="bg-green-500 hover:bg-darkgreen-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                                        View Students Applied Here
+                                    </button>
+
+
+                                    <div id="studentsBoardingApplied" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+                                        <div class="bg-white rounded-lg w-2/3 p-6 shadow-lg relative">
+                                            <button 
+                                                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" 
+                                                onclick="closeStudentsBoardingAppliedModal()">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            
+                                            <h2 id="modalTitle" class="text-xl font-semibold mb-4 text-center">Students Applied in</h2>
+        
+                                            <div id="modalContent" class="overflow-y-auto max-h-96">
+                                                <!-- Dynamic content -->
+                                            </div>
+                                            
+                                            <div class="mt-4 text-right">
+                                                <button 
+                                                    class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg"
+                                                    onclick="closeStudentsBoardingAppliedModal()">
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No approved owners found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 flex justify-between items-center">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">97</span> results
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Previous</span>
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
+                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Next</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </div>
+     <!-- Modal to display owner profile -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+                <h2 class="text-2xl font-semibold mb-4">Owner Full Profile</h2>
+                <div class="flex items-center mb-4">
+                    <img id="modalProfilePicture" class="h-16 w-16 rounded-full object-cover mr-4" src="#" alt="Profile Picture">
+                    <div>
+                        <h3 id="modalName" class="text-xl font-bold"></h3>
+                        <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                        <p><strong>Boarding House:</strong> <span id="modalBoardingHouse"></span></p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p><strong>Address:</strong> <span id="modalAddress"></span></p>
+                    <p><strong>Gender:</strong> <span id="modalGender"></span></p>
+                    <p><strong>Phone number:</strong> <span id="modalPhone"></span></p>
+                    <p><strong>Boarding House Status:</strong> <span id="modalBoardingHouseStatus"></span></p>
+                    <p><strong>Account Status:</strong> <span id="modalAccountStatus"></span></p>
+                    <p><strong>Active Status:</strong> <span id="modalActiveStatus"></span></p>
+                    <p><strong>Signup Date:</strong> <span id="modalSignupTime"></span></p>
+                </div> 
+                <form action="{% url 'view_owners_boarding_house' %}" method="post">
+                    <a class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg" onclick="closeProfileModal()" style="margin: 0 10px 0 0; cursor: pointer;">
+                        Close
+                    </a>
+                    {% csrf_token %}
+                    <input type="hidden" name="owner_email" value="{{ owner.email }}">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg">
+                        View Boarding House
+                    </button>  
+                </form>    
+            </div>
+        </div>
+
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <span class="edit-close-button" onclick="closeEditModal()">&times;</span>
+            <h2 class="edit-modal-title">Edit Profile</h2>
+            
+            <form id="editProfileForm" method="POST" action="{% url 'view_owners' %}"> <!-- Replace 'view_owners' with your edit owner view name if needed -->
+                {% csrf_token %}
+                
+                <div class="edit-modal-field">
+                    <label for="editEmail">Email</label>
+                    <input type="email" style="opacity: 0.5;" id="editEmail" name="email" placeholder="Enter your email" required readonly>
+                </div>
+                
+                <div class="edit-modal-field">
+                    <label for="editFirstname">First Name</label>
+                    <input type="text" id="editFirstname" name="firstname" placeholder="Enter your first name" required>
+                </div>
+    
+                <div class="edit-modal-field">
+                    <label for="editMiddlename">Middle Name</label>
+                    <input type="text" id="editMiddlename" name="middlename" placeholder="Enter your middle name">
+                </div>
+                
+                <div class="edit-modal-field">
+                    <label for="editLastname">Last Name</label>
+                    <input type="text" id="editLastname" name="lastname" placeholder="Enter your last name" required>
+                </div>
+                
+                <div class="edit-modal-field">
+                    <label for="editPhoneNumber">Phone Number</label>
+                    <input type="tel" id="editPhoneNumber" name="phone_number" placeholder="Enter your phone number" required>
+                </div>
+                
+                <div class="edit-modal-field">
+                    <label for="editAddress">Address</label>
+                    <input type="text" id="editAddress" name="address" placeholder="Enter your address" required>
+                </div>
+                
+                <div class="edit-modal-field">
+                    <label for="editGender">Gender</label>
+                    <select id="editGender" name="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="edit-modal-field">
+                    <label for="editBirthday">Birthday</label>
+                    <input type="date" id="editBirthday" name="birthday" required>
+                </div>
+                
+                <button type="submit" class="edit-save-button">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Removal Modal -->
+    <div class="confirm-removal-popup" id="confirmRemovalPopup" style="display: none;">
+        <div class="confirmation-popup-content">
+            <button class="confirmation-close-button" onclick="closeConfirmationPopup()">&times;</button>
+            <h2>Confirm Account Removal</h2>
+            <p>Are you sure you want to remove this account?</p>
+            <form id="confirmationForm" method="POST" action="{% url 'view_owners' %}">
+                {% csrf_token %}
+                <input type="hidden" id="confirmEmail2" name="email" value=""> 
+                <button type="submit" name="delete_account" class="confirm-button">Confirm Removal</button>
+            </form>
+        </div>
+    </div>
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+         // Function to format time logged out
+    function formatTimeLoggedOut(seconds) {
+        if (seconds >= 86400) {
+            const days = Math.floor(seconds / 86400);
+            return days === 1 ? "1 day" : `${days} days`;
+        } else if (seconds >= 3600) {
+            const hours = Math.floor(seconds / 3600);
+            const remainingMinutes = Math.floor((seconds % 3600) / 60);
+            return hours === 1 
+                ? `1 hour${remainingMinutes ? `, ${remainingMinutes} minutes` : ''}`
+                : `${hours} hours${remainingMinutes ? `, ${remainingMinutes} minutes` : ''}`;
+        } else if (seconds >= 60) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return minutes === 1 
+                ? `1 minute${remainingSeconds ? `, ${remainingSeconds} seconds` : ''}`
+                : `${minutes} minutes${remainingSeconds ? `, ${remainingSeconds} seconds` : ''}`;
+        } else {
+            return `${seconds} second${seconds === 1 ? '' : 's'}`;
+        }
+    }
+
+    // Calculate and display formatted time for each student
+    document.querySelectorAll('.formatted-time').forEach(function(element) {
+        const seconds = parseInt(element.getAttribute('data-loggedout'));
+        element.textContent = formatTimeLoggedOut(seconds);
+    });
+        
+
+        const messageList = document.querySelector('.message-list');
+
+                
+            if (messageList) {
+                setTimeout(() => {
+                    messageList.style.transition = "opacity 0.5s ease"; // Transition effect
+                    messageList.style.opacity = 0; // Fade out effect
+                    setTimeout(() => {
+                        messageList.remove(); // Remove from DOM after fading out
+                    }, 500); // Match this duration with the transition time
+                }, 2000); // 2 seconds before starting to fade out
+            }
+
+        
+            function openProfileModal(owner) {
+                const modal = document.getElementById("profileModal");
+
+                // Populate modal with owner data
+                modal.querySelector("#modalName").innerText = owner.firstname + " " + owner.lastname;
+                modal.querySelector("#modalEmail").innerText = owner.email;
+                document.querySelector('input[name="owner_email"]').value = owner.email;
+                modal.querySelector("#modalPhone").innerText = owner.phone_number;
+                modal.querySelector("#modalAddress").innerText = owner.address;
+                modal.querySelector("#modalGender").innerText = owner.gender;
+                modal.querySelector("#modalBoardingHouse").innerText = owner.boardinghouseName || 'No boarding house data';
+                modal.querySelector("#modalBoardingHouseStatus").innerText = owner.boardinghouseStatus;
+                modal.querySelector("#modalAccountStatus").innerText = owner.accountStatus;
+                modal.querySelector("#modalActiveStatus").innerText = owner.active_status;
+                modal.querySelector("#modalSignupTime").innerText = owner.signup_time;  // Adjust to your desired time field
+                modal.querySelector("#modalProfilePicture").src = owner.profile_picture || "{% static 'default_profile.png' %}";
+
+                // Display modal
+                modal.style.display = "block";
+            }
+    
+        // Function to close the modal
+        function closeProfileModal() {
+            document.getElementById("profileModal").style.display = "none";
+        }
+    
+        function openEditModal(firstname, middlename, lastname, phone_number, address, gender, birthday, email) {
+                const modal = document.getElementById("editProfileModal");
+
+                if (!modal) {
+                    console.error("Modal not found!");
+                    return;
+                }
+
+                // Populate the fields with owner data
+                document.getElementById("editFirstname").value = firstname;
+                document.getElementById("editMiddlename").value = middlename;
+                document.getElementById("editLastname").value = lastname;
+                document.getElementById("editPhoneNumber").value = phone_number;
+                document.getElementById("editAddress").value = address;
+
+                // Set the gender dropdown value
+                const genderDropdown = document.getElementById("editGender");
+                genderDropdown.value = gender;
+
+                document.getElementById("editBirthday").value = birthday;
+                document.getElementById("editEmail").value = email;
+
+                // Show the modal
+                modal.style.display = "block";
+            }
+
+            
+
+
+    
+        // Function to close the edit modal
+        function closeEditModal() {
+            const modal = document.getElementById("editProfileModal");
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+    
+        // Move confirmation popup functions outside of openEditModal
+        function openConfirmationPopup(email) {
+            console.log("Opening confirmation popup for:", email);
+            document.getElementById("confirmEmail").value = email;
+            document.getElementById("confirmationPopup").style.display = "block";
+        }
+    
+        function closeConfirmationPopup() {
+            document.getElementById("confirmationPopup").style.display = "none";
+        }
+    
+        // Make functions globally accessible
+        window.openProfileModal = openProfileModal;
+        window.closeProfileModal = closeProfileModal;
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.openConfirmationPopup = openConfirmationPopup;
+        window.closeConfirmationPopup = closeConfirmationPopup;
+    });
+
+    function confirmRemoval(email) {
+        console.log('Email for removal:', email);  // Debugging
+        document.getElementById('confirmEmail2').value = email;
+        document.getElementById('confirmRemovalPopup').style.display = 'flex';
+    }
+
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+
+    document.querySelector('input[placeholder="Search owners..."]').addEventListener('input', function (e) {
+    const query = e.target.value.toLowerCase().trim(); // Normalize query
+    const rows = document.querySelectorAll('#ownerTableBody tr.hover-trigger'); // Adjust selector if owners have a different tbody ID
+
+    rows.forEach(row => {
+        const firstname = row.getAttribute('data-firstname').toLowerCase();
+        const lastname = row.getAttribute('data-lastname').toLowerCase();
+        const boardinghouseName = row.getAttribute('data-boardinghouse-name').toLowerCase();
+
+        // Show row if any attribute matches the query
+        if (firstname.includes(query) || lastname.includes(query) || boardinghouseName.includes(query)) {
+            row.style.display = ''; // Show row
+            row.nextElementSibling.style.display = ''; // Show hover-target row
+        } else {
+            row.style.display = 'none'; // Hide row
+            row.nextElementSibling.style.display = 'none'; // Hide hover-target row
+        }
+    });
+});
+
+
+
+const allStudents = {{ students|safe }}; // Fetch all students passed from the backend
+
+function filterStudentsByOwner(boardinghouseName) {
+    const modal = document.getElementById('studentsBoardingApplied');
+    const modalContent = document.getElementById('modalContent');
+    const modalTitle = document.getElementById('modalTitle'); // Get the title element
+
+    // Update modal title
+    if (modalTitle) {
+        modalTitle.textContent = `Students Applied in ${boardinghouseName}`;
+    }
+
+    // Filter students whose boarding house matches the owner's
+    const filteredStudents = allStudents.filter(student => student.boardinghouseName === boardinghouseName);
+
+    // Populate modal content
+    if (modal) {
+        modal.style.display = 'flex';
+        if (filteredStudents.length > 0) {
+            modalContent.innerHTML = filteredStudents
+                .map(student => `
+                    <div class="mb-4 p-4 bg-gray-100 rounded-lg shadow">
+                        <div class="flex items-center">
+                            <img class="h-12 w-12 rounded-full object-cover" 
+                                 src="${student.profile_picture || '/default-profile.png'}" 
+                                 alt="${student.username}">
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold">${student.username}</h3>
+                                <p class="text-gray-600">Student ID: ${student.student_id}</p>
+                                <p class="text-gray-600">Room Name: ${student.roomName}</p>
+                                <p class="text-gray-600">Date approved by the owner: ${student.schedule_date}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+        } else {
+            modalContent.innerHTML = `<p class="text-gray-500">No students found for this boarding house.</p>`;
+        }
+    } else {
+        console.error('Modal with ID "studentsBoardingApplied" not found.');
+    }
+}
+
+function closeStudentsBoardingAppliedModal() {
+    const modal = document.getElementById('studentsBoardingApplied');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+
+    </script>
+</body>
+{% endblock %}

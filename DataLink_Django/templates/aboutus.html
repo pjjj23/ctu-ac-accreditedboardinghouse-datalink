@@ -1,0 +1,214 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - CTU-ARGAO Student Accommodation Finder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        header { 
+            background-image: url("{% static 'img/ctu-argao-photo.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            padding: 8rem 0;
+            text-align: center;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(44, 62, 80, 0.7);
+        }
+        header .container {
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 3px rgba(215, 250, 21, 0.9);
+        }
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 3rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        .content {
+            flex: 1;
+            min-width: 300px;
+            margin-right: 2rem;
+        }
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .map-container {
+            flex: 1;
+            min-width: 300px;
+            height: 450px;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: #fff;
+            padding: 1rem 1rem;
+            text-decoration: none;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-top: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .show-more-btn {
+            display: inline-block; 
+            border-color: transparent;
+            color: #2980b9;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-top: 2rem;
+            cursor: pointer;
+            transition: 0.5s ease-out; 
+        }
+
+        .cta-button:hover, .show-more-btn:hover { 
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .buttons-container {
+            text-align: center;
+            margin-top: 0.4rem;
+        }
+
+        .hidden-content {
+            display: none;
+        }
+        /* Add some space between buttons */
+        .show-more-btn {
+            margin-right: 1rem;
+        } 
+
+        @media (max-width: 768px) {
+            .cta-button, .show-more-btn {
+                padding: 0.8rem 2.5rem;
+                font-size: 1rem;
+            }
+            .buttons-container {
+                flex-direction: column;
+                margin-top: 2rem;
+            }
+            .cta-button, .show-more-btn {
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>About Our Student Accommodation Finder</h1>
+            <p class="subtitle">Simplifying Housing for CTU-ARGAO Students</p>
+        </div>
+    </header>
+    <div class="container">
+        <main>
+            <div class="content">
+                <h2>Our Mission</h2>
+                <p>At CTU-ARGAO Student Accommodation Finder, our mission is to revolutionize the way students find their home away from home. We've created a comprehensive system designed exclusively for CTU-ARGAO students, making it easier than ever to discover and secure comfortable, affordable housing options near campus.</p>
+                <div class="hidden-content">
+                    <p>Our platform serves as a bridge between students seeking accommodations and local property owners, offering a wide range of options including dormitories, apartments, and boarding houses. We provide detailed information on pricing, amenities, and directions, ensuring students can make informed decisions about their living arrangements.</p>
+                    <p>For boarding house owners, our website offers a unique opportunity for free marketing, allowing them to showcase their properties to a targeted audience of CTU-ARGAO students. Property owners can easily sign up and list their accommodations, increasing visibility and occupancy rates.</p>
+                    <p>To maintain the integrity and safety of our community, access to our platform is restricted to verified CTU-ARGAO students only. This exclusivity ensures that all listings and applications are legitimate and relevant to our student body. The Student Affairs Office (SAO) of CTU-ARGAO serves as the superadmin, overseeing the platform to guarantee a secure and beneficial experience for all users.</p>
+                </div>
+                <div class="buttons-container">
+                    <button class="show-more-btn">Show More</button>
+                    <a href="javascript:history.back()" class="cta-button">Go Back</a>
+                </div>
+                 
+            </div>
+            <div class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3930.6209827291377!2d123.59618100987558!3d9.882130775012486!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33abc5e93ecfa72b%3A0x3ae5a3c744adff7c!2sCebu%20Technological%20University%20-%20Argao!5e0!3m2!1sen!2sph!4v1727873238036!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </main>
+    </div>
+    <script>
+        gsap.from("header .container", {opacity: 0, y: 50, duration: 1, ease: "power3.out"});
+        gsap.from("main", {opacity: 0, y: 50, duration: 1, delay: 0.5, ease: "power3.out"});
+        gsap.from(".content p", {opacity: 0, y: 20, duration: 0.8, stagger: 0.2, delay: 1, ease: "power3.out"});
+        gsap.from(".map-container", {opacity: 0, x: 50, duration: 1, delay: 1.5, ease: "power3.out"});
+        gsap.from(".cta-button, .show-more-btn", {opacity: 1, scale: 0.5, duration: 1, delay: 2, ease: "elastic.out(1, 0.5)"});
+
+        document.querySelector('.show-more-btn').addEventListener('click', function() {
+            const hiddenContent = document.querySelector('.hidden-content');
+            const btn = this;
+
+            if (hiddenContent.style.display === 'none' || hiddenContent.style.display === '') {
+                hiddenContent.style.display = 'block';
+                btn.textContent = 'Show Less';
+                gsap.from(".hidden-content p", {opacity: 0, y: 20, duration: 0.8, stagger: 0.2, ease: "power3.out"});
+            } else {
+                hiddenContent.style.display = 'none';
+                btn.textContent = 'Show More';
+            }
+        });
+    </script>
+</body>
+</html>

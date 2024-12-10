@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Location</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ AIzaSyAwAEWzPd9pu47zsit7JipV38Cu3X2tUSA }}"></script>
+    <script>
+        function initMap() {
+            const location = { lat: parseFloat("{{ latitude }}"), lng: parseFloat("{{ longitude }}") };
+
+            // Create the map centered at the user's location
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: location,
+            });
+
+            // Add a marker at the user's location
+            const marker = new google.maps.Marker({
+                position: location,
+                map: map,
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <h1>User's Saved Location</h1>
+    <div id="map" style="width: 100%; height: 500px;"></div>
+</body>
+</html>

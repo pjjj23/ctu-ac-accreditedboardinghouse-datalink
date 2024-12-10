@@ -1,0 +1,728 @@
+{% extends 'Owner-base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Modern styling for the table and components */
+    .applications-wrapper {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1rem;
+            margin: 1rem;
+            overflow-x: auto;
+        }
+
+        .applications-table {
+            width: 100%;
+            min-width: 1000px; /* Ensures horizontal scroll on small screens */
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+        }
+
+        .applications-table th {
+            background-color: #f8fafc;
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        .applications-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .applications-table tbody tr {
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        .applications-table tbody tr:hover {
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-cell {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 200px;
+        }
+
+        .profile-picture {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-picture:hover {
+            transform: scale(1.1);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .username {
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .student-id {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            background-color: #fef3c7;
+            color: #d97706;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-approve {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background-color: #059669;
+        }
+
+        .btn-remove {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background-color: #dc2626;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Enhanced Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+            animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            opacity: 0;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                       0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal.show .modal-content {
+            animation: modalContentShow 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Animations */
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalContentShow {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .applications-table tbody tr {
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: calc(var(--row-index) * 0.1s);
+            opacity: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .applications-wrapper {
+                margin: 0.5rem;
+                padding: 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+            }
+
+            .profile-cell {
+                min-width: 150px;
+            }
+        }
+
+        /* Loading animation for buttons */
+        .btn.loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            border-top-color: currentColor;
+            animation: spin 0.8s linear infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+input[type="date"] {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: #1f2937;
+    font-family: inherit;
+    width: 100%;
+    max-width: 250px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    margin: 0 0 15px 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    color: #6b7280;
+    opacity: 0.7;
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+input[type="date"]:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Making sure the text is visible and properly styled */
+input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+    color: #1f2937;
+}
+
+/* Disabled state */
+input[type="date"]:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+ 
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="applications-wrapper">
+    {% if pending_applications %}
+    <table class="applications-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Gender</th> 
+                <th>House</th>
+                <th>Room</th>
+                <th>Applied</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for application in pending_applications %}
+            <tr style="--row-index: {{ forloop.counter }}">
+                <td>
+                    <div class="profile-cell">
+                        <img src="{{ application.profile_picture }}" alt="Profile Picture" class="profile-picture">
+                        <div class="user-info">
+                            <span class="username">{{ application.username }}</span>
+                            <span class="student-id">{{ application.student_id }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ application.course }}</td>
+                <td>{{ application.gender }}</td> 
+                <td>{{ application.boardinghouseName }}</td>
+                <td>{{ application.roomName }}</td>
+                <td>{{ application.time_applied }}</td>
+                <td>
+                    <span class="status-badge">
+                        <i class="fas fa-hourglass-half"></i>
+                        {{ application.status }}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <form method="POST" action="{% url 'ownerlodger' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="student_id" value="{{ application.student_id }}">
+                            <input type="hidden" name="room_name" value="{{ application.roomName }}">
+                            <input type="hidden" name="student_email" value="{{ application.email }}">
+                            <label for="schedule_date">Select Schedule Date for students to come:</label>
+                            <input type="date" name="schedule_date">
+                            <button type="submit" class="btn btn-approve" name="approve_application"><i class="fas fa-check"></i>Approve Application</button>
+                        </form> 
+                        <form>
+                            <input type="hidden" name="student_id" value="{{ application.student_id }}">
+                            <input type="hidden" name="room_name" value="{{ application.roomName }}">
+                            <button type="button" class="btn btn-remove" data-toggle="modal" data-target="#removeConfirmationModal" 
+                                    data-student-id="{{ application.student_id }}" 
+                                    data-room-name="{{ application.roomName }}">
+                                <i class="fas fa-times"></i> Remove Application
+                            </button>
+                        </form>                        
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>No pending applications found.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Approve Modal -->
+<div id="approveModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Confirm Approval</h4>
+        </div>
+        <div class="modal-body">
+            Are you sure you want to approve the application for <span id="approveUsername" style="font-weight: 900;"></span>, applying for
+            <span id="boardinghouseName" style="font-weight: 900;"></span> room <span id="roomName" style="font-weight: 900;"></span>?
+        </div> 
+        <div class="modal-body">
+            <p style="font-weight: bold;">Student Profile</p>
+            <ul>
+                <span id="student_id"></span><br>
+                <span id="gender"></span><br>
+                <span id="course"></span><br> 
+            </ul> 
+        </div> 
+        <div class="modal-body">
+            Give the student a schedule to let them know when they can come 
+            <form method="POST" action="{% url 'ownerlodger' %}">
+                {% csrf_token %}
+                <input type="hidden" name="student_id" value="{{ application.student_id }}">
+                <input type="hidden" name="student_email" value="{{ application.email }}">
+                <input type="hidden" name="room_name" value="{{ application.roomName }}">
+                <label for="schedule_date">Select Schedule Date:</label>
+                <input type="text" name="schedule_date" placeholder="MM/DD/YYYY" required>
+                <button type="submit" name="approve_application">Approve Application</button>
+              
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('removeModal')">Cancel</button> 
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Remove Modal -->
+<div class="modal fade" id="removeConfirmationModal" style="z-index: 999999;" tabindex="-1" role="dialog" aria-labelledby="removeConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'ownerlodger' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="removeConfirmationModalLabel">Confirm Removal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to remove this application?</p>
+                    <input type="hidden" name="student_id" id="modalStudentId">
+                    <input type="hidden" name="room_name" id="modalRoomName">
+
+                    <!-- Reason for Rejection -->
+                    <div class="form-group">
+                        <label for="rejection_reason">Select Reason for Rejection</label>
+                        <select class="form-control" name="rejection_reason" id="rejection_reason" required>
+                            <option value="" disabled>-- Select Reason --</option>
+                            <option value="Incomplete requirements">Incomplete requirements</option>
+                            <option value="Unqualified">Unqualified</option>
+                            <option value="Already approved by someone">Already approved by someone</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" name="remove_application" class="btn btn-danger">Confirm Remove</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                <div class="successAnderrorMessagesPoppedup-icon">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="successAnderrorMessagesPoppedup-content">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap's JavaScript (include after jQuery) -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $('#removeConfirmationModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);  // Button that triggered the modal
+        var studentId = button.data('student-id');  // Extract info from data-* attributes
+        var roomName = button.data('room-name');
+
+        var modal = $(this);
+        modal.find('#modalStudentId').val(studentId);
+        modal.find('#modalRoomName').val(roomName);
+    });
+
+   let selectedApplicationId = null;
+
+function showApproveModal(username, student_id,boardinghouseName,roomName,course,gender) {
+    selectedApplicationId = student_id;
+    document.getElementById('approveUsername').textContent = username;
+    document.getElementById('student_id').textContent = student_id;
+    document.getElementById('course').textContent = course;
+    document.getElementById('roomName').textContent = roomName;
+    document.getElementById('boardinghouseName').textContent = boardinghouseName;
+    document.getElementById('gender').textContent = gender;
+    const modal = document.getElementById('approveModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function showRemoveModal(username, applicationId) {
+    selectedApplicationId = applicationId;
+    document.getElementById('removeUsername').textContent = username;
+    const modal = document.getElementById('removeModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // Restore scrolling
+    
+    // Add fade-out animation
+    modal.style.opacity = '0';
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.style.opacity = '';
+    }, 300);
+}
+
+function showLoading(button) {
+    button.classList.add('loading');
+    button.disabled = true;
+}
+ 
+  
+// Enhanced modal handling
+window.onclick = function(event) {
+    const modals = document.getElementsByClassName('modal');
+    for (let modal of modals) {
+        if (event.target === modal) {
+            hideModal(modal.id);
+        }
+    }
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modals = document.getElementsByClassName('modal');
+        for (let modal of modals) {
+            if (modal.classList.contains('show')) {
+                hideModal(modal.id);
+            }
+        }
+    }
+});
+
+// Prevent modal close when clicking modal content
+document.querySelectorAll('.modal-content').forEach(content => {
+    content.addEventListener('click', (e) => e.stopPropagation());
+});
+
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+</script>
+{% endblock %}

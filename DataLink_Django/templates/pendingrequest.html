@@ -1,0 +1,833 @@
+{% extends 'SAO-base.html' %}
+
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+    .student-item {
+        transition: all 0.3s ease;
+    }
+    .student-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .profile-picture {
+        width: 4rem;
+        height: 4rem;
+        object-fit: cover;
+        border: 3px solid #e5e7eb;
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .status-active {
+        background-color: #D1FAE5;
+        color: #065F46;
+    }
+    .status-inactive {
+        background-color: #FEE2E2;
+        color: #991B1B;
+    }
+    .modal {
+        transition: opacity 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+    }
+    .modal-content {
+        transition: transform 0.3s ease;
+        transform: scale(0.95);
+    }
+    .modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal.show .modal-content {
+        transform: scale(1);
+    }
+    .back-button {
+        display: inline-block;
+        padding: 5px 5px;
+        margin-bottom: 2px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 15px 0 0 15px;
+        transition: background-color 0.3s;
+    }
+    .back-button:hover {
+        background-color: transparent;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+        .student-item {
+            margin-bottom: 1rem;
+        }
+        .profile-picture {
+            width: 3rem;
+            height: 3rem;
+        }
+        .modal-content {
+            width: 90%;
+            max-width: none;
+            margin: 0 auto;
+        }
+        .flex {
+            flex-direction: column;
+        }
+        .flex > * {
+            margin-bottom: 0.5rem;
+        }
+        .flex > *:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        .profile-picture {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        .text-3xl {
+            font-size: 1.5rem;
+        }
+        .text-xl {
+            font-size: 1rem;
+        }
+    }
+    .hidden {
+    display: none;
+}
+
+
+.successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+
+</style>
+
+<div class="bg-gray-100 min-h-screen">
+    <a href="{% url 'saohomepage' %}" class="back-button">Go Back</a>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Pending Request List</h1>
+        
+        <div class="messages">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                        <div class="successAnderrorMessagesPoppedup-icon">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="successAnderrorMessagesPoppedup-content">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>  
+        <div class="flex justify-between items-center mb-6">
+            <div class="relative">
+                <button id="filterButton" class="bg-white text-gray-700 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center">
+                    <i class="fas fa-filter mr-2"></i>
+                    <span>Filter</span>
+                    <i class="fas fa-chevron-down ml-2"></i>
+                </button>
+                <div id="filterMenu" class="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
+                    <div class="py-1" role="menu" aria-orientation="vertical">
+                        <button class="filter-option block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active" data-filter="all">All</button>
+                        <button class="filter-option block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-filter="student">Students</button>
+                        <button class="filter-option block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-filter="owner">Owners</button>
+                    </div>
+                </div>
+            </div>
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {% for student in students %}
+                {% if student.accountStatus == 'pending' %}
+                <div class="student-item bg-white rounded-lg shadow-md overflow-hidden" data-type="{{ student.role }}" data-student-id="{{ student.student_id }}">
+                    <div class="p-6"> 
+                        <p class="text-lg font-bold">Students Profile</p>
+                        <div class="mt-4">
+                            {% if student.is_matched %}
+                                <p class="text-green-500 font-bold">Student Exists</p>
+                            {% else %}
+                                <p class="text-red-500 font-bold">No data found</p>
+                            {% endif %}
+                        </div>
+        
+                        <div class="flex items-center mb-4">
+                            <img src="{{ student.profile_picture }}" alt="Profile Picture" class="profile-picture rounded-full mr-4">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-800">{{ student.student_id }}</h2>
+                                <p class="text-sm text-gray-600">{{ student.email }}</p>   
+                                <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-sm">
+                                    {% if student.status == 'verified' %}
+                                        <span class="flex items-center text-green-600">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span>Email Verified</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="flex items-center text-yellow-600">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span>Email Status Pending</span>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Birthday</p>
+                                <p class="text-sm text-gray-800">{{ student.birthday }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Registered</p>
+                                <p class="text-sm text-gray-800">{{ student.signup_time }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Role</p>
+                                <p class="text-sm text-gray-800">{{ student.role }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Status</p>
+                                <span class="status-badge px-2 py-1 rounded-full {% if student.active_status == 'Active' %}status-active{% else %}status-inactive{% endif %}">
+                                    {{ student.active_status }}
+                                </span>
+                            </div>
+                        </div>
+        
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-300 approve-button" data-student-id="{{ student.email }}">
+                                <i class="fas fa-check mr-2"></i>Approve
+                            </button>
+                            <button class="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-300 reject-button" data-student-id="{{ student.email }}" >
+                                <i class="fas fa-times mr-2"></i>Reject
+                            </button>
+                            <button 
+                                class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300 view-button" 
+                                data-student-id="{{ student.student_id }}" 
+                                data-student-info='{"student_id": "{{ student.student_id }}", "email": "{{ student.email }}", "username": "{{ student.username }}", "course": "{{ student.course }}", "birthday": "{{ student.birthday }}", "signup_time": "{{ student.signup_time }}", "role": "{{ student.role }}", "active_status": "{{ student.active_status }}", "gender": "{{ student.gender }}", "phone": "{{ student.phone }}"}'>
+                                <i class="fas fa-eye mr-2"></i>View
+                            </button>
+                        </div>
+                    </div>
+                </div> 
+                {% endif %}
+            {% endfor %}
+
+
+
+            {% for owner in owners %}
+                {% if owner.accountStatus == 'pending' %}
+                    <div class="owner-item bg-white rounded-lg shadow-md overflow-hidden" data-type="{{ owner.role }}" data-owner-id="{{ owner.owner_id }}">
+                        <div class="p-6">
+                            <div class="flex items-center mb-4">
+                                <img src="{{ owner.profile_picture }}" alt="Profile Picture" class="profile-picture rounded-full mr-4">
+                                <div> 
+                                    <p class="text-lg font-bold">Owners Profile</p>
+                                    <p class="text-lg font-semibold">{{ owner.firstname }} {{ owner.middlename }} {{ owner.lastname }} {{ owner.extension }}</p>
+                                    <p class="text-sm text-gray-600">{{ owner.email }}</p>   
+                                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-sm">
+                                        {% if owner.status == 'verified' %}
+                                            <span class="flex items-center text-green-600">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                <span>Email Verified</span>
+                                            </span>
+                                        {% else %}
+                                            <span class="flex items-center text-yellow-600">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span>Email Status Pending</span>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Date Registered</p>
+                                    <p class="text-sm text-gray-800">{{ owner.signup_time }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Boarding House Name</p>
+                                    <p class="text-sm text-gray-800">{{ owner.boardinghouseName }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Role</p>
+                                    <p class="text-sm text-gray-800">{{ owner.role }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Status</p>
+                                    <span class="status-badge px-2 py-1 rounded-full {% if owner.active_status == 'online' %}status-active{% else %}status-inactive{% endif %}">
+                                        {{ owner.active_status }}
+                                    </span>
+                                </div>
+                            </div><br><br>
+                            <div class="flex space-x-2">
+                                <button 
+                                    class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300 owner-view-button" 
+                                    data-owner-id="{{ owner.owner_id }}" 
+                                    data-owner-info='{ 
+                                        "firstname": "{{ owner.firstname }}",
+                                        "middlename": "{{ owner.middlename }}",
+                                        "lastname": "{{ owner.lastname }}", 
+                                        "gender": "{{ owner.gender }}",
+                                        "address": "{{ owner.address }}",
+                                        "birthday": "{{ owner.birthday }}",
+                                        "email": "{{ owner.email }}",
+                                        "boardinghouseName": "{{ owner.boardinghouseName }}",
+                                        "phone_number": "{{ owner.phone_number }}",
+                                        "signup_time": "{{ owner.signup_time }}"
+                                    }'>
+                                    <i class="fas fa-eye mr-2"></i>View Profile
+                                </button>
+                                <form action="{% url 'boardinghouseAction' %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="owner_email" value="{{ owner.email }}">
+                                    <button type="submit" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition duration-300 action-button">
+                                        <i class="fas fa-cogs mr-2"></i>Action
+                                    </button>
+                                </form>
+                                
+                                
+                            </div>
+                        </div>
+                    </div> 
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+
+ 
+        
+        
+        <!-- Modal Background -->
+        <div id="ownerModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden justify-center items-center z-50">
+            <div class="bg-white rounded-lg w-11/12 max-w-2xl p-6">
+                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                    <h3 class="text-lg font-semibold">Owner Profile</h3>
+                    <button id="closeModalButton" class="text-gray-500 hover:text-gray-700">&times;</button>
+                </div>
+                <div id="modalContent">
+                    <!-- Dynamic owner details will be populated here -->
+                    <p style="font-size: 1.3em;"><strong>Boarding House Name: </strong> <span id="modalOwnerId"></span></p>
+                    <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                    <p><strong>First Name:</strong> <span id="modalFirstName"></span></p>
+                    <p><strong>Middle Name:</strong> <span id="modalMiddleName"></span></p>
+                    <p><strong>Last Name:</strong> <span id="modalLastName"></span></p> 
+                    <p><strong>Registration Date:</strong> <span id="modalRegistrationDate"></span></p> 
+                    <p><strong>Phone Number:</strong> <span id="modalPhoneNumber"></span></p>  
+                    <p><strong>Gender:</strong> <span id="modalGender"></span></p>
+                    <p><strong>Address:</strong> <span id="modalAddress"></span></p>
+                    <p><strong>Birthday:</strong> <span id="modalBirthday"></span></p>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button id="closeModalButton2" class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600">Close</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+        <!-- Approve Modal -->
+        <div id="approveModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+            <div class="modal-content bg-white rounded-lg p-8 max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-4">Approve Student Account</h2>
+                <p class="mb-6">Are you sure you want to approve this student account?</p>
+                <form id="approveForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="approve_student_email" id="approve_student_email">
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancelApprove" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">Confirm Approve</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Reject Modal --> 
+        <div id="rejectModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="modal-content bg-white rounded-lg p-8 max-w-md w-full">
+                <h2 class="text-2xl font-bold mb-4">Reject Student Account</h2>
+                <form id="rejectForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="student_id" id="rejectStudentId" value="">
+                    <input type="hidden" name="reject_student_email" id="rejectStudentEmail" value="">
+                    <p class="mb-4">Please select a reason for rejecting this account:</p>
+                    <select id="rejectReason" name="reject_reason" class="w-full p-2 mb-4 border border-gray-300 rounded-md" required>
+                        <option value="" selected disabled>Select a reason</option>
+                        <option value="Terms of Service Violation">Terms of Service Violation</option>
+                        <option value="Incomplete Information">Incomplete Information</option>
+                        <option value="Duplicate Account">Duplicate Account</option>
+                        <option value="Account doesn't exist in database">Account doesn't exist in database</option>
+                        <option value="Invalid or False Information">Invalid or False Information</option>
+                        <option value="Failure to Meet Eligibility Criteria">Failure to Meet Eligibility Criteria</option>
+                        <option value="Security Concerns">Security Concerns</option>
+                        <option value="Suspicious or Fraudulent Activity">Suspicious or Fraudulent Activity</option>
+                        <option value="Unverified Email">Unverified Email</option>
+                        <option value="Multiple Attempts with Incorrect Information">Multiple Attempts with Incorrect Information</option>
+                        <option value="Violation of Privacy Policies">Violation of Privacy Policies</option>
+                        <option value="Incomplete Application">Incomplete Application</option>
+                        <option value="Inconsistent Data with Registered Records">Inconsistent Data with Registered Records</option>
+                        <option value="Suspended by Administration">Suspended by Administration</option>
+                        <option value="Inactivity">Inactivity</option>
+                        <option value="Previous Account Ban">Previous Account Ban</option>
+                        <option value="Abuse of Platform Rules">Abuse of Platform Rules</option>
+                    </select>
+                    
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancelReject" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300">Cancel</button>
+                        <button type="submit" id="confirmReject" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300">Confirm Reject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        
+
+
+ 
+
+
+<!-- View Modal -->
+<div id="viewModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="modal-content bg-white rounded-lg p-8 max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-4">Student Details</h2>
+        <div id="studentDetails" class="mb-6"></div>
+        <div class="flex justify-end">
+            <button id="closeView" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300">Close</button>
+        </div>
+    </div>
+</div> 
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const approveModal = document.getElementById('approveModal');
+        const rejectModal = document.getElementById('rejectModal');
+        const viewModal = document.getElementById('viewModal');
+        const studentDetails = document.getElementById('studentDetails');
+        const approveStudentEmailInput = document.getElementById('approve_student_email'); 
+        const approveForm = document.getElementById('approveForm'); 
+        const messageList = document.querySelector('.message-list');
+
+    
+        if (messageList) {
+            setTimeout(() => {
+                messageList.style.transition = "opacity 0.5s ease"; // Transition effect
+                messageList.style.opacity = 0; // Fade out effect
+                setTimeout(() => {
+                    messageList.remove(); // Remove from DOM after fading out
+                }, 500); // Match this duration with the transition time
+            }, 5000); // 2 seconds before starting to fade out
+        }
+
+        document.querySelectorAll('.approve-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const studentEmail = this.getAttribute('data-student-id');
+                approveStudentEmailInput.value = studentEmail; // Set the student email/ID in the hidden input
+                approveModal.style.display = 'flex'; // Show the modal
+            });
+        });
+        document.querySelectorAll('.approve-button').forEach(button => {
+        button.addEventListener('click', () => {
+            // Check if the modal exists
+            if (approveModal) {
+                approveModal.classList.add('show');
+
+                // Set student attributes
+                const studentId = button.getAttribute('data-student-id');
+                const studentEmail = button.getAttribute('data-student-email');
+
+                // Ensure confirmApprove button exists before setting attributes
+                const confirmApprove = document.getElementById('confirmApprove');
+                if (confirmApprove) {
+                    confirmApprove.setAttribute('data-student-id', studentId);
+                    confirmApprove.setAttribute('data-student-email', studentEmail);
+                } else {
+                    console.error('Confirm approve button not found');
+                }
+            } else {
+                console.error('Approve modal not found');
+            }
+        });
+    });
+        
+        // Handle confirm approve
+        const confirmApproveButton = document.getElementById('confirmApprove');
+        if (confirmApproveButton) {
+        confirmApproveButton.addEventListener('click', () => {
+            const studentId = confirmApproveButton.getAttribute('data-student-id');
+            const studentEmail = confirmApproveButton.getAttribute('data-student-email');
+
+            // Send POST request to approve student
+            fetch('/your-endpoint-url/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: `approve_student_email=${encodeURIComponent(studentEmail)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const studentItem = document.querySelector(`.student-item[data-student-id="${studentId}"]`);
+                    if (studentItem) {
+                        studentItem.querySelector('.status-badge').textContent = 'Approved';
+                        studentItem.querySelector('.status-badge').classList.remove('status-inactive');
+                        studentItem.querySelector('.status-badge').classList.add('status-active');
+                    }
+                    approveModal.classList.remove('show');
+                } else {
+                    alert('Failed to approve student. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    }
+
+    // Handle confirm reject
+    document.getElementById('rejectForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const studentId = document.getElementById('rejectStudentId').value;
+        const rejectReason = document.getElementById('rejectReason').value;
+        const studentEmail = document.getElementById('rejectStudentEmail').value;
+
+        if (!rejectReason) {
+            alert('Please select a reason for rejecting the account.');
+            return;
+        }
+
+        // Perform the rejection operation here, for example, submitting the form via AJAX
+        console.log(`Rejecting student with ID: ${studentId} and email: ${studentEmail} for reason: ${rejectReason}`);
+
+        // Submit the form (you can replace this with your own AJAX logic if needed)
+        this.submit();
+
+        // Hide the modal after submission
+        document.getElementById('rejectModal').classList.add('hidden');
+    });
+
+        // Function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Handle reject button clicks
+        document.querySelectorAll('.reject-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const studentId = this.getAttribute('data-student-id');
+                const studentEmail = this.getAttribute('data-email');
+
+                // Set the student ID and email in the modal form
+                document.getElementById('rejectStudentId').value = studentId;
+                document.getElementById('rejectStudentEmail').value = studentEmail;
+
+                // Show the modal
+                document.getElementById('rejectModal').classList.remove('hidden');
+            });
+        });
+
+
+        // Handle view button clicks
+        document.querySelectorAll('.view-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const studentInfo = JSON.parse(button.getAttribute('data-student-info'));
+                studentDetails.innerHTML = `
+                    <p style='color: orange; font-weight: bold'><strong>CTU ID:</strong> ${studentInfo.student_id}</p>
+                    <p><strong>Email:</strong> ${studentInfo.email}</p>
+                    <p><strong>Username:</strong> ${studentInfo.username}</p>
+                    <p><strong>Course:</strong> ${studentInfo.course}</p>
+                    <p><strong>Birthday:</strong> ${studentInfo.birthday}</p>
+                    <p><strong>Date of Register:</strong> ${studentInfo.signup_time}</p>
+                    <p><strong>Role:</strong> ${studentInfo.role}</p>
+                    <p><strong>Status:</strong> ${studentInfo.active_status}</p>
+                    <p><strong>Gender:</strong> ${studentInfo.gender}</p>
+                    <p><strong>Phone number:</strong> ${studentInfo.phone}</p>
+                `;
+                viewModal.classList.add('show');
+            });
+        });
+
+        // Close modals on cancel buttons
+        document.getElementById('cancelApprove').addEventListener('click', function () {
+            approveModal.style.display = 'none'; // Hide the modal
+        });
+
+        document.getElementById('cancelReject').addEventListener('click', function() {
+            document.getElementById('rejectModal').classList.add('hidden');
+        });
+
+
+        document.getElementById('closeView').addEventListener('click', () => {
+            viewModal.classList.remove('show');
+        });
+
+        const rejectButtons = document.querySelectorAll('.reject-button');
+        const cancelRejectButton = document.getElementById('cancelReject');
+
+        rejectButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const studentId = this.getAttribute('data-student-id');
+                document.getElementById('rejectStudentId').value = studentId;
+                document.getElementById('rejectStudentEmail').value = this.getAttribute('data-student-id');
+                rejectModal.classList.add('show');
+                rejectModal.classList.remove('hidden');
+            });
+        });
+        cancelRejectButton.addEventListener('click', function () {
+            rejectModal.classList.remove('show');
+            rejectModal.classList.add('hidden');
+        });
+        // Filter functionality
+        const filterButton = document.getElementById('filterButton');
+        const filterMenu = document.getElementById('filterMenu');
+        const filterOptions = document.querySelectorAll('.filter-option');
+        const studentItems = document.querySelectorAll('.student-item');
+
+        // Show filter menu
+        filterButton.addEventListener('click', () => {
+            filterMenu.classList.toggle('hidden');
+        });
+
+        // Apply filter
+filterOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        const filter = option.getAttribute('data-filter');
+
+        // Toggle active class on filter buttons
+        filterOptions.forEach(btn => btn.classList.remove('active'));
+        option.classList.add('active');
+
+        // Filter student and owner items
+        const allItems = document.querySelectorAll('.student-item, .owner-item'); // Select all items
+        allItems.forEach(item => {
+            const type = item.getAttribute('data-type');
+            if (filter === 'all') {
+                item.style.display = 'block';
+            } else if (type === filter) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Hide the filter menu after selection
+        filterMenu.classList.add('hidden');
+    });
+});
+
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+
+            // Search in both student and owner items
+            const studentItems = document.querySelectorAll('.student-item');
+            const ownerItems = document.querySelectorAll('.owner-item');
+
+            studentItems.forEach(item => {
+                const studentName = item.querySelector('.text-xl').textContent.toLowerCase(); // Make sure this selector is accurate
+                if (studentName.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            ownerItems.forEach(item => {
+                const ownerName = item.querySelector('.text-lg.font-semibold').textContent.toLowerCase(); // Adjust selector as needed
+                if (ownerName.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+    });
+
+    // Get modal elements
+    const modal = document.getElementById("ownerModal");
+    const closeModalButtons = document.querySelectorAll("#closeModalButton, #closeModalButton2");
+
+    // Show modal when "View Profile" button is clicked
+    document.querySelectorAll(".owner-view-button").forEach(button => {
+        button.addEventListener("click", function () {
+            const ownerInfo = JSON.parse(this.getAttribute("data-owner-info"));
+
+            // Populate modal fields
+            document.getElementById("modalOwnerId").textContent = ownerInfo.boardinghouseName;
+            document.getElementById("modalEmail").textContent = ownerInfo.email; 
+            document.getElementById("modalRegistrationDate").textContent = ownerInfo.signup_time; 
+            document.getElementById("modalPhoneNumber").textContent = ownerInfo.phone_number;
+            document.getElementById("modalFirstName").textContent = ownerInfo.firstname;
+            document.getElementById("modalMiddleName").textContent = ownerInfo.middlename;
+            document.getElementById("modalLastName").textContent = ownerInfo.lastname; 
+            document.getElementById("modalGender").textContent = ownerInfo.gender;
+            document.getElementById("modalAddress").textContent = ownerInfo.address;
+            document.getElementById("modalBirthday").textContent = ownerInfo.birthday;
+
+            // Show the modal
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        });
+    });
+
+    // Close modal when the close button is clicked
+    closeModalButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        });
+    });
+
+    // Close modal when clicking outside of modal content
+    modal.addEventListener("click", function (e) {
+        if (e.target === modal) {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+    });
+ 
+
+ 
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+
+</script>
+
+{% endblock %}

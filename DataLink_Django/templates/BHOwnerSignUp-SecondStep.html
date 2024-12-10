@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cozy Haven Boarding House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --text-color: #333;
+            --bg-color: #f4f4f4;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .edit-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 60px;
+            width: 60px;
+        }
+
+        .edit-btn:hover {
+            transform: scale(1.1);
+            background-color: #2980b9;
+        }
+
+        .edit-btn.active {
+            background-color: #c0392b;
+            transform: rotate(180deg);
+        }
+
+        .edit-btn.active:hover {
+            background-color: #e74c3c;
+        }
+
+        .edit-btn::before {
+            content: "\270E";
+        }
+
+        .edit-btn.active::before {
+            content: "\2716";
+        }
+
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .ch-header * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box; 
+        }
+
+        .ch-header {
+            background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+            padding: 2.5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative background elements */
+        .ch-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232d3748' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.1;
+        }
+
+        .ch-header__container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ch-header__title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: ch-fadeInDown 0.8s ease-out;
+        }
+
+        .ch-header__subtitle {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1.25rem;
+            color: #e2e8f0;
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            animation: ch-fadeInUp 0.8s ease-out 0.2s backwards;
+            position: relative;
+        }
+
+        /* Decorative line */
+        .ch-header__subtitle::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: #4299e1;
+            margin-top: 1.5rem;
+            border-radius: 2px;
+            animation: ch-widthGrow 1s ease-out 0.5s backwards;
+        }
+
+        .ch-header__status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            animation: ch-fadeInDown 0.6s ease-out;
+        }
+
+        .ch-header__status--pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #F59E0B;
+        }
+
+        .ch-header__status--approved {
+            background-color: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #10B981;
+        }
+
+        .ch-header__status--disabled {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #EF4444;
+        }
+
+        /* Status icon styles */
+        .ch-header__status-icon {
+            display: inline-flex;
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+        }
+
+        @keyframes ch-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .ch-header__status--pending .ch-header__status-icon {
+            animation: ch-pulse 2s ease-in-out infinite;
+        }
+
+        /* Animations */
+        @keyframes ch-fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes ch-fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes ch-widthGrow {
+            from {
+                width: 0;
+            }
+            to {
+                width: 80px;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .ch-header {
+                padding: 2rem 0;
+            }
+
+            .ch-header__title {
+                font-size: 2.5rem;
+            }
+
+            .ch-header__subtitle {
+                font-size: 1.1rem;
+            }
+            .ch-header__status {
+                font-size: 0.8125rem;
+                padding: 0.375rem 0.75rem;
+            }
+            .amenities {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ch-header__title {
+                font-size: 2rem;
+            }
+
+            .ch-header__subtitle {
+                font-size: 1rem;
+            }
+            .amenities {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .amenities-section h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .ch-header__status-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        /* Optional: Add a subtle hover effect to the entire header */
+        .ch-header:hover .ch-header__container {
+            transform: translateY(-2px);
+            transition: transform 0.3s ease;
+        }
+
+        .cover-photo {
+            width: 100%;
+            height: 300px;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+            margin: -75px auto 20px;
+            border: 5px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3rem;
+            height: 3rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+            z-index: 2;
+        }
+
+        .amenity:has(.amenity-image) .upload-icon {
+            opacity: 0;
+        }
+
+        .amenity:has(.amenity-image):hover .upload-icon {
+            opacity: 1;
+        }
+
+        .upload-icon:hover {
+            background-color: #ffffff;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .add-amenity {
+            aspect-ratio: 1;
+            background-color: #e5e7eb;
+            border: 2px dashed #9ca3af;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-amenity:hover {
+            background-color: #f3f4f6;
+            border-color: #6b7280;
+            transform: translateY(-2px);
+        }
+
+        /* Image overlay for better text contrast */
+        .amenity::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%);
+            pointer-events: none;
+        }
+
+        /* Loading state */
+        .amenity.loading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 3;
+        }
+
+        .amenity.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid #f3f4f6;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 4;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .cover-photo:hover .upload-icon,
+        .profile-photo:hover .upload-icon {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        h1, h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .bio {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .amenities-section {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .amenities-section h2 {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #1a365d;
+            margin-bottom: 1.5rem;
+        }
+
+        .amenities {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .amenity {
+            position: relative;
+            aspect-ratio: 1;
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .amenity:hover {
+            transform: translateY(-2px);
+        }
+
+        .amenity-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .amenity:hover .amenity-image {
+            transform: scale(1.05);
+        }
+
+        .sections {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .documents, .rooms {
+            width: 48%;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .document, .room {
+            background-color: var(--bg-color);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .document:hover, .room:hover {
+            background-color: #e0e0e0;
+        }
+
+        .get-direction {
+            background-color: var(--card-bg);
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #27ae60;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        [contenteditable="true"]:focus {
+            outline: 2px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        input[type="text"], input[type="file"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        } 
+
+        .image-preview {
+            width: 5%;
+            height: 5%;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .room input[type="text"] {
+            width: calc(33.33% - 10px);
+            margin-right: 10px;
+        }
+
+        .room input[type="text"]:last-child {
+            margin-right: 0;
+        }
+        .profile-picture {
+            width: 150px; /* Adjust based on your design */
+            height: 150px; /* Adjust based on your design */
+            border-radius: 50%;
+            object-fit: cover; /* Ensure image covers the area without distortion */
+        }
+        
+
+        .title-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .title-icon {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .boarding-house-title {
+            width: 60%;
+            padding: 15px 25px;
+            font-size: 2rem;
+            font-family: 'Poppins', sans-serif;
+            border: none;
+            border-bottom: 2px solid #e0e0e0;
+            background-color: transparent;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: #2c3e50;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .boarding-house-title:focus {
+            outline: none;
+            border-bottom: 2px solid #3498db;
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .boarding-house-title::placeholder {
+            color: #95a5a6;
+            opacity: 0.7;
+            font-weight: 400;
+            font-size: 1.8rem;
+        }
+
+        .title-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            margin-top: 10px;
+        }
+
+        .boarding-house-title:focus ~ .title-label,
+        .boarding-house-title:not(:placeholder-shown) ~ .title-label {
+            opacity: 1;
+        }
+
+        .title-decoration {
+            width: 62%;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                rgba(52, 152, 219, 0) 0%,
+                rgba(52, 152, 219, 0.5) 50%,
+                rgba(52, 152, 219, 0) 100%
+            );
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .boarding-house-title:focus ~ .title-decoration,
+        .boarding-house-title:not(:placeholder-shown) ~ .title-decoration {
+            opacity: 1;
+        }
+
+        .highlight {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 62%;
+            height: 60px;
+            background: linear-gradient(120deg, 
+                rgba(52, 152, 219, 0.1) 0%,
+                rgba(46, 204, 113, 0.1) 100%
+            );
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .boarding-house-title:focus ~ .highlight {
+            opacity: 1;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .rental-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 24px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .rental-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+        }
+
+        .rental-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .rental-option {
+            position: relative;
+            padding: 12px 16px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rental-option:hover {
+            background: #e5e7eb;
+        }
+
+        .rental-option input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #9ca3af;
+            border-radius: 4px;
+            margin: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .rental-option input[type="checkbox"]:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+            position: relative;
+        }
+
+        .rental-option input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            left: 4px;
+            top: 0px;
+        }
+
+        .rental-option label {
+            font-size: 14px;
+            color: #4b5563;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .rental-option:has(input:checked) {
+            background: #eef2ff;
+            border: 1px solid #4f46e5;
+        }
+
+        .rental-option:has(input:checked) label {
+            color: #4f46e5;
+            font-weight: 500;
+        }
+        .custom-button {
+            transition: all 0.3s ease;
+            margin-top: 15%;
+            margin-left: 30%;
+            }
+            .custom-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            }
+            .custom-button:active {
+            transform: translateY(0px);
+            }
+            .pulse-effect {
+            animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+            }
+
+            .successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                    <div class="successAnderrorMessagesPoppedup-icon">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="successAnderrorMessagesPoppedup-content">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <header class="ch-header">
+        <div class="ch-header__container">
+            <div class="ch-header__status-container">
+                {% if saved_owner_data.boardinghouseStatus == 'pending' %}
+                <div class="ch-header__status ch-header__status--pending">
+                    <svg class="ch-header__status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Pending Approval
+                </div>
+                {% elif saved_owner_data.boardinghouseStatus == 'approved' %}
+                <div class="ch-header__status ch-header__status--approved">
+                    <svg class="ch-header__status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Approved
+                </div>
+                {% elif saved_owner_data.boardinghouseStatus == 'disabled' %}
+                <div class="ch-header__status ch-header__status--disabled">
+                    <svg class="ch-header__status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Disabled
+                </div>
+                {% endif %}
+            </div>
+            <h1 class="ch-header__title">CTU AC Accredited Boarding House</h1>
+            <p class="ch-header__subtitle">Be part of us!</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div style="margin-bottom: 20px;">
+            <button type="button" onclick="backbtn()">Back</button>
+        </div> 
+        <form method="POST" id="bhdetails" enctype="multipart/form-data" action="{% url 'ownerSignUpSecondStep' %}">
+            {% csrf_token %}
+            
+            <!-- Cover Photo Section -->
+            <div class="cover-photo" onclick="document.getElementById('coverPhotoInput').click()">
+                <span class="upload-icon">📷</span>
+
+                <!-- Conditional display of either the saved or previewed cover photo -->
+                {% if saved_owner_data.coverPhoto %}
+                    <!-- Fetched Cover Photo -->
+                    <img id="fetchedCoverPhoto" src="{{ saved_owner_data.coverPhoto }}" alt="Cover Photo" style="width: 100%; height: auto;">
+                {% else %}
+                    <p style="text-align: center; margin-top: 5%; opacity: 0.5;">Please upload a clear photo showing the front exterior view of your boarding house. This will be the main image potential tenants see first.</p> 
+                {% endif %}
+                <!-- Hidden input to hold the current cover photo URL -->
+                
+                
+                <input type="hidden" id="coverPhotoURL" name="coverPhotoURL" value="{{ saved_owner_data.coverPhoto }}">
+                <!-- File input for cover photo (hidden) -->
+                <input type="file" id="coverPhotoInput" name="coverPhoto" class="hidden" accept="image/*" onchange="previewCoverPhoto(event)">
+
+                <!-- Preview for the new cover photo -->
+                <img id="coverPhotoPreview" src="#" alt="Cover Photo Preview" style="display: none; width: 100%; height: auto; margin-top: 10px;"> 
+            </div>
+
+            
+            
+            <!-- Profile Photo and Name -->
+            <div class="profile-photo"> 
+                <img src="{{ context.profile_picture }}" alt="Owner Profile Picture" class="profile-picture">
+            </div> 
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="title-container">
+                    <div class="title-icon">🏠</div>
+                    <input disabled
+                        type="text" 
+                        id="boardinghouseName" 
+                        name="boardinghouseName" 
+                        class="boarding-house-title"
+                        placeholder="Enter your Boarding House name"
+                        value="{% if saved_owner_data.boardinghouseName %}{{ saved_owner_data.boardinghouseName }}{% endif %}"
+                    >
+                    <label for="boardinghouseName" class="title-label">BOARDING HOUSE NAME</label>
+                    <div class="title-decoration"></div>
+                    <div class="highlight"></div>
+                </div>
+                
+                <h3>{{ context.firstname }} {{ context.middlename }} {{ context.lastname }}</h3>
+            </div>
+            
+            <!-- Bio Section -->
+            <div class="bio">
+                <h2>About Us</h2>
+                <textarea id="aboutUs" name="aboutUs" placeholder="Enter your bio" rows="4" style="width: 98%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;" disabled>{% if saved_owner_data.aboutUs %}{{ saved_owner_data.aboutUs }}{% endif %}</textarea>
+            </div>
+
+    
+            <!-- Additional Information Section -->
+            <div class="additional-info">
+                <h2>Boarding House Details</h2>
+            
+                <!-- Wi-Fi Available -->
+                <label for="wifiAvailable">Wi-Fi Available:</label>
+                <select id="wifiAvailable" name="wifiAvailable" disabled>
+                    <option value="yes" {% if saved_owner_data.wifiAvailable == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.wifiAvailable == "no" %}selected{% endif %}>No</option>
+                </select>
+            
+                <!-- Free Electric Bill -->
+                <label for="freeElectricBill">Free Electric Bill:</label>
+                <select id="freeElectricBill" name="freeElectricBill" disabled>
+                    <option value="yes" {% if saved_owner_data.freeElectricBill == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.freeElectricBill == "no" %}selected{% endif %}>No</option>
+                </select>
+            
+                <!-- Free Water Bill -->
+                <label for="freeWaterBill">Free Water Bill:</label>
+                <select id="freeWaterBill" name="freeWaterBill" disabled>
+                    <option value="yes" {% if saved_owner_data.freeWaterBill == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.freeWaterBill == "no" %}selected{% endif %}>No</option>
+                </select>
+
+                <!-- CR/Toilet available --><br>
+                <label for="toiletAvailable">CR/Toilet Available:</label>
+                <select id="toiletAvailable" name="toiletAvailable" disabled>
+                    <option value="toilets_in_each_room" {% if saved_owner_data.toiletAvailable == "toilets_in_each_room" %}selected{% endif %}>Toilets are provided to each room</option>
+                    <option value="1_toilet" {% if saved_owner_data.toiletAvailable == "1_toilet" %}selected{% endif %}>1 Toilet Available</option>
+                    <option value="2_toilets" {% if saved_owner_data.toiletAvailable == "2_toilets" %}selected{% endif %}>2 Toilets Available</option>
+                    <option value="3_toilets" {% if saved_owner_data.toiletAvailable == "3_toilets" %}selected{% endif %}>3 Toilets Available</option>
+                    <option value="4_toilets" {% if saved_owner_data.toiletAvailable == "4_toilets" %}selected{% endif %}>4 Toilets Available</option>
+                    <option value="5_or_more_toilets" {% if saved_owner_data.toiletAvailable == "5_or_more_toilets" %}selected{% endif %}>5 and Above Toilets Available</option>
+                </select>
+
+            
+                <!-- Type of Rental -->
+                <div class="rental-container">
+                    <div class="rental-title">Type of Rental</div>
+                    <div class="rental-options">
+                        <div class="rental-option">
+                            <input type="checkbox" name="rentalType[]" value="boardingHouse" {% if "boardingHouse" in saved_owner_data.typeOfRental %}checked{% endif %} id="boardingHouse" disabled>
+                            <label for="boardingHouse">Boarding House</label>
+                        </div>
+                        <div class="rental-option">
+                            <input type="checkbox" name="rentalType[]" value="lodging" {% if "lodging" in saved_owner_data.typeOfRental %}checked{% endif %} id="lodging" disabled>
+                            <label for="lodging">Lodging</label>
+                        </div>
+                        <div class="rental-option">
+                            <input type="checkbox" name="rentalType[]" value="dormitory" {% if "dormitory" in saved_owner_data.typeOfRental %}checked{% endif %} id="dormitory" disabled>
+                            <label for="dormitory">Dormitory</label>
+                        </div>
+                        <div class="rental-option">
+                            <input type="checkbox" name="rentalType[]" value="apartment" {% if "apartment" in saved_owner_data.typeOfRental %}checked{% endif %} id="apartment" disabled>
+                            <label for="apartment">Apartment</label>
+                        </div>
+                        <div class="rental-option">
+                            <input type="checkbox" name="rentalType[]" value="girlsBedspacer" {% if "girlsBedspacer" in saved_owner_data.typeOfRental %}checked{% endif %} id="girlsBedspacer" disabled>
+                            <label for="girlsBedspacer">Girls Bedspacer</label>
+                        </div>
+                        <div class="rental-option">
+                            <input type="checkbox" name="rentalType[]" value="boysBedspacer" {% if "boysBedspacer" in saved_owner_data.typeOfRental %}checked{% endif %} id="boysBedspacer" disabled>
+                            <label for="boysBedspacer">Boys Bedspacer</label>
+                        </div>
+                        <div class="rental-option">
+                            <input type="checkbox" name="rentalType[]" value="bothGenderBedspacer" {% if "bothGenderBedspacer" in saved_owner_data.typeOfRental %}checked{% endif %} id="bothGenderBedspacer" disabled>
+                            <label for="bothGenderBedspacer">Both Gender Bedspacer</label>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Parking Space --><br>
+                <label for="parkingSpace">Parking Space:</label>
+                <select id="parkingSpace" name="parkingSpace" disabled>
+                    <option value="yes" {% if saved_owner_data.parkingSpace == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.parkingSpace == "no" %}selected{% endif %}>No</option>
+                </select>
+ 
+            
+                <!-- Security Features -->
+                <h3>Security Features</h3>
+                <label for="securityKeys">Keys:</label>
+                <select id="securityKeys" name="securityFeatures_keys" disabled>
+                    <option value="yes" {% if saved_owner_data.securityFeatures_keys == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.securityFeatures_keys == "no" %}selected{% endif %}>No</option>
+                </select>
+            
+                <label for="securityCurfew">Curfew:</label>
+                <select id="securityCurfew" name="securityFeatures_curfew" disabled>
+                    <option value="yes" {% if saved_owner_data.securityFeatures_curfew == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.securityFeatures_curfew == "no" %}selected{% endif %}>No</option>
+                </select>
+            
+                <label for="securityCCTV">CCTV:</label> 
+                <select id="securityCCTV" name="securityFeatures_cctv" disabled>
+                    <option value="yes" {% if saved_owner_data.securityFeatures_cctv == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.securityFeatures_cctv == "no" %}selected{% endif %}>No</option>
+                </select>
+
+                <!-- Safety Protocols -->
+                <h3>Safety Protocols</h3>
+
+                <!-- Emergency Exit -->
+                <label for="emergencyExit">Emergency Exit:</label>
+                <select id="emergencyExit" name="emergencyExit" disabled>
+                    <option value="yes" {% if saved_owner_data.emergencyExit == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.emergencyExit == "no" %}selected{% endif %}>No</option>
+                </select>
+
+                <!-- Fire Extinguishers Available -->
+                <label for="fireExtinguishers">Fire Extinguishers Available:</label>
+                <select id="fireExtinguishers" name="fireExtinguishers" disabled>
+                    <option value="yes" {% if saved_owner_data.fireExtinguishers == "yes" %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if saved_owner_data.fireExtinguishers == "no" %}selected{% endif %}>No</option>
+                </select>
+            </div>
+            
+            
+            <!-- Amenities, Documents, Rooms, and Submit -->
+            <section class="amenities-section">
+                <h2>Our Amenities</h2>
+                <div class="amenities" id="amenitiesContainer">
+                    {% for amenity in saved_owner_data.amenities %}
+                        <div class="amenity">
+                            <img src="{{ amenity }}" alt="Amenity Image" class="amenity-image" onerror="this.style.display='none'" />
+                            <span class="upload-icon" onclick="document.getElementById('amenityInput{{ forloop.counter0 }}').click()">📷</span>
+                            <input type="file" id="amenityInput{{ forloop.counter0 }}" name="amenities[]" class="hidden" accept="image/*" onchange="uploadImage(this)">
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="amenity" id="amenity{{ saved_owner_data.amenities|length }}">
+                        <span class="upload-icon" onclick="document.getElementById('amenityInput{{ saved_owner_data.amenities|length }}').click()">📷</span>
+                        <input type="file" id="amenityInput{{ saved_owner_data.amenities|length }}" name="amenities[]" class="hidden" accept="image/*" onchange="uploadImage(this)">
+                    </div>
+                    
+                    <div class="add-amenity" onclick="addAmenity()">+</div>
+                </div>
+            </section>
+
+    
+            <div class="sections">
+                <div class="documents">
+                    <h2>Documents (Images)</h2>
+                    <div id="documentsContainer">
+                        {% if saved_owner_data.documents %}
+                            {% for document in saved_owner_data.documents %}
+                                <div class="document-item" style="position: relative; display: inline-block; margin: 5px;">
+                                    <img src="{{ document }}" alt="Document" style="width: 100px; height: auto;"/>
+                                    <button class="delete-button" style="position: absolute; top: 0; right: 0; background: red; color: white; border: none; cursor: pointer;">
+                                        &times;
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No documents available.</p>
+                        {% endif %}
+                    </div>
+                    <button type="button" onclick="addDocument()">Add Documents</button>
+                </div>
+                
+                
+    
+                <div class="rooms">
+                    <h2>Available Rooms</h2>
+                    <div id="roomsContainer">
+                        {% if saved_owner_data.rooms and saved_owner_data.rooms|length > 0 %}
+                            <!-- If rooms exist, show the manage rooms button -->
+                            <div class="flex justify-center items-center min-h-screen bg-gray-50">
+                                <button type="button" class="custom-button pulse-effect flex items-center space-x-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg" onclick="manageRooms()">
+                                  <!-- Management Icon -->
+                                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+                                    </path>
+                                  </svg> 
+                                  <!-- Button Text -->
+                                  <span>Manage Rooms</span> 
+                                </button>
+                              </div>
+                        {% else %}
+                            <!-- If no rooms exist, show the add room input fields -->
+                            <div id="addRoomSection">
+                                <button type="button" onclick="addRoom()">Add Room</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                
+                
+            </div>
+            
+            <button type="submit" id="saveBtn" style="display: none;">Save Details</button>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="button" style="background-color: #3498db; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px;" onclick="backbtn()">Back</button>
+            </div>
+        </form>
+    </div>
+    <button class="edit-btn" id="editbtn" onclick="enableEditing()"></button>
+
+    <div class="get-direction">
+        <h2>Find Us</h2>
+        <p>123 Boarding Street, Cityville, State 12345</p>
+        <button>Get Directions</button>
+    </div>
+
+    <script>
+
+        function enableEditing() {
+                    // Enable input fields
+                    document.getElementById('boardinghouseName').disabled = false;
+                    document.getElementById('aboutUs').disabled = false;
+                    document.getElementById('wifiAvailable').disabled = false;
+                    document.getElementById('freeElectricBill').disabled = false;
+                    document.getElementById('freeWaterBill').disabled = false;
+                    document.getElementById('boardingHouse').disabled = false; 
+                    document.getElementById('lodging').disabled = false;
+                    document.getElementById('dormitory').disabled = false;
+                    document.getElementById('apartment').disabled = false;
+                    document.getElementById('girlsBedspacer').disabled = false;
+                    document.getElementById('boysBedspacer').disabled = false;
+                    document.getElementById('bothGenderBedspacer').disabled = false; 
+                    document.getElementById('parkingSpace').disabled = false;
+                    document.getElementById('securityKeys').disabled = false;
+                    document.getElementById('securityCurfew').disabled = false;
+                    document.getElementById('securityCCTV').disabled = false;
+                    document.getElementById('toiletAvailable').disabled = false;
+                    document.getElementById('emergencyExit').disabled = false;
+                    document.getElementById('fireExtinguishers').disabled = false;
+                      
+                    // Show the save button
+                    document.getElementById('saveBtn').style.display = 'block';
+                    document.getElementById('editbtn').style.display = 'none'; 
+                }
+
+         function previewCoverPhoto(event) {
+        var reader = new FileReader();
+        reader.onload = function() {
+            // Show preview and update hidden input
+            var preview = document.getElementById('coverPhotoPreview');
+            var fetchedPhoto = document.getElementById('fetchedCoverPhoto');
+            var coverPhotoURL = document.getElementById('coverPhotoURL');
+
+            // Set the preview image's source to the newly selected file
+            preview.src = reader.result;
+            preview.style.display = 'block';
+            
+            // Hide the existing cover photo if a new image is chosen
+            if (fetchedPhoto) {
+                fetchedPhoto.style.display = 'none';
+            }
+
+            // Clear hidden input to avoid overriding the old cover photo
+            coverPhotoURL.value = '';  
+        };
+
+        // Read the file if a new image is selected
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+
+
+
+
+        function backbtn(){
+            window.location.href="{% url 'ownerhomepage' %}"
+        } 
+
+
+
+        let amenityCount = 1;
+
+        function addAmenity() {
+            const container = document.getElementById('amenitiesContainer');
+
+            // Create a new div for the amenity and set class and ID
+            const newAmenity = document.createElement('div');
+            newAmenity.className = 'amenity';
+            newAmenity.id = `amenity${amenityCount}`;
+
+            // Create an upload icon with an inline function to trigger file input click
+            const uploadIcon = document.createElement('span');
+            uploadIcon.className = 'upload-icon';
+            uploadIcon.textContent = '📷';
+            
+            // Create the hidden file input for image upload with unique ID
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = 'amenities[]';
+            fileInput.className = 'hidden';
+            fileInput.accept = 'image/*';
+            fileInput.onchange = function() { uploadImage(fileInput); };
+
+            // Make upload icon click open this specific input
+            uploadIcon.onclick = function() { fileInput.click(); };
+
+            // Append the icon and input to the new amenity div
+            newAmenity.appendChild(uploadIcon);
+            newAmenity.appendChild(fileInput);
+
+            // Insert new amenity before the "+" add button
+            container.insertBefore(newAmenity, container.lastElementChild);
+
+            // Increment counter for next amenity ID
+            amenityCount++;
+        }
+
+        function uploadImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const amenityContainer = input.parentNode;
+
+                // Remove any existing preview image
+                const existingPreview = amenityContainer.querySelector('.amenity-preview');
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+
+                // Create and add new preview image
+                const imgPreview = document.createElement('img');
+                imgPreview.src = URL.createObjectURL(file);
+                imgPreview.className = 'amenity-preview';
+                imgPreview.onload = function() {
+                    URL.revokeObjectURL(imgPreview.src);  // Free up memory
+                };
+                amenityContainer.appendChild(imgPreview);
+            }
+        }
+
+
+
+
+        let documentCount = 0;
+
+            function addDocument() {
+                const container = document.getElementById('documentsContainer');
+
+                // Create a new div for each document upload with a unique class and ID
+                const newDocument = document.createElement('div');
+                newDocument.className = 'document';
+                newDocument.id = `document${documentCount}`;
+
+                // Create the file input for image upload with a unique onchange handler
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.name = 'documents[]';
+                fileInput.accept = 'image/*';
+                fileInput.onchange = function() { uploadDocumentImage(fileInput); };
+
+                // Create an image preview container for this document
+                const previewContainer = document.createElement('div');
+                previewContainer.className = 'image-preview';
+                previewContainer.id = `preview${documentCount}`;
+
+                // Append input and preview to the document container
+                newDocument.appendChild(fileInput);
+                newDocument.appendChild(previewContainer);
+
+                // Append the document div to the main documents container
+                container.appendChild(newDocument);
+
+                // Increment document count for the next upload
+                documentCount++;
+            }
+
+            function uploadDocumentImage(input) {
+                const file = input.files[0];
+                if (file) {
+                    const documentContainer = input.parentNode;
+                    
+                    // Remove any existing preview image
+                    const existingPreview = documentContainer.querySelector('.image-preview img');
+                    if (existingPreview) {
+                        existingPreview.remove();
+                    }
+
+                    // Create and add a new preview image
+                    const imgPreview = document.createElement('img');
+                    imgPreview.src = URL.createObjectURL(file);
+                    imgPreview.className = 'document-preview';
+                    imgPreview.onload = function() {
+                        URL.revokeObjectURL(imgPreview.src);  // Free up memory
+                    };
+                    documentContainer.querySelector('.image-preview').appendChild(imgPreview);
+                }
+            }
+
+
+            let roomCount = 0;
+
+            function addRoom() {
+                const container = document.getElementById('roomsContainer');
+
+                // Check if the "addRoomSection" exists and is displayed
+                const addRoomSection = document.getElementById('addRoomSection');
+                if (addRoomSection) {
+                    const newRoom = document.createElement('div');
+                    newRoom.className = 'room';
+
+                    // Add inputs for room name, capacity, price, aircon status dropdown, and image
+                    newRoom.innerHTML = `
+                        <input type="text" name="rooms[]" placeholder="Room Name">
+                        <input type="number" name="capacity[]" placeholder="Capacity (number of occupants)" style="width: 45%" min="1" step="1">
+                        <input type="number" name="price[]" placeholder="Price (per month)" style="width: 40%" min="0">
+                        <select name="aircon[]" style="width: 50%">
+                            <option value="Aircon">Aircon</option>
+                            <option value="Non-Aircon">Non-Aircon</option>
+                        </select>
+                        <input type="file" name="room_images[]" accept="image/*" style="width: 90%">
+                    `;
+
+                    container.appendChild(newRoom);
+                }
+            }
+
+
+        // Initialize with one document and one room
+        addDocument();
+        addRoom();
+        
+        document.getElementById('bhdetails').onsubmit = function(e) {
+        for (let i = 0; i < amenityFiles.length; i++) {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'hidden';
+            fileInput.name = 'amenities[]';
+            fileInput.files = [amenityFiles[i]];  // Add each file
+            this.appendChild(fileInput);
+        }
+    };
+
+
+      
+        
+        function manageRooms(){
+            window.location.href="{% url 'ownersRoomManagement' %}"
+        }
+
+        
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+    </script>
+</body>
+</html>

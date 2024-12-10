@@ -1,0 +1,340 @@
+{% extends 'authentication-base-owner.html' %}
+{% load static %}
+
+{% block title %}Owner - CTU AC Accredited Boarding House{% endblock %}
+
+{% block extra_styles %}
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBz5DMWH_idVsu01fo_F9fIXAoPgNJL9cs"></script>
+    <style>
+        :root {
+            --primary-color: #006400;
+            --secondary-color: #28a745;
+            --background-color: #f0f0f0;
+            --text-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .button:hover {
+            background-color: #218838;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .back-button {
+            background-color: #f0f0f0;
+            color: var(--text-color);
+        }
+        
+        #roomPreviews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #roomPreviews img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .location-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        #map {
+            height: 200px;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 16px;
+            } 
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            } 
+        }
+    </style>
+  {% endblock %}
+
+  {% block content %}
+    <div class="container">
+         
+        <h2><i class="fas fa-clipboard-list"></i> SIGNUP - AMENITIES</h2>
+        
+        <form id="amenitiesForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="bhPicture"><i class="fas fa-image"></i> Upload BH Picture:</label>
+                <input type="file" id="bhPicture" name="bh_picture" accept="image/*">
+            </div>
+            
+            <div class="form-group">
+                <label for="bhName"><i class="fas fa-home"></i> BH Name:</label>
+                <input type="text" id="bhName" name="bh_name">
+            </div>
+            
+            <div class="form-group">
+                <button type="button" class="button" id="addRoomBtn"><i class="fas fa-plus"></i> Add Rooms</button>
+                <div id="roomPreviews"></div>
+            </div>
+            
+            <div class="form-group">
+                <button type="button" class="button" id="setLocationBtn"><i class="fas fa-map-marker-alt"></i> Set Location</button>
+                <div class="location-preview" id="locationPreview" style="display: none;">
+                    <p><strong>Country:</strong> <span id="country"></span></p>
+                    <p><strong>City:</strong> <span id="city"></span></p>
+                    <p><strong>Latitude:</strong> <span id="latitude"></span></p>
+                    <p><strong>Longitude:</strong> <span id="longitude"></span></p>
+                    <div id="map"></div>
+                </div>
+                <input type="hidden" id="location" name="location">
+            </div>
+            
+            <div class="form-group">
+                <label for="bhDetails"><i class="fas fa-info-circle"></i> BH Details:</label>
+                <textarea id="bhDetails" name="bh_details" rows="4"></textarea>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{% url 'ownerSignUpSecondStep' %}" class="button back-button"><i class="fas fa-arrow-left"></i> BACK</a>
+                <button type="submit" class="button"><i class="fas fa-arrow-right"></i> NEXT</button>
+            </div>
+        </form> 
+    </div>
+
+    <div id="addRoomModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3><i class="fas fa-door-open"></i> Add Room Picture</h3>
+            <button id="uploadRoomBtn" class="button"><i class="fas fa-upload"></i> Upload Picture</button>
+            <button id="takeRoomPictureBtn" class="button"><i class="fas fa-camera"></i> Take Picture</button>
+            <input type="file" id="roomPictureInput" accept="image/*" capture="environment" style="display: none;">
+        </div>
+    </div>
+
+    <script>
+        const addRoomBtn = document.getElementById('addRoomBtn');
+        const addRoomModal = document.getElementById('addRoomModal');
+        const closeModal = document.getElementsByClassName('close')[0];
+        const uploadRoomBtn = document.getElementById('uploadRoomBtn');
+        const takeRoomPictureBtn = document.getElementById('takeRoomPictureBtn');
+        const roomPictureInput = document.getElementById('roomPictureInput');
+        const roomPreviews = document.getElementById('roomPreviews');
+        const setLocationBtn = document.getElementById('setLocationBtn');
+        const locationInput = document.getElementById('location');
+        const form = document.getElementById('amenitiesForm');
+        const locationPreview = document.getElementById('locationPreview');
+
+        let map, marker;
+
+        function initMap(lat, lng) {
+            const mapOptions = {
+                center: { lat, lng },
+                zoom: 15
+            };
+            map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            marker = new google.maps.Marker({
+                position: { lat, lng },
+                map: map,
+                draggable: true
+            });
+
+            google.maps.event.addListener(marker, 'dragend', function() {
+                const position = marker.getPosition();
+                document.getElementById('latitude').textContent = position.lat().toFixed(6);
+                document.getElementById('longitude').textContent = position.lng().toFixed(6);
+                locationInput.value = `${position.lat()},${position.lng()}`;
+                updateLocationDetails(position.lat(), position.lng());
+            });
+        }
+
+        function updateLocationDetails(lat, lng) {
+            fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('country').textContent = data.countryName;
+                    document.getElementById('city').textContent = data.city;
+                    document.getElementById('latitude').textContent = lat.toFixed(6);
+                    document.getElementById('longitude').textContent = lng.toFixed(6);
+                })
+                .catch(error => {
+                    console.error('Error fetching location details:', error);
+                    alert("Unable to fetch detailed location information.");
+                });
+        }
+
+        addRoomBtn.onclick = () => addRoomModal.style.display = "block";
+        closeModal.onclick = () => addRoomModal.style.display = "none";
+        window.onclick = (event) => {
+            if (event.target == addRoomModal) addRoomModal.style.display = "none";
+        }
+
+        uploadRoomBtn.onclick = () => roomPictureInput.click();
+        takeRoomPictureBtn.onclick = () => {
+            roomPictureInput.setAttribute('capture', 'environment');
+            roomPictureInput.click();
+        }
+
+        roomPictureInput.onchange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    roomPreviews.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            }
+            addRoomModal.style.display = "none";
+        }
+
+        setLocationBtn.onclick = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    locationInput.value = `${lat},${lng}`;
+                    
+                    initMap(lat, lng);
+                    updateLocationDetails(lat, lng);
+                    locationPreview.style.display = 'block';
+                }, () => {
+                    alert("Unable to get your location. Please check your settings and try again.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        form.onsubmit = (event) => {
+            event.preventDefault();
+            // Here you would typically send the form data to a server
+            // For demonstration, we'll just log the form data
+            const formData = new FormData(form);
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+            alert('Form submitted successfully!');
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,374 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f2f2f2;
+            --text-color: #333;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            height: 600px;
+            background-color: #ffffff;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .verification-container {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .image-container {
+            flex: 1;
+            background-image: url("{% static 'img/verify_bg.gif' %}");
+            background-size: cover;
+            background-position: center;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .subtext {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 400;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .otp-input {
+            position: relative;
+        }
+
+        .otp-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+        }
+
+        .resend-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .resend {
+            color: var(--primary-color);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .resend:hover {
+            color: #3a7bc8;
+        }
+
+        .countdown-timer {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .submit {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .submit:hover {
+            background-color: #3a7bc8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .popup i {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+
+        .popup h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .popup p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .login-btn {
+            background-color: var(--success-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: #27ae60;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                flex-direction: column;
+                height: auto;
+                max-width: 90%;
+                border-radius: 0;
+            }
+
+            .verification-container {
+                order: 2;
+                padding: 30px;
+            }
+
+            .image-container {
+                order: 1;
+                height: 10px;
+                background-position: center top; 
+            }
+
+            body {
+                position: relative;
+                z-index: 1;
+            }
+
+            body::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-image: url("{% static 'img/verify_bg.gif' %}");
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                opacity: 0.4; /* Adjust this value to change the opacity */
+                z-index: -1; /* Keep it behind the content */
+            }
+
+            .page-container {
+                background-color: rgba(255, 255, 255, 0.9);
+            }
+
+            .popup {
+                width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="verification-container">
+            <h2>Verification <i class="fas fa-shield-alt"></i></h2>
+            <form id="verificationForm" method="POST" action="{% url 'studentverify' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="verify">
+                <div class="form-group">
+                    <label for="otp">
+                        OTP <i class="fas fa-key"></i>
+                        <br>
+                        <span class="subtext">Enter Code sent to your Gmail</span>
+                    </label>
+                    <div class="otp-input">
+                        <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+                        <img src="{% static 'img/gmail-img-logo.png' %}" alt="Gmail Icon" class="otp-icon">
+                    </div>
+                </div>
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li style="color: red;">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="resend-container">
+                    <div class="resend" id="resend-button">Resend <i class="fas fa-redo-alt"></i></div>
+                    <div class="countdown-timer" id="countdown-timer"></div>
+                </div>
+                <button type="submit" class="submit">VERIFY <i class="fas fa-check-circle"></i></button>
+            </form>
+        </div>
+        <div class="image-container"> </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <i class="fas fa-check-circle"></i>
+        <h3>Verification Successful!</h3>
+        <p>The code you entered is correct. You can now login.</p>
+        <button class="login-btn" id="loginBtn">Login</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resendButton = document.getElementById('resend-button');
+            const countdownTimer = document.getElementById('countdown-timer');
+            const verificationForm = document.getElementById('verificationForm');
+            const popup = document.getElementById('popup');
+            const overlay = document.getElementById('overlay');
+            const loginBtn = document.getElementById('loginBtn');
+    
+            // Retrieve countdown time from localStorage or set default (5 minutes)
+            let countdown = parseInt(localStorage.getItem('countdown')) || 300;
+    
+            function updateCountdown() {
+                const minutes = Math.floor(countdown / 60);
+                const seconds = countdown % 60;
+                countdownTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                countdown--;
+    
+                localStorage.setItem('countdown', countdown);
+    
+                if (countdown < 0) {
+                    clearInterval(timer);
+                    resendButton.style.opacity = '1';
+                    resendButton.style.cursor = 'pointer';
+                    countdownTimer.textContent = '00:00';
+                    localStorage.removeItem('countdown');
+                }
+            }
+    
+            let timer = setInterval(updateCountdown, 1000);
+    
+            resendButton.addEventListener('click', function() {
+                if (countdown < 0) {
+                    countdown = 300;
+                    resendButton.style.opacity = '0.5';
+                    resendButton.style.cursor = 'default';
+                    localStorage.setItem('countdown', countdown);
+                    timer = setInterval(updateCountdown, 1000);
+                    verificationForm.querySelector('input[name="action"]').value = 'resend';
+                    verificationForm.submit();
+                }
+            });
+    
+            verificationForm.addEventListener('submit', function(e) {
+                 
+            });
+    
+            function showPopup() {
+                popup.style.display = 'block';
+                overlay.style.display = 'block';
+            }
+    
+            loginBtn.addEventListener('click', function() {
+                // Redirect to login page or perform login action
+                alert('Redirecting to login page...');
+            });
+
+            overlay.addEventListener('click', function() {
+                popup.style.display = 'none';
+                overlay.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

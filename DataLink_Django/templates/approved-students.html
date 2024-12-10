@@ -1,0 +1,825 @@
+{% extends 'SAO-base.html' %}
+{% load static %}
+
+{% block content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approved Students - SAO Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { 
+            background-color: #f0f2f5;
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .hover-trigger .hover-target {
+            display: none;
+        }
+        .hover-trigger:hover .hover-target {
+            display: flex;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn {
+            from { top: -300px; opacity: 0; }
+            to { top: 0; opacity: 1; }
+        }
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .edit-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+}
+
+.edit-modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* Could be more or less, depending on screen size */
+    max-width: 500px; /* Limit width for larger screens */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.edit-close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.edit-close-button:hover,
+.edit-close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.edit-modal-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.edit-modal-field {
+    margin-bottom: 15px;
+}
+
+.edit-modal-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.edit-modal-field input,
+.edit-modal-field select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.edit-modal-field input:focus,
+.edit-modal-field select:focus {
+    border-color: #4a90e2; /* Focus color */
+    outline: none; /* Remove outline */
+}
+
+.edit-save-button {
+    background-color: #4a90e2;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.edit-save-button:hover {
+    background-color: #357ABD; /* Darker blue on hover */
+}
+
+.confirmation-popup {
+    position: fixed; /* Keeps the popup centered relative to the viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Darkened overlay */
+    z-index: 1000; /* Ensure it appears above all other content */
+}
+
+.confirmation-popup-content {
+    position: absolute; /* Use absolute positioning for explicit centering */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust position to center precisely */
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px; /* Rounded corners */
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Enhanced shadow for depth */
+    max-width: 400px; /* Limit the max width */
+    width: 90%; /* Responsive width */
+    animation: fadeIn 0.3s; /* Smooth fade-in effect */
+}
+
+.confirmation-popup h2 {
+    font-size: 1.5rem; /* Increased font size for the title */
+    margin-bottom: 15px; /* Space below the title */
+    color: #333; /* Darker color */
+}
+
+.confirmation-popup p {
+    font-size: 1rem; /* Standard font size */
+    margin-bottom: 20px; /* Space below the paragraph */
+    color: #555; /* Slightly lighter color */
+}
+
+.confirmation-close-button {
+    cursor: pointer;
+    position: absolute; /* Positioned relative to the .confirmation-popup-content */
+    top: 15px; /* Adjusted position for better spacing */
+    right: 15px; /* Adjusted position for better spacing */
+    background: transparent; /* Transparent background */
+    border: none; /* Remove border */
+    font-size: 1.5rem; /* Increased size for visibility */
+    color: #888; /* Light color */
+    transition: color 0.3s; /* Color change on hover */
+}
+ 
+.confirmation-close-button:hover {
+    color: #333; /* Darker color on hover */
+}
+
+
+#disableReason {
+    display: block; /* Ensures proper block layout */
+    width: 100%; /* Make the dropdown occupy the full width of the modal content */
+    padding: 10px; /* Add padding for better usability */
+    font-size: 1rem; /* Standard font size for readability */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    margin-bottom: 20px; /* Space below the dropdown */
+}
+
+/* Style the button */
+.confirm-button {
+    display: block; /* Ensure the button is on its own line */
+    width: 100%; /* Full width for consistency */
+    padding: 12px; /* Adequate padding for usability */
+    font-size: 1rem; /* Readable font size */
+    color: #fff; /* White text color */
+    background-color: #007bff; /* Primary button color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    margin-top: 10px; /* Add spacing above the button */
+}
+
+.confirm-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+
+.confirmation-popup select,
+.confirmation-popup button {
+    margin-top: 10px; /* Space above select and button */
+    padding: 10px; /* Consistent padding */
+    border: 1px solid #ccc; /* Subtle border */
+    border-radius: 6px; /* Rounded corners */
+    width: 100%; /* Full width */
+    font-size: 1rem; /* Consistent font size */
+}
+
+.confirmation-popup button {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white; /* White text */
+    border: none; /* Remove border */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Background color transition */
+}
+
+.confirmation-popup button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Optional fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-4">
+            <a href="{% url 'saohomepage' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+            </a>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Approved Students</h1>
+        <div class="mb-4 flex justify-between items-center">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search by Student ID..." 
+                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            <div class="messages">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                            <div class="successAnderrorMessagesPoppedup-icon">
+                                {% if message.tags == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif message.tags == 'error' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="successAnderrorMessagesPoppedup-content">
+                                {{ message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+        </div>
+        <div class="table-container bg-white overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="studentTableBody">
+                    {% for student in approved_students %}
+                    <tr class="hover-trigger" data-id="{{ student.student_id }}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    {% if student.profile_picture %}
+                                        <img class="h-10 w-10 rounded-full object-cover" src="{{ student.profile_picture }}" alt="{{ student.username }}">
+                                    {% else %}
+                                        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-500"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ student.username }}</div>
+                                    <div class="text-sm text-gray-500">ID: {{ student.student_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ student.email }}</div>
+                            <div class="text-sm text-gray-500">{{ student.phone }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                {{ student.course }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if student.active_status ==  'online' %} 
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Online
+                                </span>
+                            {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Offline
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button class="text-indigo-600 hover:text-indigo-900" 
+                                        onclick="openEditModal('{{ student.username }}', '{{ student.email }}', '{{ student.student_id }}', '{{ student.address }}', '{{ student.gender }}', '{{ student.course }}', '{{ student.birthday }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                                                 
+                                <button class="text-yellow-600 hover:text-yellow-900" onclick="openConfirmationPopup('{{ student.email }}')">
+                                    <i class="fas fa-ban"></i>
+                                </button> 
+
+                                <!-- Confirmation Popup --> 
+                                <div id="confirmationPopup" class="confirmation-popup" style="display: none;">
+                                    <div class="confirmation-popup-content">
+                                        <span class="confirmation-close-button" onclick="closeConfirmationPopup()">&times;</span>
+                                        <h2>Confirm Disable Account</h2>
+                                        <p>Are you sure you want to disable this account?</p>
+                                        <form id="confirmationForm" method="POST" action="{% url 'view_students' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="email" id="confirmEmail">
+                                            
+                                            <label for="disableReason">Reason for Disabling:</label>
+                                            <select name="disableReason" id="disableReason" required>
+                                                <option value="" selected disabled>Select a reason</option>
+                                                <option value="Terms of Service Violation">Terms of Service Violation</option>
+                                                <option value="Incomplete Information">Incomplete Information</option>
+                                                <option value="Duplicate Account">Duplicate Account</option>
+                                                <option value="Account doesn't exist in database">Account doesn't exist in database</option>
+                                                <option value="Invalid or False Information">Invalid or False Information</option>
+                                                <option value="Failure to Meet Eligibility Criteria">Failure to Meet Eligibility Criteria</option>
+                                                <option value="Security Concerns">Security Concerns</option>
+                                                <option value="Suspicious or Fraudulent Activity">Suspicious or Fraudulent Activity</option>
+                                                <option value="Unverified Email">Unverified Email</option>
+                                                <option value="Multiple Attempts with Incorrect Information">Multiple Attempts with Incorrect Information</option>
+                                                <option value="Violation of Privacy Policies">Violation of Privacy Policies</option>
+                                                <option value="Incomplete Application">Incomplete Application</option>
+                                                <option value="Inconsistent Data with Registered Records">Inconsistent Data with Registered Records</option>
+                                                <option value="Suspended by Administration">Suspended by Administration</option>
+                                                <option value="Inactivity">Inactivity</option>
+                                                <option value="Previous Account Ban">Previous Account Ban</option>
+                                                <option value="Abuse of Platform Rules">Abuse of Platform Rules</option>
+                                            </select> 
+                                            <button type="submit" name="disable_account" class="confirm-button">Confirm Disable</button>
+                                        </form>
+                                    </div>
+                                </div> 
+                        
+                            <button class="text-red-600 hover:text-red-900" onclick="confirmRemoval('{{ student.email }}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="hover-target bg-gray-50">
+                        <td colspan="5" class="px-6 py-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm text-gray-600">
+                                        <strong>Last Login:</strong> <span class="formatted-time" data-loggedout="{{ student.timeLoggedOut }}">Calculating...</span>
+                                    </p>
+                                    <p class="text-sm text-gray-600"><strong>Register Date and Time: </strong>{{ student.signup_time }}</p>
+                                </div>
+                                <div>
+                                    <button onclick="openProfileModal('{{ student.boardinghouseName }}', '{{ student.roomName }}', '{{ student.student_id }}', '{{ student.username }}', '{{ student.phone }}', '{{ student.email }}', '{{ student.address }}', '{{ student.gender }}', '{{ student.course }}', '{{ student.birthday }}', '{{ student.status }}', '{{ student.profile_picture }}', '{{ student.signup_time }}', '{{ student.active_status }}', '{{ student.role }}', '{{ student.accountStatus }}')" 
+                                            class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                                        View Full Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No approved students found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 flex justify-between items-center">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">97</span> results
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Previous</span>
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
+                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
+                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Next</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </div>
+     <!-- Modal for Full Profile -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+            <h2 class="text-2xl font-semibold mb-4">Student Full Profile</h2>
+            <div class="flex items-center mb-4">
+                <img id="modalProfilePicture" class="h-16 w-16 rounded-full object-cover mr-4" src="#" alt="Profile Picture">
+                <div>
+                    <h3 id="modalName" class="text-xl font-bold"></h3>
+                    <p><strong>Student ID:</strong> <span id="modalStudentID"></span></p>
+                    <p id="modalEmail" class="text-gray-600"></p>
+                    <p id="modalPhone" class="text-gray-600"></p>
+                </div>
+            </div>
+            <div class="mb-4">
+                <p><strong>STAYING IN:</strong> <span id="boardinghouseName" style="font-weight: 900; color:#374151; text-align: center;"></span></p>
+                <p><strong>ROOM NAME:</strong> <span id="roomName" style="font-weight: 900; color:#374151; text-align: center;"></span></p>
+                <p><strong>Address:</strong> <span id="modalAddress"></span></p> 
+                <p><strong>Gender:</strong> <span id="modalGender"></span></p>
+                <p><strong>Course:</strong> <span id="modalCourse"></span></p>
+                <p><strong>Birthday:</strong> <span id="modalBirthday"></span></p>
+                <p><strong>Status:</strong> <span id="modalStatus"></span></p> 
+                <p><strong>Signup Date:</strong> <span id="modalSignupTime"></span></p>
+                <p><strong>Active Status:</strong> <span id="modalActiveStatus"></span></p>
+                <p><strong>Role:</strong> <span id="modalRole"></span></p>
+                <p><strong>Account Status:</strong> <span id="modalAccountStatus"></span></p>
+            </div>
+            <button class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg" onclick="closeProfileModal()">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+<div id="editProfileModal" class="edit-modal">
+    <div class="edit-modal-content">
+        <span class="edit-close-button" onclick="closeEditModal()">&times;</span>
+        <h2 class="edit-modal-title">Edit Profile</h2>
+        
+        <form id="editProfileForm" method="POST" action="{% url 'view_students' %}"> <!-- Replace 'your_edit_view' with your actual view name -->
+            {% csrf_token %}
+            <div class="edit-modal-field">
+                <label for="editEmail">Email</label>
+                <input type="email" style="opacity: 0.5;" id="editEmail" name="email" placeholder="Enter your email" required readonly>
+            </div>                        
+            <div class="edit-modal-field">
+                <label for="editUsername">Username</label>
+                <input type="text" id="editUsername" name="username" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="edit-modal-field">
+                <label for="editStudentID">Student ID</label>
+                <input type="text" id="editStudentID" name="student_id" placeholder="Enter your student ID" required>
+            </div>
+            
+            <div class="edit-modal-field">
+                <label for="editAddress">Address</label>
+                <input type="text" id="editAddress" name="address" placeholder="Enter your address" required>
+            </div>
+            
+            <div class="edit-modal-field">
+                <label for="editGender">Gender</label>
+                <select id="editGender" name="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="edit-modal-field">
+                <label for="editBirthday">Birthday</label>
+                <input type="date" id="editBirthday" name="birthday" required>
+            </div>
+            
+            <div class="edit-modal-field">
+                <label for="editCourse">Course</label>
+                <select id="editCourse" name="course" required>
+                    <option value="" disabled selected>-- Select your Course --</option>
+                    <option value="BACHELOR OF INDUSTRIAL TECHNOLOGY">BACHELOR OF INDUSTRIAL TECHNOLOGY</option>
+                    <option value="HOSPITALITY MANAGEMENT">HOSPITALITY MANAGEMENT</option>
+                    <option value="BACHELOR OF SCIENCE IN TOURISM MANAGEMENT">BACHELOR OF SCIENCE IN TOURISM MANAGEMENT</option>
+                    <option value="BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY">BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY</option>
+                    <option value="BACHELOR OF SCIENCE IN INDUSTRIAL ENGINEERING">BACHELOR OF SCIENCE IN INDUSTRIAL ENGINEERING</option>
+                    <option value="BACHELOR OF SCIENCE IN AGRICULTURE">BACHELOR OF SCIENCE IN AGRICULTURE</option>
+                    <option value="BACHELOR OF SCIENCE IN FORESTRY">BACHELOR OF SCIENCE IN FORESTRY</option>
+                    <option value="BACHELOR OF SCIENCE IN ENVIRONMENTAL SCIENCE">BACHELOR OF SCIENCE IN ENVIRONMENTAL SCIENCE</option>
+                    <option value="BACHELOR OF ARTS IN ENGLISH LANGUAGE">BACHELOR OF ARTS IN LANGUAGE</option>
+                    <option value="BACHELOR OF ARTS IN LITERATURE">BACHELOR OF ARTS IN LITERATURE</option>
+                    <option value="BACHELOR OF SCIENCE IN PSYCHOLOGY">BACHELOR OF SCIENCE IN PSYCHOLOGY</option>
+                    <option value="BACHELOR IN TECHNOLOGY AND LIVELIHOOD EDUCATION">BACHELOR IN TECHNOLOGY AND LIVELIHOOD EDUCATION</option>
+                    <option value="BACHELOR OF SECONDARY EDUCATION MAJOR IN MATHEMATICS">BACHELOR OF SECONDARY EDUCATION MAJOR IN MATHEMATICS</option>
+                    <option value="BACHELOR OF ELEMENTARY EDUCATION">BACHELOR OF ELEMENTARY EDUCATION</option>
+                </select>
+            </div> 
+            <button type="submit" class="edit-save-button">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<div class="confirm-removal-popup" id="confirmRemovalPopup" style="display: none;">
+    <div class="confirmation-popup-content">
+        <button class="confirmation-close-button" onclick="closeConfirmationPopup()">&times;</button>
+        <h2>Confirm Account Removal</h2>
+        <p>Are you sure you want to remove this account?</p>
+        <form id="confirmationForm" method="POST" action="{% url 'view_students' %}">
+            {% csrf_token %}
+            <input type="hidden" id="confirmEmail2" name="email" value=""> 
+            <button type="submit" name="delete_account" class="confirm-button">Confirm Removal</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+         // Function to format time logged out
+    function formatTimeLoggedOut(seconds) {
+        if (seconds >= 86400) {
+            const days = Math.floor(seconds / 86400);
+            return days === 1 ? "1 day" : `${days} days`;
+        } else if (seconds >= 3600) {
+            const hours = Math.floor(seconds / 3600);
+            const remainingMinutes = Math.floor((seconds % 3600) / 60);
+            return hours === 1 
+                ? `1 hour${remainingMinutes ? `, ${remainingMinutes} minutes` : ''}`
+                : `${hours} hours${remainingMinutes ? `, ${remainingMinutes} minutes` : ''}`;
+        } else if (seconds >= 60) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return minutes === 1 
+                ? `1 minute${remainingSeconds ? `, ${remainingSeconds} seconds` : ''}`
+                : `${minutes} minutes${remainingSeconds ? `, ${remainingSeconds} seconds` : ''}`;
+        } else {
+            return `${seconds} second${seconds === 1 ? '' : 's'}`;
+        }
+    }
+
+    // Calculate and display formatted time for each student
+    document.querySelectorAll('.formatted-time').forEach(function(element) {
+        const seconds = parseInt(element.getAttribute('data-loggedout'));
+        element.textContent = formatTimeLoggedOut(seconds);
+    });
+        
+
+        const messageList = document.querySelector('.message-list');
+
+                
+            if (messageList) {
+                setTimeout(() => {
+                    messageList.style.transition = "opacity 0.5s ease"; // Transition effect
+                    messageList.style.opacity = 0; // Fade out effect
+                    setTimeout(() => {
+                        messageList.remove(); // Remove from DOM after fading out
+                    }, 500); // Match this duration with the transition time
+                }, 2000); // 2 seconds before starting to fade out
+            }
+
+        
+            function openProfileModal(boardinghouseName, roomName, student_id, username, phone, email, address, gender, course, birthday, status, profile_picture, signup_time, active_status, role, accountStatus) {
+                const modal = document.getElementById("profileModal");
+
+                // Check if modal exists
+                if (!modal) {
+                    console.error("Modal not found!");
+                    return;
+                }
+
+                // Populate modal with individual student data
+                modal.querySelector("#boardinghouseName").innerText = boardinghouseName;
+                modal.querySelector("#roomName").innerText = roomName;
+                modal.querySelector("#modalStudentID").innerText = student_id;
+                modal.querySelector("#modalName").innerText = username;
+                modal.querySelector("#modalPhone").innerText = phone;
+                modal.querySelector("#modalEmail").innerText = email;
+                modal.querySelector("#modalAddress").innerText = address;
+                modal.querySelector("#modalGender").innerText = gender;
+                modal.querySelector("#modalCourse").innerText = course;
+                modal.querySelector("#modalBirthday").innerText = birthday;
+                modal.querySelector("#modalStatus").innerText = status;
+                modal.querySelector("#modalProfilePicture").src = profile_picture || "{% static 'default_profile.png' %}";
+                modal.querySelector("#modalSignupTime").innerText = signup_time;
+                modal.querySelector("#modalActiveStatus").innerText = active_status;
+                modal.querySelector("#modalRole").innerText = role;
+                modal.querySelector("#modalAccountStatus").innerText = accountStatus;
+
+                // Display the modal
+                modal.style.display = "block";
+            }
+
+    
+        // Function to close the modal
+        function closeProfileModal() {
+            document.getElementById("profileModal").style.display = "none";
+        }
+    
+        function openEditModal(username, email, student_id, address, gender, course, birthday) {
+    console.log("Student Data:", { username, email, student_id, address, gender, course, birthday }); // Log the student data
+    
+    const modal = document.getElementById("editProfileModal");
+
+    // Check if the modal is null
+    if (!modal) {
+        console.error("Modal not found!");
+        return;
+    }
+
+    // Populate the fields with the passed student data
+    document.getElementById("editUsername").value = username;
+    document.getElementById("editStudentID").value = student_id;
+    document.getElementById("editAddress").value = address;
+
+    // Set the gender dropdown value
+    const genderDropdown = document.getElementById("editGender");
+    genderDropdown.value = gender; // Set the selected option
+
+    document.getElementById("editBirthday").value = birthday;
+    document.getElementById("editEmail").value = email;
+
+    // Set the course dropdown value
+    const courseDropdown = document.getElementById("editCourse");
+    courseDropdown.value = course; // Set the selected option
+
+    // Show the modal
+    modal.style.display = "block";
+}
+
+    
+        // Function to close the edit modal
+        function closeEditModal() {
+            const modal = document.getElementById("editProfileModal");
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+    
+        // Move confirmation popup functions outside of openEditModal
+        function openConfirmationPopup(email) {
+            console.log("Opening confirmation popup for:", email);
+            document.getElementById("confirmEmail").value = email;
+            document.getElementById("confirmationPopup").style.display = "block";
+        }
+    
+        function closeConfirmationPopup() {
+            document.getElementById("confirmationPopup").style.display = "none";
+        }
+    
+        // Make functions globally accessible
+        window.openProfileModal = openProfileModal;
+        window.closeProfileModal = closeProfileModal;
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.openConfirmationPopup = openConfirmationPopup;
+        window.closeConfirmationPopup = closeConfirmationPopup;
+    });
+
+    function confirmRemoval(email) {
+    console.log('Email for removal:', email);  // Debugging
+    document.getElementById('confirmEmail2').value = email;
+    document.getElementById('confirmRemovalPopup').style.display = 'flex';
+}
+
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+
+// JavaScript to handle the search functionality
+document.getElementById('searchInput').addEventListener('input', function (e) {
+    const query = e.target.value.toLowerCase().trim(); // Get search input, convert to lowercase, and trim whitespace
+    const rows = document.querySelectorAll('#studentTableBody tr.hover-trigger'); // Select rows with `hover-trigger` class
+
+    rows.forEach(row => {
+        const studentID = row.getAttribute('data-id').toLowerCase(); // Get the student_id from the `data-id` attribute
+
+        // Display row if it matches the query; otherwise, hide it
+        if (studentID.includes(query)) {
+            row.style.display = '';
+            row.nextElementSibling.style.display = ''; // Ensure associated hover-target row is also displayed
+        } else {
+            row.style.display = 'none';
+            row.nextElementSibling.style.display = 'none'; // Hide associated hover-target row
+        }
+    });
+});
+
+
+
+
+    </script>
+</body>
+{% endblock %}

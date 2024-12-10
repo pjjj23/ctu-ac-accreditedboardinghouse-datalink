@@ -1,0 +1,327 @@
+{% extends 'authentication-base-student.html' %}
+{% load static %}
+
+{% block title %}Student - CTU AC Accredited Boarding House{% endblock %}
+
+{% block extra_styles %}
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <style>
+            :root {
+                --primary-color: #2A9D8F;
+                --secondary-color: #E9C46A;
+                --background-color: #F4F4F4;
+                --text-color: #264653;
+                --accent-color: #2A9134;
+            }
+    
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+    
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+    
+            .back-button {
+                position: absolute;
+                top: 1rem;
+                left: 1rem;
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: var(--primary-color);
+                transition: color 0.3s ease;
+            }
+    
+            .back-button:hover {
+                color: var(--accent-color);
+            }
+    
+            main {
+                flex-grow: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 2rem;
+            }
+    
+            .confirmation-box {
+                background-color: white;
+                padding: 2rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                width: 100%;
+                max-width: 500px;
+            }
+    
+            .confirmation-box h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+                color: var(--accent-color);
+                font-weight: 700;
+            }
+    
+            .confirmation-box form {
+                display: flex;
+                flex-direction: column;
+            }
+    
+            .confirmation-box label {
+                margin-bottom: 0.5rem;
+                font-weight: 700;
+            }
+    
+            .confirmation-box input[type="text"] {
+                margin-bottom: 1rem;
+                padding: 0.75rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 1rem;
+                transition: border-color 0.3s ease;
+            }
+    
+            .confirmation-box input[type="text"]:focus {
+                outline: none;
+                border-color: var(--accent-color);
+            }
+    
+            .otp-input {
+                position: relative;
+            }
+    
+            .otp-input input {
+                padding-left: 2.5rem;
+                text-indent: 35px;
+            }
+    
+            .otp-icon {
+                position: absolute;
+                left: 0.75rem;
+                top: 37%;
+                transform: translateY(-50%);
+                width: 24px;
+                height: 24px;
+            }
+    
+            .resend {
+                display: inline-block;
+                margin-top: 0.5rem;
+                color: var(--accent-color);
+                font-weight: bold;
+                cursor: pointer;
+            }
+    
+            .resend:hover {
+                text-decoration: underline;
+            }
+    
+            .buttons {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 1.5rem;
+            }
+    
+            .buttons button {
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 700;
+                transition: all 0.3s ease;
+            }
+    
+            .back { 
+                color: var(--accent-color);
+                background-color: transparent;
+            }
+    
+            .back:hover {
+                background-color: rgba(42, 145, 52, 0.1);
+            }
+    
+            .submit {
+                background-color: var(--accent-color);
+                color: white;
+            }
+    
+            .submit:hover {
+                background-color: #217a29;
+            }
+    
+            .extra-links { 
+                margin-top: 1.5rem;
+                font-size: 0.9rem;
+                text-align: center;
+            }
+    
+            .extra-links a {
+                color: var(--text-color);
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+    
+            .extra-links span {
+                color: var(--accent-color);
+                font-weight: 700;
+            }
+    
+            .extra-links a:hover, .extra-links span:hover {
+                color: #217a29;
+            }
+    
+            @media (max-width: 768px) {
+                .confirmation-box {
+                    padding: 1.5rem;
+                }
+    
+                .buttons {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+    
+                .buttons button {
+                    width: 100%;
+                }
+    
+                .extra-links {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+            }
+    
+            .countdown-timer {
+                font-size: 1rem;
+                color: var(--text-color);
+                margin-top: 0.5rem;
+            }
+    
+            .countdown-timer span {
+                font-weight: bold;
+                color: var(--accent-color);
+            }
+    
+            @media (max-width: 480px) { 
+                .back-button {
+                    top: 0.5rem;
+                    left: 0.5rem;
+                }
+    
+                main {
+                    padding: 1rem;
+                }
+            }
+
+            .progress-indicator {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 30px;
+            }
+    
+            .steps-container {
+                display: flex;
+                justify-content: space-between;
+            }
+    
+            .step {
+                flex: 1;
+                text-align: center;
+                padding: 10px;
+                background-color: #e0e0e0;
+                color: #666;
+                position: relative;
+                font-weight: bold;
+                margin: 0;
+                border-right: 1px solid white;
+            }
+    
+            .step:last-child {
+                border-right: none;
+            }
+    
+            .step.active {
+                background-color: #4CAF50;
+                color: white;
+            }
+        </style> 
+{% endblock %}
+
+{% block content %} 
+        <main>
+            <div class="confirmation-box">
+                <h2>Student Confirmation</h2>
+                <div class="progress-indicator">
+                    <div class="step completed">Step 1</div>
+                    <div class="step active">Step 2</div>
+                </div>
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <label for="school-id">Enter Student ID:</label>
+                    <input type="text" id="school-id" name="school-id" placeholder="Student ID" required>
+                    <label for="otp">OTP<br><span style="font-weight: 300;">Enter Code sent to your Gmail:</span></label>
+                    <div class="otp-input">
+                        <input type="text" id="otp" name="otp" placeholder="OTP" required>
+                        <img src="{% static 'img/gmail-img-logo.png' %}" alt="Gmail Icon" class="otp-icon">
+                    </div>
+                    <div class="resend" id="resend-button">Resend</div>
+                    <div class="countdown-timer" id="countdown-timer"></div>
+                    <div class="buttons">
+                        <a href="{% url 'studentSignupFirststep' %}"><button type="button" class="back">BACK</button></a>
+                        <button type="submit" class="submit">SUBMIT</button>
+                    </div>
+                </form>
+                <div class="extra-links"> 
+                    <a href="#">Already have an account? <span>LOGIN</span></a>
+                </div>
+            </div>
+        </main> 
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const resendButton = document.getElementById('resend-button');
+                const countdownDisplay = document.getElementById('countdown-timer');
+                let countdownInterval;
+    
+                function startCountdown() {
+                    let timeLeft = 90;  
+    
+                    function updateCountdown() {
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        countdownDisplay.innerHTML = `Resend available in <span>${minutes}:${seconds.toString().padStart(2, '0')}</span>`;
+                        timeLeft--;
+    
+                        if (timeLeft < 0) {
+                            clearInterval(countdownInterval);
+                            resendButton.textContent = 'Resend';
+                            resendButton.style.cursor = 'pointer';
+                            resendButton.disabled = false;
+                        }
+                    }
+    
+                    updateCountdown();
+                    countdownInterval = setInterval(updateCountdown, 1000);
+                }
+    
+                resendButton.addEventListener('click', function() {
+                    if (!resendButton.disabled) {
+                        resendButton.textContent = 'Please wait...';
+                        resendButton.style.cursor = 'not-allowed';
+                        resendButton.disabled = true;
+                        startCountdown();
+                    }
+                });
+            });
+        </script> 
+    {% endblock %}
+    
+    

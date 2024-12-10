@@ -1,0 +1,384 @@
+{% extends 'SAO-base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid settings-page py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white py-3">
+          <h3 class="card-title mb-0"><i class="fas fa-cog mr-2"></i> Settings</h3>
+        </div>
+         
+        <div class="card-body">
+          <div class="messages">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                        <div class="successAnderrorMessagesPoppedup-icon">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="successAnderrorMessagesPoppedup-content">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        
+              
+          <div class="row">
+            <div class="col-12 mb-4">
+              <div class="dropdown d-lg-none">
+                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="settingsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fas fa-bars mr-2"></i> Settings Menu
+                </button>
+                <div class="dropdown-menu1 w-100" aria-labelledby="settingsDropdown">
+                  <a class="dropdown-item2 active" href="#v-pills-profile">Profile Information</a>
+                  <a class="dropdown-item2" href="#v-pills-password">Change Password</a>
+                  <a class="dropdown-item2" href="#v-pills-privacy">Privacy Policy</a>
+                  <a class="dropdown-item2" href="#v-pills-terms">Terms and Conditions</a>
+                  <a class="dropdown-item2" href="#v-pills-help">Help</a>
+                  <a class="dropdown-item2" href="#v-pills-about">About Us</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 mb-4 mb-lg-0 d-none d-lg-block">
+              <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <a class="nav-link active mb-2" id="v-pills-profile-tab" data-bs-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="true">
+                  <i class="fas fa-user-circle mr-2"></i> Profile Information
+                </a>
+                <a class="nav-link mb-2" id="v-pills-password-tab" data-bs-toggle="pill" href="#v-pills-password" role="tab" aria-controls="v-pills-password" aria-selected="false">
+                  <i class="fas fa-lock mr-2"></i> Change Password
+                </a>
+                <a class="nav-link mb-2" id="v-pills-privacy-tab" data-bs-toggle="pill" href="#v-pills-privacy" role="tab" aria-controls="v-pills-privacy" aria-selected="false">
+                  <i class="fas fa-user-shield mr-2"></i> Privacy Policy
+                </a>
+                <a class="nav-link mb-2" id="v-pills-terms-tab" data-bs-toggle="pill" href="#v-pills-terms" role="tab" aria-controls="v-pills-terms" aria-selected="false">
+                  <i class="fas fa-file-contract mr-2"></i> Terms and Conditions
+                </a>
+                <a class="nav-link mb-2" id="v-pills-help-tab" data-bs-toggle="pill" href="#v-pills-help" role="tab" aria-controls="v-pills-help" aria-selected="false">
+                  <i class="fas fa-question-circle mr-2"></i> Help
+                </a>
+                <a class="nav-link" id="v-pills-about-tab" data-bs-toggle="pill" href="#v-pills-about" role="tab" aria-controls="v-pills-about" aria-selected="false">
+                  <i class="fas fa-info-circle mr-2"></i> About Us
+                </a>
+              </div>
+            </div>
+
+
+            <div class="col-lg-8">
+              <div class="tab-content" id="v-pills-tabContent">
+                
+                <!-- This is for the Profile Information section -->
+            <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+              <div class="profile-info d-flex align-items-center mb-4">
+                  <div class="profile-icon mr-4">
+                      <img src="{% static 'img/profile-default.png' %}" class="rounded-circle" alt="Profile Picture"
+                          style="width: 100px; height: 100px; object-fit: cover;">
+                  </div>
+                  <div class="profile-details flex-grow-1">
+                      <h4 id="profile-name-display" class="profile-name mb-2">{{ name }}</h4>
+                      <p id="profile-email-display" class="profile-email text-muted mb-3">{{ email }}</p> 
+                      <button type="button" class="btn btn-primary" id="editProfileBtn">
+                          <i class="fas fa-edit mr-2"></i>Edit Profile
+                      </button>
+                  </div>
+              </div>
+
+              <!-- Profile Edit Form -->
+              <form id="profileForm" method="post" action="{% url 'sao_settings' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="form_type" value="profile_update">
+                  <div class="mb-3">
+                      <label for="profileName" class="form-label">Name</label>
+                      <input type="text" class="form-control" id="profileName" name="name" value="{{ name }}" disabled>
+                  </div>
+                  <div class="mb-3">
+                      <label for="profileEmail" class="form-label">Email</label>
+                      <input type="email" class="form-control" id="profileEmail" name="email" value="{{ email }}" disabled>
+                  </div>
+                  <div class="mb-3">
+                      <label for="profileBirthday" class="form-label">Birthday</label>
+                      <input type="date" class="form-control" id="profileBirthday" name="birthday" value="{{ birthday }}" disabled>
+                  </div>
+                  <button type="submit" class="btn btn-success" id="saveProfileBtn" style="display: none;">Save</button>
+              </form>
+            </div>
+              
+              
+                <!-- This is for the Change Password section -->
+          <div class="tab-pane fade" id="v-pills-password" role="tabpanel" aria-labelledby="v-pills-password-tab">
+            <h4>Change Password</h4>
+            <form method="POST" action="{% url 'sao_settings' %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="password_update">
+                <!-- Current Password Field -->
+                <div class="mb-3">
+                    <label for="currentPassword" class="form-label">Current Password</label>
+                    <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                </div>
+
+                <!-- New Password Field -->
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label">New Password</label>
+                    <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                    
+                    <!-- Password Strength Meter -->
+                    <div class="progress mt-2" style="height: 10px;">
+                        <div id="passwordStrengthMeter" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                    <small id="passwordStrengthText" class="form-text text-muted"></small>
+                </div>
+
+                <!-- Confirm Password Field -->
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </form>
+          </div>
+
+
+                <!--This is for the Privacy Policy section-->
+                <div class="tab-pane fade" id="v-pills-privacy" role="tabpanel" aria-labelledby="v-pills-privacy-tab">
+                  <h4>Privacy Policy</h4>
+                  <p>This is where you would put your privacy policy content.</p>
+                </div>
+                <!--This is for the Terms and Condition section-->
+                <div class="tab-pane fade" id="v-pills-terms" role="tabpanel" aria-labelledby="v-pills-terms-tab">
+                  <h4>Terms and Conditions</h4>
+                  <p>This is where you would put your terms and conditions content.</p>
+                </div>
+                <!--This is for the Help section-->
+                <div class="tab-pane fade" id="v-pills-help" role="tabpanel" aria-labelledby="v-pills-help-tab">
+                  <h4>Help</h4>
+                  <p>This is where you would put your help content or FAQ.</p>
+                </div>
+                <!--This is for the About Us section-->
+                <div class="tab-pane fade" id="v-pills-about" role="tabpanel" aria-labelledby="v-pills-about-tab">
+                  <h4>About Us</h4>
+                  <p>This is where you would put your about us content.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .settings-page {
+    background-color: #f8f9fa;
+  }
+  .card {
+    border: none;
+    border-radius: 10px;
+  }
+  .card-header {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  .nav-pills .nav-link {
+    color: #495057;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+  }
+  .nav-pills .nav-link:hover,
+  .nav-pills .nav-link.active {
+    color: #fff;
+    background-color: #007bff;
+  }
+  .profile-info {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 30px;
+  }
+  .profile-name {
+    font-size: 1.5rem;
+  }
+  .profile-email {
+    font-size: 1.1rem;
+  }
+  /* Container for messages */
+  .successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+
+/* Info message */
+.alert.alert-info {
+    background-color: #cce5ff; /* Light blue background */
+    color: #004085; /* Dark blue text */
+    border: 1px solid #b8daff; /* Blue border */
+}
+
+  @media (max-width: 991px) {
+    .dropdown-menu1 {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var dropdownItems = document.querySelectorAll('.dropdown-item2');
+    var tabPanes = document.querySelectorAll('.tab-pane');
+    var dropdownToggle = document.querySelector('.dropdown-toggle');
+    const newPassword = document.getElementById('newPassword');
+    const strengthMeter = document.getElementById('passwordStrengthMeter');
+    const strengthText = document.getElementById('passwordStrengthText');
+    const messageList = document.querySelector('.message-list');
+
+
+        if (messageList) {
+            setTimeout(() => {
+                messageList.style.transition = "opacity 0.5s ease"; // Transition effect
+                messageList.style.opacity = 0; // Fade out effect
+                setTimeout(() => {
+                    messageList.remove(); // Remove from DOM after fading out
+                }, 500); // Match this duration with the transition time
+            }, 2000); // 2 seconds before starting to fade out
+        }
+
+    newPassword.addEventListener('input', function() {
+        const password = newPassword.value;
+        let strength = calculatePasswordStrength(password);
+        
+        // Update the strength meter
+        strengthMeter.style.width = strength + '%';
+
+        // Update the text below the meter
+        if (strength <= 25) {
+            strengthMeter.classList.remove('bg-warning', 'bg-success');
+            strengthMeter.classList.add('bg-danger');
+            strengthText.textContent = 'Very Weak';
+        } else if (strength <= 50) {
+            strengthMeter.classList.remove('bg-danger', 'bg-success');
+            strengthMeter.classList.add('bg-warning');
+            strengthText.textContent = 'Weak';
+        } else if (strength <= 75) {
+            strengthMeter.classList.remove('bg-danger', 'bg-warning');
+            strengthMeter.classList.add('bg-success');
+            strengthText.textContent = 'Good';
+        } else {
+            strengthMeter.classList.remove('bg-danger', 'bg-warning');
+            strengthMeter.classList.add('bg-success');
+            strengthText.textContent = 'Strong';
+        }
+    });
+
+    // Simple password strength calculation function
+    function calculatePasswordStrength(password) {
+        let strength = 0;
+
+        if (password.length >= 8) strength += 25;
+        if (/[A-Z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 25;
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 25;
+
+        return strength;
+    }
+
+    dropdownItems.forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = this.getAttribute('href');
+        tabPanes.forEach(function(pane) {
+          pane.classList.remove('show', 'active');
+        });
+        document.querySelector(target).classList.add('show', 'active');
+        dropdownToggle.textContent = this.textContent;
+      });
+    });
+
+    document.getElementById("editProfileBtn").addEventListener("click", function() {
+        // Enable input fields and show the save button
+        document.getElementById("profileName").disabled = false;
+        document.getElementById("profileEmail").disabled = true;  // Keep email disabled for security
+        document.getElementById("profileBirthday").disabled = false;
+        document.getElementById("saveProfileBtn").style.display = "inline-block";
+    });
+  });
+</script>
+{% endblock %}

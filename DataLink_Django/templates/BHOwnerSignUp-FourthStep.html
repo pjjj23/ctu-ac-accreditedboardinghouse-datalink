@@ -1,0 +1,606 @@
+{% extends 'authentication-base-owner.html' %}
+{% load static %}
+
+{% block title %}Owner - CTU AC Accredited Boarding House{% endblock %}
+
+{% block extra_styles %}
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #45a049;
+            --accent-color: #2196F3;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --card-bg: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .input-container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: 500;
+            margin-right: 1rem;
+            min-width: 150px;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }  
+         
+        .upload-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .input-icon {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .input-icon i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .input-icon input,
+        .input-icon select,
+        .input-icon textarea {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        #backBtn {
+            background-color: #95a5a6;
+        }
+
+        #backBtn:hover {
+            background-color: #7f8c8d;
+        }
+
+        #saveBtn {
+            background-color: var(--primary-color);
+        }
+
+        #saveBtn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            label {
+                margin-bottom: 0.5rem;
+            }
+
+            input[type="number"] {
+                width: 100%;
+            }
+
+            .buttons-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .upload-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .input-container {
+                padding: 1rem;
+            }
+
+            .card h2 {
+                font-size: 1.2rem;
+            }
+
+            .room-picture {
+                height: 150px;
+            }
+        }
+
+        .card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card h2 {
+    color: var(--primary-color);
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+.upload-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.room-picture {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.upload-btn:hover {
+    background-color: #1976D2;
+}
+
+.input-icon {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-icon i {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: var(--primary-color);
+}
+
+.input-icon input,
+.input-icon select,
+.input-icon textarea {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-icon input:focus,
+.input-icon select:focus,
+.input-icon textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+textarea.room-details {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.remove-btn:hover {
+    background-color: #c0392b;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.popup-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.popup-content h3 {
+    margin-bottom: 20px;
+}
+
+.popup-content button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.info-banner {
+    background-color: #f0f4c3;
+    border-left: 5px solid #cddc39;
+    color: #33691e;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    animation: slideDown 0.5s ease-out forwards;
+}
+
+.info-banner i {
+    font-size: 24px;
+    margin-right: 15px;
+    animation: pulse 2s infinite;
+}
+
+.info-banner span {
+    flex-grow: 1;
+}
+
+.dismiss-btn {
+    background: none;
+    border: none;
+    color: #33691e;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.dismiss-btn:hover {
+    color: #1b5e20;
+    transform: scale(1.1);
+}
+    </style>
+  {% endblock %}
+
+  {% block content %} 
+  <div id="infoBanner" class="info-banner">
+    <i class="fas fa-info-circle"></i>
+    <span>This will be shown by the tenants, please provide clearer images.</span>
+    <button onclick="dismissInfoBanner()" class="dismiss-btn"><i class="fas fa-times"></i></button>
+</div>
+    <div id="uploadPopup" class="popup">
+        <div class="popup-content">
+            <h3>Choose Upload Method</h3>
+            <button onclick="handleUpload('camera')"><i class="fas fa-camera"></i> Take Picture</button>
+            <button onclick="handleUpload('gallery')"><i class="fas fa-image"></i> Upload from Gallery</button>
+            <button onclick="closePopup()"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+    </div>
+    <div class="container">
+        <h1><i class="fas fa-hotel"></i> Generate - Specify the quantity of rooms</h1>
+        <div class="input-container">
+            <div class="input-group">
+                <label for="cardNumber">Number of Cards:</label>
+                <input type="number" id="cardNumber" min="1" value="1">
+            </div>
+            <button type="button" onclick="generateCards()">Generate Cards</button>
+        </div>
+        <div id="cardContainer" class="card-container"></div>
+        <div class="buttons-container">
+            <button id="backBtn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back</button>
+            <button id="saveBtn" onclick="saveCards()"><i class="fas fa-save"></i> Save</button>
+        </div>
+    </div>
+    <script>
+        let currentUploadButton;
+        
+        function generateCards() {
+            const number = parseInt(document.getElementById('cardNumber').value);
+            const container = document.getElementById('cardContainer');
+            container.innerHTML = ''; // Clear previous cards
+        
+            if (isNaN(number) || number < 1) {
+                alert("Please enter a valid positive number.");
+                return;
+            }
+        
+            for (let i = 0; i < number; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <button class="remove-btn" onclick="removeCard(this)"><i class="fas fa-times"></i></button>
+                    <h2><i class="fas fa-bed"></i> Room Details</h2>
+                    <div class="upload-container">
+                        <img src="{% static 'img/default-img.png' %}" alt="Room Picture" class="room-picture">
+                        <input type="file" accept="image/*" class="file-input">
+                        <div class="upload-btn"><i class="fas fa-upload"></i> Upload Image</div>
+                    </div>
+                    <div class="input-icon">
+                        <i class="fas fa-tag"></i>
+                        <input type="text" placeholder="Room Name" class="room-name">
+                    </div>
+                    <div class="input-icon">
+                        <i class="fas fa-peso-sign"></i>
+                        <input type="text" placeholder="Pricing (in Peso)" class="room-pricing">
+                    </div>
+                    <select class="room-capacity">
+                        <option value="" disabled selected>Room Capacity</option>
+                        ${Array.from({length: 10}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+                    </select>
+                    <textarea placeholder="Room Details" class="room-details"></textarea>
+                `;
+                container.appendChild(card);
+            }
+        
+            // Add event listeners for upload buttons
+            document.querySelectorAll('.upload-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentUploadButton = this;
+                    document.getElementById('uploadPopup').style.display = 'block';
+                });
+            });
+        }
+        
+        function removeCard(button) {
+            button.closest('.card').remove();
+        }
+        
+        function goBack() {
+            // Implement your back functionality here
+            console.log("Back button clicked");
+        }
+        
+        function saveCards() {
+            // Implement your save functionality here
+            console.log("Save button clicked");
+        }
+        
+        function closePopup() {
+            document.getElementById('uploadPopup').style.display = 'none';
+        }
+        
+        function handleUpload(method) {
+            const fileInput = currentUploadButton.previousElementSibling;
+            
+            if (method === 'camera') {
+                fileInput.setAttribute('capture', 'environment');
+                fileInput.setAttribute('accept', 'image/*');
+            } else {
+                fileInput.removeAttribute('capture');
+                fileInput.setAttribute('accept', 'image/*');
+            }
+            
+            fileInput.click();
+            closePopup();
+        }
+        
+        // Add this event listener to handle file selection
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('file-input')) {
+                const file = e.target.files[0];
+                const img = e.target.previousElementSibling;
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        img.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+        
+        // Initial call to generate cards (if needed)
+        // generateCards();
+
+        function dismissInfoBanner() {
+    document.getElementById('infoBanner').style.display = 'none';
+}
+        </script>
+{% endblock %}
