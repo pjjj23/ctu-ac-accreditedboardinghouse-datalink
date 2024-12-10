@@ -37,7 +37,7 @@ EMAIL_HOST_USER = 'pjjbonbon@gmail.com'  # Your Gmail address
 EMAIL_HOST_PASSWORD = 'tyeb izwg cnal kfpu'  # Your Gmail app password (not your Gmail account password)
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pjjj122.pythonanywhere.com']
 
 
 # Application definition
@@ -130,7 +130,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'  # Use trailing slash
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'DataLink_Django/static'),  # Explicit path to the static directory
+    os.path.join(BASE_DIR, 'DataLink_Django/static'),  # Pointing to a unique folder
+    os.path.join(BASE_DIR, 'my_unique_static_folder'),  # Optional: Add another folder if needed
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Used for 'collectstatic' in production
 
