@@ -181,123 +181,321 @@
         }
 
         /* New styles for the popup */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+        .firstTimeTutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to the top to allow scrolling */
+  overflow-y: auto; /* Enable scrolling */
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        .popup-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
+    .firstTimeTutorial-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
 
-        .popup-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            position: relative;
-            transform: scale(0.8);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
+    .firstTimeTutorial-content {
+  background: #ffffff;
+  padding: 0;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+              0 0 0 1px rgba(255, 255, 255, 0.1);
+  max-width: 800px;
+  width: 95%;
+  margin: 40px 0; /* Add margin for spacing */
+  position: relative;
+  transform: scale(0.95) translateY(20px);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+    .firstTimeTutorial-overlay.show .firstTimeTutorial-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
 
-        .popup-overlay.show .popup-content {
-            transform: scale(1);
-            opacity: 1;
-        }
+    .firstTimeTutorial-header {
+      background: #f8fafc;
+      padding: 24px 40px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .popup-step {
-            display: none;
-        }
+    .firstTimeTutorial-stepCounter {
+      font-size: 14px;
+      color: #475569;
+      font-weight: 500;
+      background: #ffffff;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 1px solid #e2e8f0;
+    }
 
-        .popup-step.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
+    .firstTimeTutorial-closeButton {
+      background: none;
+      border: none;
+      color: #475569;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+    .firstTimeTutorial-closeButton:hover {
+      background: #f8fafc;
+      color: #0f172a;
+    }
 
-        .popup-title {
-            font-size: 24px;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
+    .firstTimeTutorial-step {
+      display: none;
+      padding: 40px;
+    }
 
-        .popup-text {
-            font-size: 16px;
-            margin-bottom: 30px;
-        }
+    .firstTimeTutorial-step.active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      animation: firstTimeTutorial-fadeScale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-        .popup-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            opacity: 0.5;
-            pointer-events: none;
-        }
+    .firstTimeTutorial-stepContent {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-        .popup-button.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+    .firstTimeTutorial-illustration {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .popup-button:hover {
-            background-color: var(--hover-color);
-        }
+    .firstTimeTutorial-image {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+      animation: firstTimeTutorial-float 6s ease-in-out infinite;
+    }
 
-        .popup-progress {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
+    .firstTimeTutorial-title {
+      font-size: 36px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
 
-        .progress-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #ccc;
-            margin: 0 5px;
-            transition: background-color 0.3s ease;
-        }
+    .firstTimeTutorial-text {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #475569;
+      margin-bottom: 32px;
+    }
 
-        .countdown {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
+    .firstTimeTutorial-footer {
+      background: #f8fafc;
+      padding: 24px 40px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .popup-image {
-            max-width: 200px;
-            max-height: 200px;
-            margin-bottom: 20px;
-        }
+    .firstTimeTutorial-progress {
+      display: flex;
+      gap: 8px;
+    }
 
-        .progress-dot.active {
-            background-color: var(--primary-color);
-        }
+    .firstTimeTutorial-progressDot {
+      width: 48px;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 100px;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .firstTimeTutorial-progressDot::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #2563eb;
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+
+    .firstTimeTutorial-progressDot.active::after {
+      transform: translateX(0);
+    }
+
+    .firstTimeTutorial-buttonGroup {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .firstTimeTutorial-nextButton {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0.5;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .firstTimeTutorial-nextButton.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .firstTimeTutorial-nextButton.active:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+    }
+
+    .firstTimeTutorial-skipButton {
+      background: none;
+      border: none;
+      color: #475569;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 12px 24px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .firstTimeTutorial-skipButton:hover {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .firstTimeTutorial-featureList {
+      display: grid;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .firstTimeTutorial-featureItem {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .firstTimeTutorial-featureIcon {
+      width: 24px;
+      height: 24px;
+      background: #60a5fa;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .firstTimeTutorial-featureText {
+      font-size: 15px;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    @keyframes firstTimeTutorial-fadeScale {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes firstTimeTutorial-float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-16px);
+      }
+    }
+
+    .image-zoom-modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+}
+
+.zoomed-image {
+  max-width: 90%;
+  max-height: 90vh;
+  margin: auto;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+
+.zoom-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 2001;
+}
+
+.zoom-close-btn:hover {
+  color: #bbb;
+}
+
+/* Make tutorial images clickable */
+.firstTimeTutorial-image {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.firstTimeTutorial-image:hover {
+  transform: scale(1.05);
+}
 
         @media (max-width: 768px) {
             .header-content {
@@ -336,22 +534,57 @@
                 height: 80px;
             }
 
-            .popup-content {
-                padding: 20px;
-            }
+            .firstTimeTutorial-step.active {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 16px;
+    }
 
-            .popup-title {
-                font-size: 20px;
-            }
+    .firstTimeTutorial-illustration {
+      order: -1;
+    }
 
-            .popup-text {
-                font-size: 14px;
-            }
+    .firstTimeTutorial-image {
+      max-width: 200px;
+    }
 
-            .popup-button {
-                font-size: 14px;
-                padding: 8px 16px;
-            }
+    .firstTimeTutorial-title {
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .firstTimeTutorial-header,
+    .firstTimeTutorial-footer {
+      padding: 12px 16px;
+    }
+
+    .firstTimeTutorial-footer {
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .firstTimeTutorial-buttonGroup {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .firstTimeTutorial-nextButton,
+    .firstTimeTutorial-skipButton {
+      padding: 12px 16px;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .firstTimeTutorial-progress {
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .firstTimeTutorial-progressDot {
+      width: 24px;
+      height: 4px;
+    }
         }
     </style>
 </head>
@@ -396,38 +629,137 @@
     </main>
 
     <!-- New popup HTML -->
-    <div id="popup-overlay" class="popup-overlay">
-        <div class="popup-content">
-            <div id="step1" class="popup-step active">
-                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="Welcome" class="popup-image">
-                <h2 class="popup-title">Welcome to CTU AC Boarding House Portal</h2>
-                <p class="popup-text">Let's take a quick tour of our features.</p>
+    <div id="firstTimeTutorial-overlay" class="firstTimeTutorial-overlay">
+        <div class="firstTimeTutorial-content">
+          <div class="firstTimeTutorial-header">
+            <div class="firstTimeTutorial-stepCounter">Step <span id="firstTimeTutorial-currentStep">1</span> of 4</div>
+            <button class="firstTimeTutorial-closeButton">✕</button>
+          </div>
+      
+          <div id="firstTimeTutorial-step1" class="firstTimeTutorial-step active">
+            <div class="firstTimeTutorial-stepContent">
+              <h2 class="firstTimeTutorial-title">Welcome to CTU AC Accredited Boarding House Portal</h2>
+              <p class="firstTimeTutorial-text">Discover a smarter way to manage and find student accommodations. Our platform connects students with quality boarding houses while providing powerful tools for administrators.</p>
+              <div class="firstTimeTutorial-featureList">
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">✓</div>
+                  <div class="firstTimeTutorial-featureText">Streamlined booking process</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">✓</div>
+                  <div class="firstTimeTutorial-featureText">Real-time availability updates</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">✓</div>
+                  <div class="firstTimeTutorial-featureText">Boarding house tracker and messenger chats</div>
+                </div>
+              </div>
             </div>
-            <div id="step2" class="popup-step">
-                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="Admin Login" class="popup-image">
-                <h2 class="popup-title">Admin Login</h2>
-                <p class="popup-text">Access the admin panel for Boarding House Owners and SAO staff.</p>
+            <div class="firstTimeTutorial-illustration">
+              <img src="{% static 'img/CTU-logo-BH.png' %}" alt="Welcome" class="firstTimeTutorial-image">
             </div>
-            <div id="step3" class="popup-step">
-                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="Student Login" class="popup-image">
-                <h2 class="popup-title">Student Login</h2>
-                <p class="popup-text">Students can log in to manage their boarding house information.</p>
+          </div>
+      
+          <div id="firstTimeTutorial-step2" class="firstTimeTutorial-step">
+            <div class="firstTimeTutorial-stepContent">
+              <h2 class="firstTimeTutorial-title">Search and Filter</h2>
+              <p class="firstTimeTutorial-text">Find your ideal accommodation, filter price range, ratings, boarding house type to find the perfect match for your needs. You can rate each boarding house Accredited in this website.</p>
+              <div class="firstTimeTutorial-featureList">
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">🔍</div>
+                  <div class="firstTimeTutorial-featureText">Helpful search filters</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">🏠</div>
+                  <div class="firstTimeTutorial-featureText">Display boarding house availability</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">📊</div>
+                  <div class="firstTimeTutorial-featureText">Rate each boarding houses</div>
+                </div>
+              </div>
             </div>
-            <div id="step4" class="popup-step">
-                <img src="{% static 'img/nest-forgot-password-dribbble-unscreen.gif' %}" alt="All Set" class="popup-image">
-                <h2 class="popup-title">You're All Set!</h2>
-                <p class="popup-text">Enjoy using the CTU AC Boarding House Portal.</p>
+            <div class="firstTimeTutorial-illustration">
+              <img src="https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2Fhome-pics.png?alt=media&token=2336ac65-08d0-42e2-8028-4a242398d51c" alt="Search Features" class="firstTimeTutorial-image">
             </div>
-            <div id="countdown" class="countdown"></div>
-            <button id="popup-button" class="popup-button">Next</button>
-            <div class="popup-progress">
-                <div class="progress-dot active"></div>
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
-                <div class="progress-dot"></div>
+          </div>
+      
+          <div id="firstTimeTutorial-step3" class="firstTimeTutorial-step">
+            <div class="firstTimeTutorial-stepContent">
+              <h2 class="firstTimeTutorial-title">Apply Rooms</h2>
+              <p class="firstTimeTutorial-text">CTUac's SAO will approve your account, by this you can apply boarding houses. Boarding house owners will approve your pending to welcome you in to their boarding houses.</p>
+              <div class="firstTimeTutorial-featureList">
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">🛡️</div>
+                  <div class="firstTimeTutorial-featureText">Administrative controls</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">💬</div>
+                  <div class="firstTimeTutorial-featureText">Direct messaging system</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">📋</div>
+                  <div class="firstTimeTutorial-featureText">Application tracking</div>
+                </div>
+              </div>
             </div>
+            <div class="firstTimeTutorial-illustration">
+              <img src="https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2Forchestrate.gif?alt=media&token=3cb3c4d2-66e0-4c87-af73-73d10fb815da" alt="Booking Management" class="firstTimeTutorial-image">
+            </div>
+          </div>
+      
+          <div id="firstTimeTutorial-step4" class="firstTimeTutorial-step">
+            <div class="firstTimeTutorial-stepContent">
+              <h2 class="firstTimeTutorial-title">Let's get started!</h2>
+              <p class="firstTimeTutorial-text">To get started, create an account depending if you are a student(login as student), or an owner (login as owner). If you already have an account, you can now login. <span class="firstTimeTutorial-text" style="font-size: 0.8em; font-style: italic;">Please take note: Your credentials are securely stored, your password is encrypted and hidden, and all messages are transmitted with end-to-end encryption. We prioritize your privacy and ensure your data is never shared.</span></p>
+              <div class="firstTimeTutorial-featureList">
+                <div class="firstTimeTutorial-featureItem">
+                  <div class="firstTimeTutorial-featureIcon">🛡️</div>
+                  <div class="firstTimeTutorial-featureText">End-to-end messages encryption</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                    <div class="firstTimeTutorial-featureIcon">👤</div>
+                    <div class="firstTimeTutorial-featureText">User-friendly login and account management</div>
+                </div>
+                <div class="firstTimeTutorial-featureItem">
+                    <div class="firstTimeTutorial-featureIcon">✅</div>
+                    <div class="firstTimeTutorial-featureText">Accreditation of boarding houses by SAO</div>
+                </div>
+              </div>
+            </div>
+            <div class="firstTimeTutorial-illustration">
+              <img src="https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2Fstep4.gif?alt=media&token=14af6d67-d033-4bb9-bf29-7d590e90513f" alt="Support and Safety" class="firstTimeTutorial-image">
+            </div>
+          </div>
+      
+          <div class="firstTimeTutorial-footer">
+            <div class="firstTimeTutorial-progress">
+              <div class="firstTimeTutorial-progressDot active"></div>
+              <div class="firstTimeTutorial-progressDot"></div>
+              <div class="firstTimeTutorial-progressDot"></div>
+              <div class="firstTimeTutorial-progressDot"></div>
+            </div>
+            <div class="firstTimeTutorial-buttonGroup">
+              <button class="firstTimeTutorial-skipButton">Skip Tour</button>
+              <button id="firstTimeTutorial-nextButton" class="firstTimeTutorial-nextButton active">
+                Continue
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
+
+      
+      <div id="imageZoomModal" class="image-zoom-modal">
+        <span class="zoom-close-btn">&times;</span>
+        <img id="zoomedImage" class="zoomed-image" src="" alt="Zoomed image">
+      </div>
+      
+      
+      
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -509,64 +841,128 @@
     }
 
     // New popup functionality
-    const popupOverlay = document.getElementById('popup-overlay');
-            const popupButton = document.getElementById('popup-button');
-            const popupSteps = document.querySelectorAll('.popup-step');
-            const progressDots = document.querySelectorAll('.progress-dot');
-            const countdownElement = document.getElementById('countdown');
-            let currentStep = 0;
+     
+    const firstTimeTutorial = {
+    overlay: document.getElementById('firstTimeTutorial-overlay'),
+    nextButton: document.getElementById('firstTimeTutorial-nextButton'),
+    skipButton: document.querySelector('.firstTimeTutorial-skipButton'),
+    closeButton: document.querySelector('.firstTimeTutorial-closeButton'),
+    steps: document.querySelectorAll('.firstTimeTutorial-step'),
+    progressDots: document.querySelectorAll('.firstTimeTutorial-progressDot'),
+    currentStepElement: document.getElementById('firstTimeTutorial-currentStep'),
+    currentStep: 0,
 
-            function showPopup() {
-                popupOverlay.classList.add('show');
-                startCountdown();
-            }
+    init() {
+        this.addEventListeners();
+        this.show();
+    },
 
-            function hidePopup() {
-                popupOverlay.classList.remove('show');
-            }
-
-            function startCountdown() {
-                let count = 3;
-                countdownElement.textContent = count;
-                
-                const countdownInterval = setInterval(() => {
-                    count--;
-                    if (count > 0) {
-                        countdownElement.textContent = count;
-                    } else {
-                        clearInterval(countdownInterval);
-                        countdownElement.textContent = '';
-                        popupButton.classList.add('active');
-                    }
-                }, 1000);
-            }
-
-            function nextStep() {
-                popupSteps[currentStep].classList.remove('active');
-                progressDots[currentStep].classList.remove('active');
-                currentStep++;
-
-                if (currentStep < popupSteps.length) {
-                    popupSteps[currentStep].classList.add('active');
-                    progressDots[currentStep].classList.add('active');
-                    popupButton.classList.remove('active');
-
-                    if (currentStep === popupSteps.length - 1) {
-                        popupButton.textContent = 'Got it!';
-                    }
-
-                    startCountdown();
-                } else {
-                    hidePopup();
-                }
-            }
-
-            popupButton.addEventListener('click', nextStep);
-
-            // Check if it's the first visit
-            if (!localStorage.getItem('visitedBefore')) {
-                showPopup();
-                localStorage.setItem('visitedBefore', 'true');
-            }
+    addEventListeners() {
+        this.nextButton.addEventListener('click', () => this.nextStep());
+        this.skipButton.addEventListener('click', () => this.hide());
+        this.closeButton.addEventListener('click', () => this.hide());
+        this.overlay.addEventListener('click', (e) => {
+            if (e.target === this.overlay) this.hide();
         });
+        document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+    },
+
+    show() {
+        this.overlay.classList.add('show');
+        this.updateStepCounter();
+    },
+
+    hide() {
+        this.overlay.classList.remove('show');
+    },
+
+    updateStepCounter() {
+        this.currentStepElement.textContent = this.currentStep + 1;
+    },
+
+    nextStep() {
+        this.steps[this.currentStep].classList.remove('active');
+        this.progressDots[this.currentStep].classList.remove('active');
+        this.currentStep++;
+
+        if (this.currentStep < this.steps.length) {
+            this.steps[this.currentStep].classList.add('active');
+            this.progressDots[this.currentStep].classList.add('active');
+            this.updateStepCounter();
+
+            if (this.currentStep === this.steps.length - 1) {
+                this.nextButton.innerHTML = `Get Started <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>`;
+            }
+        } else {
+            this.hide();
+        }
+    },
+
+    handleKeyPress(e) {
+        if (!this.overlay.classList.contains('show')) return;
+        
+        switch(e.key) {
+            case 'Escape':
+                this.hide();
+                break;
+            case 'ArrowRight':
+            case 'Enter':
+                this.nextStep();
+                break;
+        }
+    }
+};
+
+// Initialize the tutorial
+if (!localStorage.getItem('firstTimeTutorialSeen')) {
+    firstTimeTutorial.init();
+    localStorage.setItem('firstTimeTutorialSeen', 'true');
+}
+
+// For demo purposes
+firstTimeTutorial.init();
+
+        });
+
+        const modal = document.getElementById('imageZoomModal');
+const modalImg = document.getElementById('zoomedImage');
+const closeBtn = document.getElementsByClassName('zoom-close-btn')[0];
+
+// Get all tutorial images
+const tutorialImages = document.querySelectorAll('.firstTimeTutorial-image');
+
+// Add click event to all tutorial images
+tutorialImages.forEach(img => {
+  img.addEventListener('click', function() {
+    modal.style.display = 'block';
+    modalImg.src = this.src;
+    modalImg.alt = this.alt;
+    
+    // Prevent tutorial navigation when clicking images
+    event.stopPropagation();
+  });
+});
+
+// Close modal when clicking the × button
+closeBtn.addEventListener('click', function() {
+  modal.style.display = 'none';
+});
+
+// Close modal when clicking outside the image
+modal.addEventListener('click', function(event) {
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+
+// Close modal with escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && modal.style.display === 'block') {
+    modal.style.display = 'none';
+  }
+});
     </script>
+
+

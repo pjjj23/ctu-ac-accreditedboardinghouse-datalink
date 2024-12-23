@@ -37,7 +37,7 @@ EMAIL_HOST_USER = 'pjjbonbon@gmail.com'  # Your Gmail address
 EMAIL_HOST_PASSWORD = 'tyeb izwg cnal kfpu'  # Your Gmail app password (not your Gmail account password)
 
 
-ALLOWED_HOSTS = ['pjjj122.pythonanywhere.com']
+ALLOWED_HOSTS = ['pjjj122.pythonanywhere.com', '127.0.0.1']
 
 
 # Application definition

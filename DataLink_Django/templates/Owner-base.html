@@ -23,7 +23,7 @@
             left: 0;
             width: 16.666667%;
             overflow-y: auto;
-            z-index: 1000;
+            z-index: 5000;
         }
         .sidebar .nav-link {
             color: white;
@@ -142,13 +142,13 @@
             .sidebar {
                 width: 250px;
                 left: -250px;
-                transition: left 0.3s;
+                transition: left 0.3s; 
             }  
 
             .sidebar .nav {
                 display: flex;
                 flex-direction: row;
-                padding: 10px 0;
+                padding: 10px 0; 
             }
 
             .sidebar .nav-item {
@@ -165,7 +165,7 @@
                 margin-left: 0;
             } 
             .sidebar.active {
-                left: 0;
+                left: 0; 
             }
             #sidebarCollapse {
                 display: block;
@@ -186,6 +186,17 @@
             }
             .welcome-message {
                 margin-left: 50px;
+            }
+            .header-text{
+                margin-left: -65px;
+                font-size: 1rem;
+            } 
+            .profile-header {
+                flex-shrink: 0;
+                margin-right: -20px;
+            }
+            .notification-bell-container {
+                margin-right: -25px;
             }
         }
 
@@ -340,6 +351,200 @@
     25% { transform: translateX(-4px); }
     75% { transform: translateX(4px); }
 }
+
+
+.notification-bell-container {
+    position: fixed;
+    top: 0.5rem;
+    right: 5rem;
+    z-index: 50;
+}
+
+.notification-bell-button {
+    position: relative;
+    padding: 0.5rem;
+    background: rgb(47, 165, 37);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50px; 
+}
+
+/* Sophisticated shadow on hover */
+.notification-bell-button:hover {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.08));
+}
+
+.notification-bell-button:focus {
+    outline: none;
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+}
+
+.notification-bell-button:active {
+    transform: translateY(0px);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.bell-icon {
+    width: 20px;
+    height: 20px;
+    stroke: #475569;
+    stroke-width: 2;
+    fill: none;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    /* Subtle shadow for the icon */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
+}
+
+.notification-bell-button:hover .bell-icon {
+    animation: wiggle 1s ease-in-out;
+    stroke: #1e293b;
+    /* Enhanced shadow on hover */
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.notification-counter {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 300ms ease-out;
+    /* Elevated shadow for the counter */
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2),
+                0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(12deg); }
+    75% { transform: rotate(-12deg); }
+}
+
+@keyframes scaleIn {
+    from { 
+        transform: scale(0); 
+        opacity: 0; 
+        box-shadow: 0 0 0 rgba(239, 68, 68, 0);
+    }
+    to { 
+        transform: scale(1); 
+        opacity: 1;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2),
+                    0 0 2px rgba(239, 68, 68, 0.1);
+    }
+}
+
+/* Dark mode support with adjusted shadows */
+@media (prefers-color-scheme: dark) {
+    .bell-icon {
+        stroke: #e2e8f0;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .notification-bell-button:hover .bell-icon {
+        stroke: #f8fafc;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+    }
+
+    .notification-counter {
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3),
+                    0 0 2px rgba(239, 68, 68, 0.2);
+    }
+}
+
+
+
+.profile-dropdown-ctuac {
+    position: relative;
+    display: inline-block;
+    transition: 0.4s ease-out;
+} 
+
+.dropdown-content-ctuac {
+    display: none;
+    position: absolute;
+    right: 0;
+    margin-top: 8px;
+    min-width: 200px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+.dropdown-content-ctuac.show {
+    display: block;
+}
+
+.dropdown-item-ctuac {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item-ctuac:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item-ctuac svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+}
+
+.dropdown-divider-ctuac {
+    border-top: 1px solid #eee;
+    margin: 4px 0;
+}
+
+.dropdown-item-ctuac.logout {
+    color: #dc3545;
+}
+
+/* Keep your existing styles unchanged */
+.profile-header {
+    position: relative;
+}
+
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.status-indicator-pp {
+    position: absolute;
+    bottom: -2px;
+    right: 6px; /* Adjusted for me-2 spacing */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%; 
+    border: 2px solid white;
+    z-index: 2;
+}
+
+/* Status colors */
+.status-active-pp {
+    background-color: #2ecc71; /* Green */
+}
+
+.status-inactive-pp {
+    background-color: #ea080c; /* Grey */
+}
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -412,18 +617,79 @@
             <main class="col-lg-10 ms-auto p-0 main-content">
                 <div class="header">
                     <div class="welcome-message">
-                        <h1 class="text-white mb-0 header-text">
-                            <span class="wave-emoji">👋</span> HELLO and WELCOME, 
-                            <span class="name">{{ firstname }}</span>!
-                        </h1>
+                        <h1 class="text-white mb-0 header-text"> 
+                            <span class="name">Goodafternoon, {{ firstname }}</span>
+                        </h1>                    
                     </div>
-                    <div class="profile-header d-flex align-items-center">
-                        <img src="{{ profile_picture }}" alt="Profile Picture" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+
+
+                    <div class="profile-header d-flex align-items-center" id="profileHeader">
+                        <div class="profile-dropdown-ctuac">
+                            <div class="profile-image-container">
+                                <img src="{{ profile_picture }}" 
+                                     alt="Profile Picture" 
+                                     class="rounded-circle me-2" 
+                                     style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;" 
+                                     id="profileImage"
+                                     onclick="toggleDropdown(event)">
+                                     <span class="status-indicator-pp {% if active_status %}status-active-pp{% else %}status-inactive-pp{% endif %}"></span>
+                            </div>
+                            
+                            <div class="dropdown-content-ctuac" id="dropdownMenuCtuac">
+                                <a href="{% url 'ownersettings' %}" class="dropdown-item-ctuac" onclick="viewProfile()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                    View Profile
+                                </a>
+                                <a href="{% url 'message_owner' %}" class="dropdown-item-ctuac" onclick="openChat()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                                    </svg>
+                                    Chat
+                                </a>
+                                <a href="{% url 'aboutus' %}" class="dropdown-item-ctuac" onclick="openAboutUs()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM12 5c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zM12 19.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                                    </svg>
+                                    About Us
+                                </a>
+                                <a href="{% url 'owner_homeReport' %}" class="dropdown-item-ctuac" onclick="reportProblem()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    Report a Problem
+                                </a>
+                                <div class="dropdown-divider-ctuac"></div>
+                                <a href="{% url 'ownerlogout' %}" class="dropdown-item-ctuac logout" onclick="hideLogoutModal()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
                         <div>
-                            <h6 class="mb-0 text-white">{{ user.first_name }} {{ user.last_name }}</h6>
-                            <small class="text-white-50">Owner</small>
+                            <!-- Notification Bell Container -->
+                            <div class="notification-bell-container">
+                                <button class="notification-bell-button" aria-label="Notifications">
+                                    <svg class="bell-icon" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                    </svg>
+                                    <span class="notification-counter">5</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
+
+
+
                 </div>
                 <div class="content p-4">
                     {% block content %}
@@ -515,6 +781,61 @@
                 logoutModal.classList.remove('show');
             }
         });
+
+
+        // Toggle dropdown
+function toggleDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('dropdownMenuCtuac');
+    dropdown.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdownMenuCtuac');
+    if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Prevent dropdown from closing when clicking inside it
+document.getElementById('dropdownMenuCtuac').addEventListener('click', function(event) {
+    event.stopPropagation();
+});
+
+// Your existing functions (implement these according to your needs)
+function viewProfile() {
+    console.log('View Profile clicked');
+    // Add your view profile logic here
+}
+
+function openSettings() {
+    console.log('Settings clicked');
+    // Add your settings logic here
+}
+
+function reportProblem() {
+    console.log('Report Problem clicked');
+    // Add your report problem logic here
+}
+ 
+var statusIndicator = document.querySelector('.status-indicator-pp');
+var activeStatusText = document.querySelector('.activeStatus span.status-text');
+
+// Getting active status from Django template variable
+var activeStatus = "{{ active_status }}";
+
+// Update status indicator based on active status
+if (activeStatus === 'online') {
+    statusIndicator.classList.add('status-active-pp'); // Add class to change appearance for online
+    statusIndicator.classList.remove('status-inactive-pp'); // Ensure inactive class is removed
+    activeStatusText.textContent = 'ONLINE';
+} else {
+    statusIndicator.classList.add('status-inactive-pp'); // Add class to show offline appearance
+    statusIndicator.classList.remove('status-active-pp'); // Ensure active class is removed
+    activeStatusText.textContent = 'OFFLINE';
+}
+
     </script>
     {% block extra_js %}{% endblock %}
 </body>

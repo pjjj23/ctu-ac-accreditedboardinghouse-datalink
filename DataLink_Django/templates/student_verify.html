@@ -262,6 +262,22 @@
                 width: 85%;
             }
         }
+        .message {
+            margin-bottom: 1rem; /* Add some space between messages */
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .success {
+            background-color: var(--success-color);
+            color: #fff;
+        }
+
+        .error {
+            background-color: #f8d7da; /* light red */
+            color: #721c24; /* dark red */
+        }
     </style>
 </head>
 <body>
@@ -283,12 +299,10 @@
                     </div>
                 </div>
                 {% if messages %}
-                    <ul>
-                        {% for message in messages %}
-                            <li style="color: red;">{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
                 <div class="resend-container">
                     <div class="resend" id="resend-button">Resend <i class="fas fa-redo-alt"></i></div>
                     <div class="countdown-timer" id="countdown-timer"></div>

@@ -3087,7 +3087,7 @@ def view_owners_boarding_house(request):
     if request.method == 'POST':
         owner_email = request.POST.get('owner_email')
         print(f"Owner email fetched: {owner_email}")  # Debugging step
-        
+
         if not owner_email:
             messages.error(request, 'No email provided in the form submission.')
             return redirect('approved-owners-viewBH')
@@ -3099,12 +3099,12 @@ def view_owners_boarding_house(request):
             # Fetch boarding house data from 'ownersBoardingHouse'
             boarding_house_info = db.child('ownersBoardingHouse').child(email_key).get().val()
             print(f"Boarding house info: {boarding_house_info}")  # Debugging step
-            
+
             # If no boarding house info found, add an error message and redirect
             if not boarding_house_info:
                 messages.error(request, 'No boarding house data found for this owner.')
                 return redirect('approved-owners-viewBH')  # Redirect to the desired page
-            
+
             # Extract required fields from the boarding house info
             fullname = boarding_house_info.get('name', None)
             boardinghouse_name = boarding_house_info.get('boardinghouseName', None)
@@ -3155,9 +3155,9 @@ def view_owners_boarding_house(request):
                 'owner': boarding_house_info
             }
 
-            # Render the profile page with the fetched data 
+            # Render the profile page with the fetched data
             return render(request, 'approved-owners-viewBH.html', context)
-            
+
         except Exception as e:
             # In case of error, add a generic error message
             messages.error(request, f"An error occurred: {str(e)}")
@@ -5449,6 +5449,77 @@ def ownerhomepage(request):
 
 
 
+
+def owner_homeReport(request):
+    # Log IP address and URL for debugging or analytics purposes
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+    current_url = request.path
+    log_ip_and_url(ip_address, current_url, "owner/ownerhomepage/owner_report_problem")
+
+    # Fetch context data for the logged-in owner
+    context = get_owner_context(request)
+
+    if context is None:  # Handle missing email in session
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('owner_login')
+
+    # Extract the necessary details from the context
+    email = context.get('email', '')
+    firstname = context.get('firstname', '')
+    lastname = context.get('lastname', '')
+    full_name = f"{firstname} {lastname}"
+
+    # Include owner details in the context for the template
+    owner_details = {
+        'email': email,
+        'fullname': full_name,
+    }
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        # Format email key for Firebase query
+        email_key = email.replace('.', '_').replace('@', '_at_')
+
+        try:
+            # Check if the email exists in the 'owners' table in Firebase
+            owner_data = db.child("owners").child(email_key).get()
+
+            if owner_data.val():
+                # If email exists, proceed with saving the report
+                date_of_report = datetime.now().strftime("%B %d, %Y %I:%M %p")
+
+                report_data = {
+                    "name": name,
+                    "email": email,
+                    "message": message,
+                    "date_of_report": date_of_report,
+                    "status": "unfixed"
+                }
+
+                # Save the report data under the email_key in messages
+                db.child("usersReport").child("owners").child(email_key).child("messages").push(report_data)
+                messages.success(request, 'Your report has been sent. Please wait for the response.')
+            else:
+                # If email doesn't exist, show error
+                messages.error(request, 'Only the owners with account registered can report.')
+
+        except Exception as e:
+            error_message = str(e)
+            print(f"Exception occurred: {error_message}")  # Debugging
+            messages.error(request, f'Error processing your request: {error_message}')
+
+        return redirect('owner_homeReport')
+
+    return render(request, 'owner-homeReport.html', {**context, **owner_details})
+
+
+
+
+
+
 def ownerlodger(request):
     context = get_owner_context(request)
 
@@ -6744,6 +6815,75 @@ def studenthomepage(request):
 
     # Render the homepage with context containing only approved boarding houses
     return render(request, 'Student-Homepage.html', context)
+
+
+
+
+
+
+def student_homeReport(request):
+    # Log IP address and URL for debugging or analytics purposes
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+    current_url = request.path
+    log_ip_and_url(ip_address, current_url, "student/studenthomepage/student_report_problem")
+
+    # Fetch context data for the logged-in student
+    context = get_student_context(request)
+
+    if context is None:  # Handle missing email in session
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('student_login')
+
+    # Extract the necessary details from the context
+    email = context.get('email', '')
+    username = context.get('username', '')
+
+    # Include student details in the context for the template
+    student_details = {
+        'email': email,
+        'username': username,
+    }
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+        # Format email key for Firebase query
+        email_key = email.replace('.', '_').replace('@', '_at_')
+
+        try:
+            # Check if the email exists in the 'students' table in Firebase
+            student_data = db.child("students").child(email_key).get()
+
+            if student_data.val():
+                # If email exists, proceed with saving the report
+                date_of_report = datetime.now().strftime("%B %d, %Y %I:%M %p")
+
+                report_data = {
+                    "name": name,
+                    "email": email,
+                    "message": message,
+                    "date_of_report": date_of_report,
+                    "status": "unfixed"
+                }
+
+                # Save the report data under the email_key in messages
+                db.child("usersReport").child("students").child(email_key).child("messages").push(report_data)
+                messages.success(request, 'Your report has been sent. Please wait for the response.')
+            else:
+                # If email doesn't exist, show error
+                messages.error(request, 'Only students with a registered account can report.')
+
+        except Exception as e:
+            error_message = str(e)
+            print(f"Exception occurred: {error_message}")  # Debugging
+            messages.error(request, f'Error processing your request: {error_message}')
+
+        return redirect('student_homeReport')
+
+    # Render the template with student details
+    return render(request, 'student-homeReport.html', {**context, **student_details})
 
 
 

@@ -270,6 +270,7 @@
             <h2>Verification <i class="fas fa-shield-alt"></i></h2>
             <form id="verificationForm" method="POST" action="{% url 'ownerVerifyOtp' %}">
                 {% csrf_token %} 
+                <input type="hidden" name="action" value="verify">
                 <div class="form-group">
                     <label for="otp">
                         OTP <i class="fas fa-key"></i>

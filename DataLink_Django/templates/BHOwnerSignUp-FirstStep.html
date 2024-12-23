@@ -140,11 +140,25 @@ label {
 .next-button:hover {
     background-color: var(--hover-color);
 }
-
+input[type="tel"] {
+    flex: 1; /* Allows input to take the remaining space */
+    padding: 0.75rem;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 50px; /* Ensures a minimum width for the input */
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    width: 100%; 
+}
+.phone-input {
+    width: 24px;
+    height: 24px;
+    border-radius: 50px;
+}
 input[type="text"],
 input[type="email"],
 input[type="password"],
-input[type="tel"],
 input[type="date"],
 select {
     width: 100%;
@@ -310,6 +324,7 @@ select:focus {
     0% { transform: translateY(-50%) rotate(0deg); }
     100% { transform: translateY(-50%) rotate(360deg); }
 }
+  
     </style>
 {% endblock %}
 
@@ -361,8 +376,10 @@ select:focus {
                 </div>
                 <div class="form-group">
                     <label for="phone-number"><i class="fas fa-phone"></i> Phone Number<span style="color:red;" title="required"> *</span></label>
-                    <input type="tel" id="phone-number" name="phone-number" placeholder="+639 Phone Number" required value="+639">
-                    <span class="warning">Please enter a valid phone number</span>
+                       
+                        <img class="phone-input" src="{% static 'img/philippine-flag.jpg' %}" alt="Philippine Flag">
+                        <input type="tel" id="phone-number" name="phone-number" placeholder="+639 Phone Number" required value="+639">
+                        <span class="warning">Please enter a valid phone number</span> 
                 </div>
                 <div class="form-group">
                     <label for="address"><i class="fas fa-home"></i> Address<span style="color:red;" title="required"> *</span></label>

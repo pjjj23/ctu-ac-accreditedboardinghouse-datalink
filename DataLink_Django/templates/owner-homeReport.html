@@ -1,0 +1,245 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report a Problem</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --input-bg: #fff;
+            --success-color: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-section {
+            flex: 1;
+            background-image: url("{% static 'img/CTU-logo-BH.png' %}");
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .info-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 62, 80, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            color: #fff;
+        }
+
+        .form-section {
+            flex: 1;
+            padding: 3rem;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h2 {
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .info-item {
+            margin-bottom: 2rem;
+        }
+
+        .info-item h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .info-item span {
+            display: block;
+            font-size: 1rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input, textarea {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .back-link {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .info-section, .form-section {
+                padding: 2rem;
+            }
+
+            .info-overlay {
+                position: static;
+                background: var(--secondary-color);
+            }
+        }
+
+        a {
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .message {
+            margin-bottom: 1rem; /* Add some space between messages */
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .success {
+            background-color: var(--success-color);
+            color: #fff;
+        }
+
+        .error {
+            background-color: #f8d7da; /* light red */
+            color: #721c24; /* dark red */
+        }
+
+    </style>
+</head>
+<body> 
+    <div class="container">
+        <div class="info-section">
+            <div class="info-overlay">
+                <div class="info-item">
+                    <h3><i class="fas fa-map-marker-alt icon"></i>Location</h3>
+                    <span>VHJX+VG2, Ed, Isidro Kintanar St, Argao, 6021 Cebu</span>
+                </div>
+                <div class="info-item">
+                    <h3><i class="fa-brands fa-facebook-f icon"></i> Facebook</h3>
+                    <a href="https://www.facebook.com/profile.php?id=100080414087307&mibextid=ZbWKwL"><span>CTU AC Student Affairs Office</span></a>
+                </div>
+                <div class="info-item">
+                    <h3><i class="fas fa-envelope icon"></i>Email</h3>
+                    <span>ctuac-bh@gmail.com</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-section">
+            <h2>Report a Problem</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <form id="contactForm" action="{% url 'owner_homeReport' %}" method="POST">
+                {% csrf_token %}
+                 <!-- Name Field: Pre-filled with the Full Name -->
+                <input type="text" id="name" name="name" value="{{ fullname }}" placeholder="Enter your Name" style="opacity: 0.7;" required readonly> 
+
+                <!-- Email Field: Pre-filled with the Email -->
+                <input type="email" id="email" name="email" value="{{ email }}" placeholder="Enter your Email" style="opacity: 0.7;" required readonly> 
+
+                <textarea id="message" name="message" placeholder="Describe your problem here" rows="6" required></textarea>
+                <button type="submit">Send Report</button>
+                <a href="{% url 'ownerhomepage' %}" class="back-link">← Back to Login</a>
+            </form>
+        </div>
+    </div> 
+
+    
+    <script>
+         document.addEventListener('DOMContentLoaded', function() {
+            const successMessage = document.getElementById('successMessage');
+
+            // Hide success message after 3 seconds if it is visible
+            if (successMessage) {
+                setTimeout(function() {
+                    successMessage.classList.remove('show');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

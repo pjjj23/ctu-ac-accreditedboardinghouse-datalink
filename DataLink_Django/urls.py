@@ -69,8 +69,8 @@ urlpatterns=[
     path('owner/owner_login/ownerSignUpFirstStep/ownerVerifyOtp/', views.ownerVerifyOtp, name='ownerVerifyOtp'),
     path('owner/owner_forgotpassword/', views.owner_forgotpassword, name='owner_forgotpassword'),
     path('ownerlogout/', views.ownerlogout, name='ownerlogout'),
- 
-  
+    path('owner/ownerhomepage/owner_homeReport', views.owner_homeReport, name='owner_homeReport'),
+   
   
     #This is for Student
     path('student/student_login/', views.student_login, name='student_login'),
@@ -84,7 +84,7 @@ urlpatterns=[
     path('student/studenthomepage/student_message/delete_conversation/<str:superadmin_email>/', views.delete_conversation, name='delete_conversation'),
     path('student/studenthomepage/owner_message', views.owner_message, name='owner_message'),
     path('student/studenthomepage/owner_message/delete_conversation_by_owner/<str:owner_email>/', views.delete_conversation_by_owner, name='delete_conversation_by_owner'),
-
+    path('student/studenthomepage/student_homeReport', views.student_homeReport, name='student_homeReport'),
      
     path('student/studentapplication/', views.studentapplication, name='studentapplication'),
     path('student/studentsettings/', views.studentsettings, name='studentsettings'),
