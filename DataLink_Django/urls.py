@@ -70,7 +70,8 @@ urlpatterns=[
     path('owner/owner_forgotpassword/', views.owner_forgotpassword, name='owner_forgotpassword'),
     path('ownerlogout/', views.ownerlogout, name='ownerlogout'),
     path('owner/ownerhomepage/owner_homeReport', views.owner_homeReport, name='owner_homeReport'),
-   
+    
+    path('update_days_login_owner/', views.update_days_login_owner, name='update_days_login_owner'),
   
     #This is for Student
     path('student/student_login/', views.student_login, name='student_login'),
@@ -85,7 +86,9 @@ urlpatterns=[
     path('student/studenthomepage/owner_message', views.owner_message, name='owner_message'),
     path('student/studenthomepage/owner_message/delete_conversation_by_owner/<str:owner_email>/', views.delete_conversation_by_owner, name='delete_conversation_by_owner'),
     path('student/studenthomepage/student_homeReport', views.student_homeReport, name='student_homeReport'),
-     
+    
+    path('update_days_login/', views.update_days_login, name='update_days_login'),
+ 
     path('student/studentapplication/', views.studentapplication, name='studentapplication'),
     path('student/studentsettings/', views.studentsettings, name='studentsettings'),
     # path('student/studentmessage/', views.studentmessage, name='studentmessage'),
@@ -95,4 +98,3 @@ urlpatterns=[
     path('student/student_forgotpassword/', views.student_forgotpassword, name='student_forgotpassword'),
 ]  
 handler404 = 'DataLink_Django.views.custom_404'
- 

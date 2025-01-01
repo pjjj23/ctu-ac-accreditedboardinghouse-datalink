@@ -1378,6 +1378,9 @@ def get_sao_context(request):
     email = request.session.get('email')
     active_status = 'offline'  # Default to offline
     birthday = None  # Initialize birthday as None
+    pending_students_count = 0  # Count for pending students
+    pending_owners_count = 0  # Count for pending owners
+    total_pending_count = 0  # Total count of pending students and owners
 
     if not email:
         return None  # If email is not found, return None
@@ -1385,7 +1388,6 @@ def get_sao_context(request):
     try:
         # Fetch all superadmins from Firebase
         existing_superadmins = db.child("saoaccounts").child("datas").child("superadmin").get().val()
-         
 
         # Loop through all superadmins to find the matching email
         if existing_superadmins:
@@ -1395,11 +1397,29 @@ def get_sao_context(request):
                     active_status = superadmin_data.get('active_status', 'offline')
                     birthday = superadmin_data.get('birthday', None)  # Fetch the birthday from Firebase
                     name = superadmin_data.get('name', name)  # Update the name from Firebase if available
-                    
                     break
         else:
             print("No superadmin data found.")
             active_status = 'offline'
+
+        # Fetch pending students count
+        # Iterate through all students and check accountStatus
+        students_data = db.child("students").get().val()
+        if students_data:
+            for student_email, student_data in students_data.items():
+                if student_data.get('accountStatus') == 'pending':
+                    pending_students_count += 1
+
+        # Fetch pending owners count
+        # Iterate through all owners and check accountStatus
+        owners_data = db.child("owners").get().val()
+        if owners_data:
+            for owner_email, owner_data in owners_data.items():
+                if owner_data.get('accountStatus') == 'pending':
+                    pending_owners_count += 1
+
+        # Calculate the total pending count (students + owners)
+        total_pending_count = pending_students_count + pending_owners_count
 
     except Exception as e:
         # Handle any errors with fetching data
@@ -1410,10 +1430,14 @@ def get_sao_context(request):
         'name': name,
         'email': email,
         'active_status': active_status,
-        'birthday': birthday  # Include birthday in the context
+        'birthday': birthday,  # Include birthday in the context
+        'pending_students_count': pending_students_count,  # Include count of pending students
+        'pending_owners_count': pending_owners_count,  # Include count of pending owners
+        'total_pending_count': total_pending_count  # Include total count of pending students and owners
     }
 
     return context
+
 
 
 
@@ -5351,6 +5375,7 @@ def ownerSignUpFourthStep(request):
 
 def get_owner_context(request):
     # Retrieve first name and profile picture from session
+    #greeting = get_greeting()
     firstname = request.session.get('first_name', 'Owner')
     profile_picture = request.session.get(
         'profile_picture',
@@ -5363,6 +5388,8 @@ def get_owner_context(request):
     lastname = ''
     middlename = ''
     account_status = 'inactive'  # Default account status
+    pending_students_count = 0  # Default to 0 for pending students
+    days_login = 0  # Initialize daysLogin for the owner
 
     if not email:
         return None  # Indicate that email was not found
@@ -5378,7 +5405,18 @@ def get_owner_context(request):
             lastname = owner_data.get('lastname', '')  # Fetch lastname
             middlename = owner_data.get('middlename', '')  # Fetch middlename
             account_status = owner_data.get('accountStatus', 'inactive')  # Fetch accountStatus
-            
+            days_login = owner_data.get('daysLogin', 0)  # Fetch daysLogin for the owner
+
+            # Fetch the students' applications data
+            students_applied_data = db.child('ownersBoardingHouse').child(email_key).child('studentsapplied').get().val()
+            if students_applied_data:
+                # Iterate through each student's data and check the status of their room application
+                for student in students_applied_data.values():
+                    for room_name, room_data in student.items():
+                        # If the status is 'pending', increment the count
+                        if room_data.get('status') == 'pending':
+                            pending_students_count += 1
+
             # Update session with latest owner data
             request.session['user_data'] = owner_data
             request.session['first_name'] = owner_data.get('firstname', 'Owner')  # Update first name in session
@@ -5396,10 +5434,46 @@ def get_owner_context(request):
         'active_status': active_status,
         'lastname': lastname,
         'middlename': middlename,
-        'account_status': account_status  # Include accountStatus in the context
-    } 
+        'account_status': account_status,  # Include accountStatus in the context
+        'pending_students_count': pending_students_count,  # Include the count of pending students
+        'daysLogin': days_login,  # Include daysLogin in the context
+        #'greeting': greeting,
+    }
 
     return context
+
+ 
+@csrf_exempt  # Only if CSRF token is manually handled in the script
+def update_days_login_owner(request):
+    if request.method == 'POST':
+        try:
+            # Use get_owner_context to fetch the owner's context
+            owner_context = get_owner_context(request)
+            if not owner_context:
+                return JsonResponse({'error': 'Owner context could not be retrieved'}, status=400)
+
+            # Extract email from the context
+            email = owner_context.get('email')
+            if not email:
+                return JsonResponse({'error': 'Email not found in context'}, status=400)
+
+            # Generate Firebase key
+            email_key = email.replace('.', '_').replace('@', '_at_')
+
+            # Update the `daysLogin` field in Firebase
+            db.child("owners").child(email_key).update({'daysLogin': owner_context['daysLogin'] + 1})
+            messages.success(request, "Tour is done! Now, let's showcase your boarding house to students by updating its details.")
+            # Return a success response
+            return JsonResponse({'message': 'daysLogin updated successfully'})
+        except Exception as e:
+            # Handle errors gracefully
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # Return a method not allowed response if the request is not POST
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
 
 
 def ownerhomepage(request):
@@ -5999,6 +6073,21 @@ def ownersettings(request):
             context['middlename'] = owner_data.get('middlename', '')
             context['lastname'] = owner_data.get('lastname', '')
             context['profile_picture'] = owner_data.get('profile_picture', '')
+            
+            try:
+                email_key = context['email'].replace('.', '_').replace('@', '_at_')
+                saved_owner_data = db.child('ownersBoardingHouse').child(email_key).get().val()
+                print(f"Fetched owner data: {saved_owner_data}")  # Debug output
+                if saved_owner_data:
+                    context['boardinghouse_name'] = saved_owner_data.get('boardinghouseName', 'No boarding house assigned')
+                    print(f"Boardinghouse name found: {context['boardinghouse_name']}")  # Debug output
+                else:
+                    context['boardinghouse_name'] = 'No boarding house data available'
+                    print("No data found for the provided email key")  # Debug output
+            except Exception as e:
+                print(f"Error fetching boardinghouseName: {e}")
+                context['boardinghouse_name'] = 'Error fetching boarding house'
+
 
             # Check if feedback was already submitted
             existing_feedback = db.child('usersReport').child('saofeedback').child('owners').child(user_id).get()
@@ -6664,7 +6753,7 @@ def get_student_context(request):
     # Retrieve user data from session
     user_data = request.session.get('user_data', {})
     email = user_data.get('email')  # Ensure email is in the session
-
+    #greeting = get_greeting()
     # Check if email is present in the session
     if not email:
         messages.error(request, 'Email not found in session. Please log in again.')
@@ -6672,6 +6761,17 @@ def get_student_context(request):
 
     # Create email_key for Firebase key
     email_key = email.replace('.', '_').replace('@', '_at_')
+    
+    # Define default values
+    days_login = 0
+
+    try:
+        # Fetch student data from Firebase
+        student_data = db.child("students").child(email_key).get().val()
+        if student_data:
+            days_login = student_data.get('daysLogin', 0)
+    except Exception as e:
+        print(f"Error fetching student data: {e}")
 
     # Define the default profile picture URL
     default_profile_picture_url = (
@@ -6689,6 +6789,7 @@ def get_student_context(request):
     applied_room_status = ''
     boardinghouse_name = ''
     room_name = ''
+    unseen_notifications_count = 0  # Initialize unseen notifications count
 
     try:
         # Get the student data from Firebase
@@ -6703,6 +6804,12 @@ def get_student_context(request):
             applied_room_status = student_data.get('appliedRoomStatus', '')
             boardinghouse_name = student_data.get('boardinghouseName', '')
             room_name = student_data.get('roomName', '')
+
+            # Fetch and count unseen notifications
+            notifications = student_data.get('notifications', {})
+            unseen_notifications_count = sum(
+                1 for notif in notifications.values() if not notif.get('seen', False)
+            )
     except Exception as e:
         print(f"Error fetching student data: {e}")
 
@@ -6721,13 +6828,38 @@ def get_student_context(request):
         'daysLogin': days_login,
         'appliedRoomStatus': applied_room_status,  # Include appliedRoomStatus
         'boardinghouseName': boardinghouse_name,  # Include boardinghouseName
-        'roomName': room_name  # Include roomName
+        'roomName': room_name,  # Include roomName
+        'unseen_notifications_count': unseen_notifications_count,  # Include unseen notifications count
+        'daysLogin': days_login,
+        #'greeting': greeting,
     }
 
     return context
 
 
 
+@csrf_exempt  # If CSRF token is manually handled in the script
+def update_days_login(request):
+    if request.method == 'POST':
+        user_data = request.session.get('user_data', {})
+        email = user_data.get('email')
+        if not email:
+            return JsonResponse({'error': 'Email not found in session'}, status=400)
+        
+        email_key = email.replace('.', '_').replace('@', '_at_')
+        
+        try:
+            student_data = db.child("students").child(email_key).get().val()
+            if student_data:
+                db.child("students").child(email_key).update({'daysLogin': 2}) 
+                messages.success(request, "Tour is done! Let's go apply rooms!")
+                return JsonResponse({'message': 'daysLogin updated successfully'})
+            else:
+                return JsonResponse({'error': 'Student data not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 

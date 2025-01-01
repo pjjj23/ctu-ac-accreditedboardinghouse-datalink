@@ -1,4 +1,4 @@
-{% load static %}
+{% load static %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTU AC Accredited Boarding Houses</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/CTU-logo-BH.png' %}" />
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa; 
+            background-color: #f8f9fa;
             padding-top: 70px; /* Add padding to account for fixed header */
         }
         .sidebar {
@@ -24,7 +25,7 @@
             left: 0;
             width: 16.666667%; /* This is equivalent to col-lg-2 */
             overflow-y: auto;
-            z-index: 1040; /* Increased z-index */
+            z-index: 5000; /* Increased z-index */
             transition: transform 0.3s ease-in-out;
         }
         .sidebar .nav-link {
@@ -36,7 +37,7 @@
             transition: background-color 0.3s ease;
         }
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: darkgreen; 
+            background-color: darkgreen;
         }
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
             border-radius: 50px;
@@ -59,7 +60,7 @@
 
         .status-indicator {
             width: 10px;
-            height: 10px; 
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
             margin-right: 5px;
@@ -80,7 +81,7 @@
             border-radius: 5px;
         }
         .logout-btn .btn:hover {
-            background-color: #ba222f; 
+            background-color: #ba222f;
         }
         #sidebarCollapse {
             display: none;
@@ -115,7 +116,9 @@
             top: 0;
             left: 16.666667%;
             right: 0;
+            left: 0;
             z-index: 1030;
+            width: 100%;
         }
         .sidebar .logo {
             background-color: white;
@@ -134,15 +137,19 @@
         }
         .profile-header {
             flex-shrink: 0;
+        }
+        .profile-header img {
+            border-radius: 50px;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
-            transition: box-shadow 0.3s ease;
-            padding: 5px 10px;
-            border-radius: 20px;
+            transition: 0.3s ease-out;
         }
-        .profile-header:hover {
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); /* Subtle glowing effect */
+        .profile-header img:hover {
+            transform: scale(1.1);
+            border: 1px solid #111;
         }
-         
+
         .profile-popup {
             position: absolute;
             top: 60px;
@@ -209,7 +216,7 @@
 
 
 
-        @media (max-width: 991px) {  
+        @media (max-width: 991px) {
             .sidebar {
                 width: 250px;
                 transform: translateX(-100%);
@@ -237,9 +244,19 @@
             .main-content.sidebar-active {
                 margin-left: 250px;
             }
-            .header {
-                left: 0;
-                width: 100%;
+            .welcome-message {
+                margin-left: 50px;
+            }
+            .header-text {
+                margin-left: -65px;
+                font-size: 1rem;
+            }
+            .profile-header {
+                flex-shrink: 0;
+                margin-right: -20px;
+            }
+            .notification-bell-container {
+                margin-right: -25px;
             }
         }
 
@@ -295,6 +312,243 @@
         .logout-modal-footer button {
             margin-left: 10px;
         }
+
+
+.notification-bell-container {
+    position: fixed;
+    top: 0.5rem;
+    right: 5rem;
+    z-index: 50;
+}
+
+.notification-bell-button {
+    position: relative;
+    padding: 0.5rem;
+    background: rgb(47, 165, 37);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50px;
+}
+
+/* Sophisticated shadow on hover */
+.notification-bell-button:hover {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.08));
+}
+
+.notification-bell-button:focus {
+    outline: none;
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.3));
+}
+
+.notification-bell-button:active {
+    transform: translateY(0px);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.bell-icon {
+    width: 20px;
+    height: 20px;
+    stroke: #475569;
+    stroke-width: 2;
+    fill: none;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    /* Subtle shadow for the icon */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
+}
+
+.notification-bell-button:hover .bell-icon {
+    animation: wiggle 1s ease-in-out;
+    stroke: #1e293b;
+    /* Enhanced shadow on hover */
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.notification-counter {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 300ms ease-out;
+    /* Elevated shadow for the counter */
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2),
+                0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(12deg); }
+    75% { transform: rotate(-12deg); }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(239, 68, 68, 0);
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2),
+                    0 0 2px rgba(239, 68, 68, 0.1);
+    }
+}
+
+/* Dark mode support with adjusted shadows */
+@media (prefers-color-scheme: dark) {
+    .bell-icon {
+        stroke: #e2e8f0;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .notification-bell-button:hover .bell-icon {
+        stroke: #f8fafc;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+    }
+
+    .notification-counter {
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3),
+                    0 0 2px rgba(239, 68, 68, 0.2);
+    }
+}
+
+
+.profile-dropdown-ctuac {
+    position: relative;
+    display: inline-block;
+    transition: 0.4s ease-out;
+} 
+
+.dropdown-content-ctuac {
+    display: none;
+    position: absolute;
+    right: 0;
+    margin-top: 8px;
+    min-width: 200px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+.dropdown-content-ctuac.show {
+    display: block;
+}
+
+.dropdown-item-ctuac {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item-ctuac:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item-ctuac svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+}
+
+.dropdown-divider-ctuac {
+    border-top: 1px solid #eee;
+    margin: 4px 0;
+}
+
+.dropdown-item-ctuac.logout {
+    color: #dc3545;
+}
+
+/* Keep your existing styles unchanged */
+.profile-header {
+    position: relative;
+}
+
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+} 
+
+.status-indicator-pp {
+    position: absolute;
+    bottom: -2px;
+    right: 6px; /* Adjusted for me-2 spacing */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%; 
+    border: 2px solid white;
+    z-index: 2;
+}
+
+/* Status colors */
+.status-active-pp {
+    background-color: #2ecc71; /* Green */
+}
+
+.status-inactive-pp {
+    background-color: #ea080c; /* Grey */
+}
+
+.nav-item .undoTheActionOfSAO-dropdown-menu-undo {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 200px;
+    z-index: 1000;
+}
+
+.nav-item .undoTheActionOfSAO-dropdown-menu-undo li {
+    padding: 10px;
+} 
+
+.nav-item .undoTheActionOfSAO-dropdown-menu-undo li a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+}
+
+.nav-item .undoTheActionOfSAO-dropdown-menu-undo li a:hover {
+    background-color: #f1f1f1;
+}
+
+.nav-item .undoTheActionOfSAO-dropdown-toggle {
+    cursor: pointer;
+}
+
+.undoTheActionOfSAO-badge {
+    display: inline-block;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+}
+
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -313,109 +567,87 @@
                     <div class="activeStatus">
                         <span class="status-indicator"></span>
                         <span class="status-text">{{ active_status|upper }}</span>
-                    </div> 
+                    </div>
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'saohomepage' %}">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
-                        </li> 
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'feedback' %}active{% endif %}" href="{% url 'sao_feedback' %}">
                                 <i class="fas fa-comment-alt"></i> Feedback
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {% if active_page == 'undo' %}active{% endif %}" href="#" id="undoActionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-undo"></i> Undo Users Action
+                            <a class="nav-link undoTheActionOfSAO-dropdown-toggle {% if active_page == 'undo' %}active{% endif %}" href="#" id="undoTheActionOfSAO-undoActionsDropdown" role="button">
+                                <i class="fas fa-undo"></i> Undo Users Action <span style="font-size: 0.7em; color: #fff; font-weight:900; font-family: Impact;"> ﹀</span>
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="undoActionsDropdown">
+                            <ul class="undoTheActionOfSAO-dropdown-menu-undo" aria-labelledby="undoTheActionOfSAO-undoActionsDropdown">
                                 <li><h6 class="dropdown-header">Rejected</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'rejectstudents' %}">
-                                        Rejected Students 
+                                    <a class="undoTheActionOfSAO-dropdown-item-undo" href="{% url 'rejectstudents' %}">
+                                        Rejected Students
                                         {% if summary_counts.rejected_students > 0 %}
-                                        <span style="display: inline-block; background-color: red; color: white; 
-                                                     border-radius: 50%; width: 20px; height: 20px; 
-                                                     text-align: center; line-height: 20px; margin-left: 5px;">
-                                            {{ summary_counts.rejected_students }}
-                                        </span>
+                                        <span class="undoTheActionOfSAO-badge">{{ summary_counts.rejected_students }}</span>
                                         {% endif %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'rejectowners' %}">
+                                    <a class="undoTheActionOfSAO-dropdown-item-undo" href="{% url 'rejectowners' %}">
                                         Rejected Owners
                                         {% if summary_counts.rejected_owners > 0 %}
-                                        <span style="display: inline-block; background-color: red; color: white; 
-                                                     border-radius: 50%; width: 20px; height: 20px; 
-                                                     text-align: center; line-height: 20px; margin-left: 5px;">
-                                            {{ summary_counts.rejected_owners }}
-                                        </span>
+                                        <span class="undoTheActionOfSAO-badge">{{ summary_counts.rejected_owners }}</span>
                                         {% endif %}
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                
+                        
                                 <li><h6 class="dropdown-header">Disabled</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'disablestudents' %}">
-                                        Disabled Students 
+                                    <a class="undoTheActionOfSAO-dropdown-item-undo" href="{% url 'disablestudents' %}">
+                                        Disabled Students
                                         {% if summary_counts.disabled_students > 0 %}
-                                        <span style="display: inline-block; background-color: red; color: white; 
-                                                     border-radius: 50%; width: 20px; height: 20px; 
-                                                     text-align: center; line-height: 20px; margin-left: 5px;">
-                                            {{ summary_counts.disabled_students }}
-                                        </span>
+                                        <span class="undoTheActionOfSAO-badge">{{ summary_counts.disabled_students }}</span>
                                         {% endif %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'disableowners' %}">
+                                    <a class="undoTheActionOfSAO-dropdown-item-undo" href="{% url 'disableowners' %}">
                                         Disabled Owners
                                         {% if summary_counts.disabled_owners > 0 %}
-                                        <span style="display: inline-block; background-color: red; color: white; 
-                                                     border-radius: 50%; width: 20px; height: 20px; 
-                                                     text-align: center; line-height: 20px; margin-left: 5px;">
-                                            {{ summary_counts.disabled_owners }}
-                                        </span>
+                                        <span class="undoTheActionOfSAO-badge">{{ summary_counts.disabled_owners }}</span>
                                         {% endif %}
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                
+                        
                                 <li><h6 class="dropdown-header">Removed</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'removestudents' %}">
-                                        Removed Students 
+                                    <a class="undoTheActionOfSAO-dropdown-item-undo" href="{% url 'removestudents' %}">
+                                        Removed Students
                                         {% if summary_counts.removed_students > 0 %}
-                                        <span style="display: inline-block; background-color: red; color: white; 
-                                                     border-radius: 50%; width: 20px; height: 20px; 
-                                                     text-align: center; line-height: 20px; margin-left: 5px;">
-                                            {{ summary_counts.removed_students }}
-                                        </span>
+                                        <span class="undoTheActionOfSAO-badge">{{ summary_counts.removed_students }}</span>
                                         {% endif %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'removeowners' %}">
+                                    <a class="undoTheActionOfSAO-dropdown-item-undo" href="{% url 'removeowners' %}">
                                         Removed Owners
                                         {% if summary_counts.removed_owners > 0 %}
-                                        <span style="display: inline-block; background-color: red; color: white; 
-                                                     border-radius: 50%; width: 20px; height: 20px; 
-                                                     text-align: center; line-height: 20px; margin-left: 5px;">
-                                            {{ summary_counts.removed_owners }}
-                                        </span>
+                                        <span class="undoTheActionOfSAO-badge">{{ summary_counts.removed_owners }}</span>
                                         {% endif %}
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="#">Removed Superadmins</a></li>
+                                <li>
+                                    <a class="undoTheActionOfSAO-dropdown-item-undo" href="#">Removed Superadmins</a>
+                                </li>
                             </ul>
-                            
-                        </li> 
+                        </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="{% url 'sao_settings' %}">
-                                <i class="fas fa-cog"></i> Settings 
+                                <i class="fas fa-cog"></i> Settings
                             </a>
                         </li>
                     </ul>
@@ -430,23 +662,83 @@
                 <div class="header">
                     <div class="welcome-message">
                         <h1 class="text-white mb-0 header-text">
-                            <span class="wave-emoji">👋</span> HELLO and WELCOME, 
-                            <span class="name">{{ name }}</span>!
+                            <span class="name">Goodmorning, {{ name }}</span>
                         </h1>
                     </div>
                     <div class="profile-header d-flex align-items-center" id="profileHeader">
-                        <img src="{% static 'img/profile-default.png' %}" alt="Profile Picture" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;" id="profileImage">
+                        <div class="profile-dropdown-ctuac">
+                            <div class="profile-image-container">
+                                <img src="https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2Fdefaultprofile.png?alt=media&token=7e36c938-4750-4a55-8e38-a480bafa1f23" 
+                                     alt="Profile Picture" 
+                                     class="rounded-circle me-2" 
+                                     style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;" 
+                                     id="profileImage"
+                                     onclick="toggleDropdown(event)">
+                                     <span class="status-indicator-pp {% if active_status %}status-active-pp{% else %}status-inactive-pp{% endif %}"></span>
+                            </div>
+                            
+                            <div class="dropdown-content-ctuac" id="dropdownMenuCtuac">
+                                <a href="{% url 'sao_settings' %}" class="dropdown-item-ctuac" onclick="viewProfile()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                    View Profile
+                                </a>
+                                <a href="{% url 'sao_message' %}" class="dropdown-item-ctuac" onclick="openChat()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                                    </svg>
+                                    Chat
+                                </a>
+                                <a href="{% url 'owner_report' %}" class="dropdown-item-ctuac" onclick="reportProblem()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    Owners Report
+                                </a>
+                                <a href="{% url 'student_report' %}" class="dropdown-item-ctuac" onclick="reportProblem()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                    Students Report
+                                </a>
+                                <div class="dropdown-divider-ctuac"></div>
+                                <a href="{% url 'saologout' %}" class="dropdown-item-ctuac logout" onclick="hideLogoutModal()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
                         <div>
-                            <small class="text-white-50">Superadmin</small>
+                            <!-- Notification Bell Container -->
+                            <div class="notification-bell-container">
+                                <button class="notification-bell-button" aria-label="Notifications" onclick="gotoApplied()">
+                                    <svg class="bell-icon" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                    </svg>
+                                    <span class="notification-counter">{{ total_pending_count }}</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="profile-popup" id="profilePopup">
+                            <ul>
+                                <li><a href="#" id="viewProfileLink">View Image</a></li>
+                                <li><a href="{% url 'sao_settings' %}" id="goToProfileLink">Go to Profile</a></li>
+                                <li><a href="{% url 'saologout' %}"  class="btn btn-danger w-100">Logout</a></li>
+                            </ul>
                         </div>
                     </div>
-                    <div class="profile-popup" id="profilePopup">
-                        <ul>
-                            <li><a href="#" id="viewProfileLink">View Image</a></li>
-                            <li><a href="{% url 'sao_settings' %}" id="goToProfileLink">Go to Profile</a></li>
-                            <li><a href="{% url 'saologout' %}"  class="btn btn-danger w-100">Logout</a></li>
-                        </ul>
-                    </div>
+                     
                 </div>
                  <!-- Image Modal -->
                 <div id="imageModal" class="image-modal">
@@ -477,9 +769,27 @@
             </div>
         </div>
     </div>
-
+ 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const dropdownToggle = document.getElementById("undoTheActionOfSAO-undoActionsDropdown");
+    const dropdownMenu = document.querySelector(".undoTheActionOfSAO-dropdown-menu-undo");
+
+    dropdownToggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        dropdownMenu.style.display =
+            dropdownMenu.style.display === "block" ? "none" : "block";
+    });
+
+    document.addEventListener("click", (event) => {
+        if (
+            !dropdownToggle.contains(event.target) &&
+            !dropdownMenu.contains(event.target)
+        ) {
+            dropdownMenu.style.display = "none";
+        }
+    });
+    
         document.addEventListener('DOMContentLoaded', function() {
         var sidebar = document.getElementById('sidebar');
         var sidebarCollapse = document.getElementById('sidebarCollapse');
@@ -489,9 +799,8 @@
         var header = document.querySelector('.header');
         var statusIndicator = document.querySelector('.status-indicator');
         var activeStatusText = document.querySelector('.activeStatus span.status-text');
-        
-        var profileHeader = document.getElementById('profileHeader');
-        var profilePopup = document.getElementById('profilePopup');
+
+        var profileHeader = document.getElementById('profileHeader'); 
         var viewProfileLink = document.getElementById('viewProfileLink');
         var goToProfileLink = document.getElementById('goToProfileLink');
         var logoutLink = document.getElementById('logoutLink');
@@ -499,29 +808,18 @@
         var modalImage = document.getElementById('modalImage');
         var closeModal = document.getElementsByClassName('close')[0];
 
-        function toggleProfilePopup() {
-                profilePopup.style.display = profilePopup.style.display === 'block' ? 'none' : 'block';
-            }
-
-            function viewProfile() {
-                var profileImage = document.getElementById('profileImage');
-                modalImage.src = profileImage.src;
-                imageModal.style.display = 'block';
-                toggleProfilePopup();
-            }
-
-            function goToProfile() {
-                // Implement go to profile functionality
-                console.log('Go to Profile clicked');
-                toggleProfilePopup();
-            }
-
-            // Event Listeners
-            profileHeader.addEventListener('click', toggleProfilePopup);
-            viewProfileLink.addEventListener('click', viewProfile);
-            goToProfileLink.addEventListener('click', goToProfile);
-            
-
+         // Getting active status from Django template variable
+         var activeStatus = "{{ active_status }}";
+    
+    // Update status indicator based on active status
+    if (activeStatus === 'online') {
+        statusIndicator.classList.add('online');  // Add class to change appearance for online
+        activeStatusText.textContent = 'ONLINE';
+    } else {
+        statusIndicator.classList.remove('online');  // Remove class to show offline appearance
+        activeStatusText.textContent = 'OFFLINE';
+    }
+ 
             // Close modal when clicking on <span> (x)
             closeModal.onclick = function() {
                 imageModal.style.display = 'none';
@@ -533,39 +831,29 @@
                     imageModal.style.display = 'none';
                 }
             }
-
-            // Close popup when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!profileHeader.contains(event.target) && !profilePopup.contains(event.target)) {
-                    profilePopup.style.display = 'none';
-                }
-            });
-
-         
+ 
 
 
 
 
-        // Close popup when clicking outside
-        document.addEventListener('click', function(event) {
-            var popup = document.getElementById('profilePopup');
-            var profileHeader = document.querySelector('.profile-header');
-            if (!profileHeader.contains(event.target) && !popup.contains(event.target)) {
-                popup.style.display = 'none';
-            }
-        });
-            
-            // Getting active status from Django template variable
-            var activeStatus = "{{ active_status }}";
-    
-            // Update status indicator based on active status
-            if (activeStatus === 'online') {
-                statusIndicator.classList.add('online');  // Add class to change appearance for online
-                activeStatusText.textContent = 'ONLINE';
-            } else {
-                statusIndicator.classList.remove('online');  // Remove class to show offline appearance
-                activeStatusText.textContent = 'OFFLINE';
-            }
+ 
+
+        var statusIndicator = document.querySelector('.status-indicator-pp');
+var activeStatusText = document.querySelector('.activeStatus span.status-text');
+
+// Getting active status from Django template variable
+var activeStatus = "{{ active_status }}";
+
+// Update status indicator based on active status
+if (activeStatus === 'online') {
+    statusIndicator.classList.add('status-active-pp'); // Add class to change appearance for online
+    statusIndicator.classList.remove('status-inactive-pp'); // Ensure inactive class is removed
+    activeStatusText.textContent = 'ONLINE';
+} else {
+    statusIndicator.classList.add('status-inactive-pp'); // Add class to show offline appearance
+    statusIndicator.classList.remove('status-active-pp'); // Ensure active class is removed
+    activeStatusText.textContent = 'OFFLINE';
+}
 
         sidebarCollapse.addEventListener('click', function(event) {
             event.stopPropagation();
@@ -615,7 +903,36 @@
             logoutModal.classList.remove('show');
         }
     });
+
+     function gotoProfile(){
+    window.location.href="{% url 'sao_settings' %}"
+}
+
+// Toggle dropdown
+function toggleDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('dropdownMenuCtuac');
+    dropdown.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('dropdownMenuCtuac');
+    if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Prevent dropdown from closing when clicking inside it
+document.getElementById('dropdownMenuCtuac').addEventListener('click', function(event) {
+    event.stopPropagation();
+});
+
+function gotoApplied(){
+    window.location.href="{% url 'pendingreq' %}"
+}
+
     </script>
     {% block extra_js %}{% endblock %}
 </body>
-</html>
+</html> 
