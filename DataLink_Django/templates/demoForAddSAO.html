@@ -29,7 +29,7 @@
         </div>
         
         <h2>Add Superadmin</h2>
-        <form method="post" action="{% url 'addsuperadmin' %}">
+        <form method="post" action="#">
             {% csrf_token %}
             <div class="form-group">
                 <label for="email">Email</label>
@@ -56,7 +56,7 @@
             </div>
             
             <div id="changePinForm" style="display:none;">
-                <form id="pinForm" method="POST" action="{% url 'addsuperadmin' %}" class="pin-form">
+                <form id="pinForm" method="POST" action="#" class="pin-form">
                     {% csrf_token %}
                     
                     <div class="form-group">

@@ -844,7 +844,7 @@
         </div>
  
 
-        <form id="studentForm" method="post" action="{% url 'add_student' %}">
+        <form id="studentForm" method="post" action="#">
             {% csrf_token %}
             
             <div class="form-group">
@@ -882,7 +882,7 @@
             </div>
         
             <div class="button-group" id="buttonGroup">
-                <a href="{% url 'saohomepage' %}" class="btn btn-primary">
+                <a href="#" class="btn btn-primary">
                     <i class="fas fa-arrow-left"></i> Back
                 </a>
                 
@@ -907,7 +907,7 @@
             </div>
             
             <div id="changePinForm" style="display:none;">
-                <form id="pinForm" method="POST" action="{% url 'add_student' %}" class="pin-form">
+                <form id="pinForm" method="POST" action="#" class="pin-form">
                     {% csrf_token %}
                     
                     <div class="form-group">
@@ -937,63 +937,7 @@
                 
                 <div id="pinMessage" class="pin-message"></div>
             </div>
-        </div>
-
-        <div class="table-container" id="tableContainer">
-            <div class="table-header">
-                <h2>Student Records</h2>
-                <div class="table-controls">
-                    <div class="search-bar">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Search students...">
-                    </div>
-                    <button class="minimize-btn" id="minimizeBtn" title="Minimize/Maximize Table">
-                        <i class="fas fa-chevron-up" id="minimizeIcon"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="table-body" id="tableBody">
-                <table id="studentsTable">
-                    <thead>
-                        <tr>
-                            <th>Student ID</th>
-                            <th>Birthday</th>
-                            <th>Course</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if students %}
-                            {% for student in students %}
-                                <tr>
-                                    <td>{{ student.student_id }}</td>
-                                    <td>{{ student.birthday }}</td>
-                                    <td>{{ student.course }}</td>
-                                    <td>
-                                        <button type="button" class="action-btn action-btn-update" onclick="loadStudentData('{{ student.student_id }}', '{{ student.birthday }}', '{{ student.course }}')">
-                                            <i class="fas fa-edit"></i> Update
-                                        </button>
-                    
-                                        <!-- Delete Button Form -->
-                                        <form method="POST" action="{% url 'add_student' %}" style="display: inline;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="delete_student" value="{{ student.student_id }}">
-                                            <button type="button" class="action-btn action-btn-delete" onclick="confirmDelete(this)">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="4">No students found.</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </div> 
     </div>
 
 
@@ -1512,7 +1456,7 @@
                 // Add an event listener for the button click
                 nextBtn.addEventListener("click", function handleNextClick() {
                     // Redirect to the new page
-                    window.location.href = "{% url 'addsuperadmin' %}";
+                    window.location.href = "{% url 'demoAddSAO' %}";
     
                     // Remove the event listener to avoid multiple redirects
                     nextBtn.removeEventListener("click", handleNextClick);

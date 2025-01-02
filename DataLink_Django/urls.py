@@ -27,9 +27,14 @@ urlpatterns=[
     path('sao/saohomepage/message_sao_owner/', views.message_sao_owner, name='message_sao_owner'), 
     path('sao/saohomepage/message_sao_owner/delete_conversation_by_sao_owner/<str:owner_email>/', views.delete_conversation_by_sao_owner, name='delete_conversation_by_sao_owner'),
      
+    path('update_days_login_sao/', views.update_days_login_sao, name='update_days_login_sao'),
+
     path('sao/sao_feedback/', views.sao_feedback, name='sao_feedback'),
     path('sao/sao_settings/', views.sao_settings, name='sao_settings'),
     path('sao/saohomepage/pendingreq/', views.pendingreq, name='pendingreq'),
+    path('sao/saohomepage/demoAddStudent/', views.demoAddStudent, name='demoAddStudent'),
+    path('sao/saohomepage/demoAddSAO/', views.demoAddSAO, name='demoAddSAO'),
+     
     path('sao/saohomepage/pendingreq/boardinghouseAction', views.boardinghouseAction, name='boardinghouseAction'),
     path('sao/saohomepage/add_student/', views.add_student, name='add_student'),
     path('sao/saohomepage/addsuperadmin/', views.addsuperadmin, name='addsuperadmin'),

@@ -504,6 +504,574 @@
     </div>
 </div> 
 
+
+
+{% if daysLogin == 1 %}
+    <!-- Background Overlay -->
+    <div class="firstlogin-overlay"></div>
+    
+    <div id="firstLoginEverModal" class="firstlogin-modal">
+        <div class="firstlogin-modal-content">
+            <!-- Timer -->
+            <div class="animation-timer">
+                <svg class="timer-circle">
+                    <circle r="24" cx="26" cy="26"/>
+                </svg>
+                <span class="timer-text">3</span>
+            </div>
+    
+            <!-- Decorative elements -->
+            <div class="firstlogin-decoration">
+                <div class="firstlogin-blob"></div>
+                <div class="firstlogin-dots"></div>
+            </div>
+            
+            <!-- Progress bar -->
+            <div class="firstlogin-progress">
+                <div class="firstlogin-progress-track">
+                    <div class="firstlogin-progress-fill"></div>
+                </div>
+                <div class="firstlogin-steps-count">Step <span class="current">1</span> of 2</div>
+            </div>
+    
+            <div class="firstlogin-steps-container">
+                <!-- Step 1 -->
+                <div class="firstlogin-step active" data-step="1">
+                    <div class="firstlogin-icon-container">
+                        <div class="firstlogin-welcome-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16M4 12h16" />
+                            </svg>                            
+                            
+                        </div>
+                        <div class="firstlogin-icon-ring"></div>
+                        <div class="firstlogin-icon-particles"></div>
+                    </div>
+                    <h2>Approve or Reject users</h2>
+                    <p>Approve or reject users here. The system checks if a student's signup matches class records added by the superadmin in the add student page. If matched, it confirms; otherwise, it shows "No data found."</p>
+                </div>
+    
+                <!-- Step 2 -->
+                <div class="firstlogin-step" data-step="2">
+                    <div class="firstlogin-icon-container">
+                        <div class="firstlogin-welcome-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>                          
+                            
+                        </div>
+                        <div class="firstlogin-icon-ring"></div>
+                        <div class="firstlogin-icon-particles"></div>
+                    </div>
+                    <h2>Let's head to your final tour!</h2>
+                     
+                </div> 
+            </div>
+    
+            <button id="firstlogin-next-btn" class="hidden">Continue</button>
+        </div>
+    </div>
+    
+    <style>
+    /* Background Overlay */
+    .firstlogin-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 9998;
+        opacity: 0;
+        animation: fadeIn 0.5s ease forwards;
+    }
+    
+    .firstlogin-modal {
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 550px;
+        min-height: 450px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 255, 0.95));
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.1),
+            0 0 0 1px rgba(0, 0, 0, 0.05),
+            inset 0 0 80px rgba(255, 255, 255, 0.5);
+        z-index: 9999;
+        overflow: hidden;
+        opacity: 0;
+        animation: modalPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    
+    /* Timer Styles */
+    .animation-timer {
+        position: absolute;
+        bottom: 2px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .timer-circle {
+        width: 52px;
+        height: 52px;
+        transform: rotate(-90deg);
+    }
+    
+    .timer-circle circle {
+        fill: none;
+        stroke: #0066ff;
+        stroke-width: 3;
+        stroke-dasharray: 151;
+        stroke-dashoffset: 151;
+        animation: timerAnimation 3s linear forwards;
+    }
+    
+    .timer-text {
+        position: absolute;
+        font-size: 16px;
+        font-weight: 600;
+        color: #0066ff;
+    }
+    
+    .firstlogin-modal-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Decorative Elements */
+    .firstlogin-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    
+    .firstlogin-blob {
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(0, 102, 255, 0.05));
+        border-radius: 50%;
+        filter: blur(40px);
+        animation: blobFloat 8s infinite ease-in-out;
+    }
+    
+    .firstlogin-dots {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(rgba(0, 102, 255, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.5;
+    }
+    
+    /* Progress Bar */
+    .firstlogin-progress {
+        margin-bottom: 40px;
+    }
+    
+    .firstlogin-progress-track {
+        width: 100%;
+        height: 6px;
+        background: rgba(0, 102, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    
+    .firstlogin-progress-fill {
+        width: 33.33%;
+        height: 100%;
+        background: #0066ff;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+    
+    .firstlogin-steps-count {
+        text-align: right;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    /* Icon Styles */
+    .firstlogin-icon-container {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 30px;
+    }
+    
+    .firstlogin-welcome-icon {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #0066ff, #0052cc);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+    }
+    
+    .firstlogin-welcome-icon svg {
+        width: 50px;
+        height: 50px;
+        color: white;
+        animation: iconPop 0.5s ease;
+    }
+    
+    .firstlogin-icon-ring {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border: 2px solid #0066ff;
+        border-radius: 50%;
+        animation: ringPulse 2s infinite;
+    }
+    
+    .firstlogin-icon-particles::before,
+    .firstlogin-icon-particles::after {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #0066ff;
+        border-radius: 50%;
+        animation: particleFloat 3s infinite;
+    }
+    
+    /* Content Styles */
+    .firstlogin-step {
+        display: none;
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        padding: 20px 0;
+    }
+    
+    .firstlogin-step.active {
+        display: block;
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    
+    .firstlogin-modal h2 {
+        color: #1a1a1a;
+        font-size: clamp(24px, 5vw, 32px);
+        margin: 0 0 16px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    
+    .firstlogin-modal p {
+        color: #666;
+        font-size: clamp(16px, 3vw, 18px);
+        line-height: 1.6;
+        margin: 0 0 30px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Button Styles */
+    #firstlogin-next-btn {
+        background: linear-gradient(135deg, #0066ff, #0052cc);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+        opacity: 0;
+        transform: translateY(10px);
+        animation: buttonFloat 3s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    #firstlogin-next-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+        transform: translateX(-100%);
+        transition: transform 0.5s ease;
+    }
+    
+    #firstlogin-next-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+    }
+    
+    #firstlogin-next-btn:hover::before {
+        transform: translateX(100%);
+    }
+    
+    #firstlogin-next-btn.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .hidden {
+        display: none;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes modalPopIn {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -40%) scale(0.95);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+    
+    @keyframes timerAnimation {
+        from { stroke-dashoffset: 151; }
+        to { stroke-dashoffset: 0; }
+    }
+    
+    @keyframes buttonFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    @keyframes blobFloat {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-30px, 20px) rotate(180deg); }
+    }
+    
+    @keyframes ringPulse {
+        0% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 0; }
+        100% { transform: scale(1); opacity: 0.5; }
+    }
+    
+    @keyframes particleFloat {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(10px, -10px); }
+    }
+    
+    @keyframes iconPop {
+        0% { transform: scale(0.5); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .firstlogin-modal {
+            padding: 30px;
+            min-height: 400px;
+        }
+        
+        .firstlogin-icon-container {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .firstlogin-welcome-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+    }
+    @media (max-width: 480px) {
+        .firstlogin-modal {
+            padding: 20px;
+            min-height: 350px;
+        }
+        
+        .animation-timer {
+            top: 25px;
+            left: 7px;
+            width: 40px;
+            height: 40px; 
+        }
+        
+        .timer-circle {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .timer-circle circle {
+            r: 18;
+            cx: 20;
+            cy: 20;
+            stroke-dasharray: 113;
+            stroke-dashoffset: 113;
+        }
+        
+        .timer-text {
+            font-size: 14px;
+        }
+        
+        .firstlogin-progress {
+            margin-bottom: 30px;
+        }
+        
+        .firstlogin-modal h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        
+        .firstlogin-modal p {
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        #firstlogin-next-btn {
+            padding: 14px 28px;
+            font-size: 15px;
+        }
+    }
+    </style>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const modal = document.getElementById("firstLoginEverModal");
+        const nextBtn = document.getElementById("firstlogin-next-btn");
+        const steps = document.querySelectorAll(".firstlogin-step");
+        const progressFill = document.querySelector(".firstlogin-progress-fill");
+        const currentStepText = document.querySelector(".firstlogin-steps-count .current");
+        const timerText = document.querySelector(".timer-text");
+        let currentStep = 1;
+        let timeLeft = 3;
+    
+        // Timer countdown
+        const timer = setInterval(() => {
+            timeLeft--;
+            timerText.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                nextBtn.classList.remove("hidden");
+                nextBtn.classList.add("show");
+            }
+        }, 1000); 
+    
+        function updateStep(step) {
+            // Reset timer for each step
+            timeLeft = 3;
+            timerText.textContent = timeLeft;
+            
+            // Restart timer animation
+            const timerCircle = document.querySelector(".timer-circle circle");
+            timerCircle.style.animation = 'none';
+            timerCircle.offsetHeight;
+            timerCircle.style.animation = 'timerAnimation 5s linear forwards';
+    
+            // Previous step update logic
+            steps.forEach(s => {
+                s.classList.remove("active");
+                if (s.dataset.step == step) {
+                    s.classList.add("active");
+                }
+            });
+    
+            progressFill.style.width = `${(step/2) * 100}%`;
+            currentStepText.textContent = step;
+    
+            if (step === 2) {
+                nextBtn.textContent = "Take me next";
+    
+                // Add an event listener for the button click
+                nextBtn.addEventListener("click", function handleNextClick() {
+                    // Redirect to the new page
+                    window.location.href = "{% url 'sao_settings' %}";
+    
+                    // Remove the event listener to avoid multiple redirects
+                    nextBtn.removeEventListener("click", handleNextClick);
+                });
+            } else {
+                nextBtn.textContent = "Continue";
+            }
+    
+    
+            const currentIcon = document.querySelector(`.firstlogin-step[data-step="${step}"] .firstlogin-welcome-icon svg`);
+            currentIcon.style.animation = 'none';
+            currentIcon.offsetHeight;
+            currentIcon.style.animation = 'iconPop 0.5s ease';
+            
+            // Hide button until timer completes
+            nextBtn.classList.add("hidden");
+            nextBtn.classList.remove("show");
+            
+            // Start new timer
+            timeLeft = 3;
+            const newTimer = setInterval(() => {
+                timeLeft--;
+                timerText.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(newTimer);
+                    nextBtn.classList.remove("hidden");
+                    nextBtn.classList.add("show");
+                }
+            }, 1000);
+        }
+    
+        nextBtn.addEventListener("click", function() {
+            if (currentStep < 2) {
+                currentStep++;
+                updateStep(currentStep);
+            } else {
+                // Fade out animation
+                modal.style.animation = 'fadeOut 0.5s ease forwards';
+                document.querySelector('.firstlogin-overlay').style.animation = 'fadeOut 0.5s ease forwards';
+                
+                setTimeout(() => {
+                    modal.style.display = "none";
+                    document.querySelector('.firstlogin-overlay').remove();
+                    document.body.classList.remove("firstlogin-modal-active");
+                }, 500);
+            }
+        });
+    
+        // Initialize
+        document.body.classList.add("firstlogin-modal-active");
+    }); 
+    </script>
+    {% endif %}
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const approveModal = document.getElementById('approveModal');

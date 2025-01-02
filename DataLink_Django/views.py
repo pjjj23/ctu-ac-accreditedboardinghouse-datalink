@@ -248,7 +248,7 @@ def owner_report(request):
                 print(f"Error updating status: {e}")  # Debugging
             return redirect('owner_report')
 
-    # Fetch all student reports from Firebase
+    # Fetch all owner reports from Firebase
     student_reports = db.child("usersReport").child("owners").get().val()
 
     # Prepare a list to hold all feedback reports
@@ -1040,7 +1040,9 @@ def addsuperadmin(request):
             'active_status': "offline",
             'accountStatus': "approved",
             'studentdatabasePin': studentdatabasePin,
-            'addsuperadminPin': addsuperadminPin
+            'addsuperadminPin': addsuperadminPin,
+            'signup_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  # Store current date and time
+            'daysLogin': 0  # Initialize daysLogin to 0
         }
 
         try:
@@ -1126,7 +1128,10 @@ def addsuperadmin(request):
         messages.error(request, f"Error fetching superadmin data: {str(e)}")
         superadmin_list = []
 
-    return render(request, 'add_sao.html', {'superadmin_list': superadmin_list})
+    return render(request, 'add_sao.html', {
+        'superadmin_list': superadmin_list,
+        **context,
+    })
 
 
 
@@ -1273,6 +1278,7 @@ def sao_verify_otp(request):
     ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
     current_url = request.path
     log_ip_and_url(ip_address, current_url, "sao/sao_login/sao_verify_otp/")
+
     if request.method == 'POST':
         # Collect OTP digits from separate inputs
         otp_digits = [
@@ -1308,8 +1314,17 @@ def sao_verify_otp(request):
                     user_info = user_data.each()[0]  # Get the first matching entry (should be the correct one)
                     superadmin_key = user_info.key()  # Get the key for the superadmin account
                     
-                    # Set active_status to 'online' in Firebase Realtime Database using the correct key
-                    db.child("saoaccounts").child("datas").child("superadmin").child(superadmin_key).update({"active_status": "online"})
+                    # Retrieve the current daysLogin value
+                    current_days_login = user_info.val().get('daysLogin', 0)
+
+                    # Increment the daysLogin by 1
+                    new_days_login = current_days_login + 1
+
+                    # Update active_status and daysLogin in Firebase Realtime Database using the correct key
+                    db.child("saoaccounts").child("datas").child("superadmin").child(superadmin_key).update({
+                        "active_status": "online",
+                        "daysLogin": new_days_login  # Update the daysLogin field
+                    })
 
                     # Redirect to the homepage or any protected page 
                     messages.success(request, f'Successfully logged in as {name}.')
@@ -1324,6 +1339,22 @@ def sao_verify_otp(request):
     return render(request, 'sao_otplogin.html')
 
 
+def demoAddStudent(request):
+    context = get_sao_context(request)
+    
+    if context is None:  # Check if email was not found
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('sao_login')  # Redirect to login page if email is missing
+    return render(request, 'demoForAddStudent.html', context)
+
+
+def demoAddSAO(request):
+    context = get_sao_context(request)
+    
+    if context is None:  # Check if email was not found
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('sao_login')  # Redirect to login page if email is missing
+    return render(request, 'demoForAddSAO.html', context)
 
 
 def sao_forgotpassword(request):
@@ -1373,6 +1404,7 @@ def sao_forgotpassword(request):
 
 
 def get_sao_context(request):
+    #greeting = get_greeting()
     # Retrieve name and email from session
     name = request.session.get('name', 'Guest')  # Default to 'Guest' if the name is not found
     email = request.session.get('email')
@@ -1381,6 +1413,9 @@ def get_sao_context(request):
     pending_students_count = 0  # Count for pending students
     pending_owners_count = 0  # Count for pending owners
     total_pending_count = 0  # Total count of pending students and owners
+    unfixed_students_count = 0  # Count for students with 'unfixed' status
+    unfixed_owners_count = 0  # Count for owners with 'unfixed' status
+    days_login = 0  # Default daysLogin
 
     if not email:
         return None  # If email is not found, return None
@@ -1393,30 +1428,51 @@ def get_sao_context(request):
         if existing_superadmins:
             for superadmin_key, superadmin_data in existing_superadmins.items():
                 if superadmin_data.get('email') == email:
-                    # Fetch active status and birthday
+                    # Fetch active status, birthday, and daysLogin
                     active_status = superadmin_data.get('active_status', 'offline')
                     birthday = superadmin_data.get('birthday', None)  # Fetch the birthday from Firebase
                     name = superadmin_data.get('name', name)  # Update the name from Firebase if available
+                    days_login = superadmin_data.get('daysLogin', 0)  # Fetch the daysLogin value
                     break
         else:
             print("No superadmin data found.")
             active_status = 'offline'
 
         # Fetch pending students count
-        # Iterate through all students and check accountStatus
         students_data = db.child("students").get().val()
         if students_data:
             for student_email, student_data in students_data.items():
                 if student_data.get('accountStatus') == 'pending':
                     pending_students_count += 1
+                if student_data.get('status') == 'unfixed':  # Check for 'unfixed' status
+                    unfixed_students_count += 1
 
         # Fetch pending owners count
-        # Iterate through all owners and check accountStatus
         owners_data = db.child("owners").get().val()
         if owners_data:
             for owner_email, owner_data in owners_data.items():
                 if owner_data.get('accountStatus') == 'pending':
                     pending_owners_count += 1
+                if owner_data.get('status') == 'unfixed':  # Check for 'unfixed' status
+                    unfixed_owners_count += 1
+
+        # Fetch owner reports and student reports from messages path
+        owner_reports = db.child("usersReport").child("owners").get().val()
+        student_reports = db.child("usersReport").child("students").get().val()
+
+        # Count owners with 'unfixed' status in the reports
+        if owner_reports:
+            for owner_email, owner_data in owner_reports.items():
+                for message_id, message_data in owner_data.get('messages', {}).items():
+                    if message_data.get('status') == 'unfixed':
+                        unfixed_owners_count += 1
+
+        # Count students with 'unfixed' status in the reports
+        if student_reports:
+            for student_email, student_data in student_reports.items():
+                for message_id, message_data in student_data.get('messages', {}).items():
+                    if message_data.get('status') == 'unfixed':
+                        unfixed_students_count += 1
 
         # Calculate the total pending count (students + owners)
         total_pending_count = pending_students_count + pending_owners_count
@@ -1433,10 +1489,58 @@ def get_sao_context(request):
         'birthday': birthday,  # Include birthday in the context
         'pending_students_count': pending_students_count,  # Include count of pending students
         'pending_owners_count': pending_owners_count,  # Include count of pending owners
-        'total_pending_count': total_pending_count  # Include total count of pending students and owners
+        'total_pending_count': total_pending_count,  # Include total count of pending students and owners
+        'unfixed_students_count': unfixed_students_count,  # Include count of students with 'unfixed' status
+        'unfixed_owners_count': unfixed_owners_count,  # Include count of owners with 'unfixed' status
+        'daysLogin': days_login,  # Include daysLogin in the context
+        #'greeting': greeting,
     }
 
     return context
+
+
+@csrf_exempt  # Only if CSRF token is manually handled in the script
+def update_days_login_sao(request):
+    if request.method == 'POST':
+        try:
+            # Use get_sao_context to fetch the SAO's context
+            sao_context = get_sao_context(request)
+            if not sao_context:
+                return JsonResponse({'error': 'SAO context could not be retrieved'}, status=400)
+
+            # Extract email from the context
+            email = sao_context.get('email')
+            if not email:
+                return JsonResponse({'error': 'Email not found in context'}, status=400)
+
+            # Generate Firebase key
+            email_key = email.replace('.', '_').replace('@', '_at_')
+
+            # Fetch the list of superadmins from Firebase
+            superadmins_data = db.child("saoaccounts").child("datas").child("superadmin").get().val()
+            if not superadmins_data:
+                return JsonResponse({'error': 'Superadmin data not found in Firebase'}, status=404)
+
+            # Loop through superadmin data to find the matching email
+            for superadmin_key, superadmin_data in superadmins_data.items():
+                if superadmin_data.get('email') == email:
+                    # Update the `daysLogin` field in Firebase for the matching superadmin
+                    db.child("saoaccounts").child("datas").child("superadmin").child(superadmin_key).update(
+                        {'daysLogin': sao_context['daysLogin'] + 1}
+                    )
+                    messages.success(request, "Tour is complete! Welcome Superadmin, you can now work your progress.")
+                    return JsonResponse({'message': 'daysLogin updated successfully'})
+
+            # If no matching email is found
+            return JsonResponse({'error': 'Superadmin email not found in the superadmin list'}, status=404)
+
+        except Exception as e:
+            # Handle errors gracefully
+            return JsonResponse({'error': str(e)}, status=500)
+
+    # Return a method not allowed response if the request is not POST
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 
 
@@ -1813,8 +1917,24 @@ def sao_message(request):
 
     if students_data and students_data.each():
         for item in students_data.each():
+            student_email = item.val().get('email', 'No Email')
+            sanitized_student_email = sanitize_path_part(student_email)
+            sanitized_superadmin_email = sanitize_path_part(superadmin_context['email'])
+
+            # Check for unread messages
+            path_1 = f'messages/{sanitized_superadmin_email}-{sanitized_student_email}'
+            path_2 = f'messages/{sanitized_student_email}-{sanitized_superadmin_email}'
+            unread_message = False
+
+            for path in [path_1, path_2]:
+                messages_data = db.child(path).order_by_child('seen').equal_to(False).get()
+                if messages_data and messages_data.each():
+                    unread_message = True
+                    break
+
+            # Build student info with unread_message flag
             student_info = {
-                'email': item.val().get('email', 'No Email'),
+                'email': student_email,
                 'username': item.val().get('username', 'No Username'),
                 'student_id': item.val().get('student_id', 'No Student ID'),
                 'profile_picture': item.val().get(
@@ -1822,6 +1942,7 @@ def sao_message(request):
                     'https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2Fprofile-default.png?alt=media&token=aef7b39e-480c-4f18-989a-fc13c5f242f4'
                 ),
                 'active_status': item.val().get('active_status', 'offline'),
+                'unread_message': unread_message,  # Add this flag
             }
             student_list.append(student_info)
 
@@ -3114,7 +3235,8 @@ def view_owners_boarding_house(request):
 
         if not owner_email:
             messages.error(request, 'No email provided in the form submission.')
-            return redirect('approved-owners-viewBH')
+            # Just render the page with the error message, no redirect
+            return render(request, 'approved-owners-viewBH.html')
 
         try:
             # Process email to get email_key
@@ -3124,10 +3246,10 @@ def view_owners_boarding_house(request):
             boarding_house_info = db.child('ownersBoardingHouse').child(email_key).get().val()
             print(f"Boarding house info: {boarding_house_info}")  # Debugging step
 
-            # If no boarding house info found, add an error message and redirect
+            # If no boarding house info found, add an error message and render the page
             if not boarding_house_info:
                 messages.error(request, 'No boarding house data found for this owner.')
-                return redirect('approved-owners-viewBH')  # Redirect to the desired page
+                return render(request, 'approved-owners-viewBH.html')
 
             # Extract required fields from the boarding house info
             fullname = boarding_house_info.get('name', None)
@@ -3151,7 +3273,22 @@ def view_owners_boarding_house(request):
             documents = boarding_house_info.get('documents', [])
             rooms = boarding_house_info.get('rooms', [])
 
-            # Create the owner_data dictionary
+            # Fetch ratings from the database
+            ratings = boarding_house_info.get('ratings', {})
+            average_rating = 0  # Default rating if no ratings exist
+            total_reviews = 0  # Default if no ratings exist
+
+            if ratings:
+                # Calculate total rating
+                total_rating = sum(rating['rating'] for rating in ratings.values())
+                # Calculate average rating
+                average_rating = total_rating / len(ratings) if len(ratings) > 0 else 0
+                # Calculate the number of users who gave ratings
+                total_reviews = len(ratings)
+                # Round the average rating
+                average_rating = round(average_rating)
+
+            # Add the calculated average rating and total reviews to the owner_data
             owner_data = {
                 'name': fullname,
                 'boardinghouseName': boardinghouse_name,
@@ -3170,13 +3307,16 @@ def view_owners_boarding_house(request):
                 'securityFeatures_curfew': securityFeatures_curfew,
                 'securityFeatures_cctv': securityFeatures_cctv,
                 'boardinghouseStatus': boardinghouse_status,
-                'email': email
+                'email': email,
+                'averageRating': average_rating,  # Include the average rating
+                'totalReviews': total_reviews,  # Include total reviews count
             }
 
             # Prepare the data to pass to the template
             context = {
                 'boardinghouse_data': owner_data,
-                'owner': boarding_house_info
+                'owner': boarding_house_info,
+                'star_range': range(1, 6), 
             }
 
             # Render the profile page with the fetched data
@@ -3185,12 +3325,14 @@ def view_owners_boarding_house(request):
         except Exception as e:
             # In case of error, add a generic error message
             messages.error(request, f"An error occurred: {str(e)}")
-            return redirect('approved-owners-viewBH')  # Redirect to the desired page
+            return render(request, 'approved-owners-viewBH.html')  # Render the page with the error
 
     else:
         # Handle GET request or any invalid method
         messages.error(request, 'Invalid request')
-        return redirect('approved-owners-viewBH')  # Redirect to the desired page
+        return render(request, 'approved-owners-viewBH.html')  # Render the page with the error
+
+
 
 
 
@@ -4570,7 +4712,7 @@ def ownerSignUpSecondStep(request):
         # Preserve existing rooms if any
         existing_rooms = saved_owner_data.get('rooms', [])
         
-        default_room_image_url = "https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2FCTU-logo-BH.png?alt=media&token=23bd87f5-9483-4c77-910b-a3d3838e07d9"
+        default_room_image_url = "https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2FbhdefaultImg.jpg?alt=media&token=840762fb-fd74-4b8a-9576-ccff59a636b6"
 
         for i in range(len(rooms)):
             room_data = {
@@ -4900,7 +5042,7 @@ def ownersRoomManagement(request):
         room_image = request.FILES.get('room_image')
 
         # Default room image URL
-        default_room_image_url = "https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2FCTU-logo-BH.png?alt=media&token=23bd87f5-9483-4c77-910b-a3d3838e07d9"
+        default_room_image_url = "https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2FbhdefaultImg.jpg?alt=media&token=840762fb-fd74-4b8a-9576-ccff59a636b6"
 
         # Initialize room data
         room_data = {

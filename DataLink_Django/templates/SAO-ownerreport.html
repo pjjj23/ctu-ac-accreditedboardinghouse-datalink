@@ -21,122 +21,215 @@
         .modal {
             transition: opacity 0.3s ease;
         }
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+        .filter-button.active {
+            background-color: #4F46E5;
+            color: white;
+        }
     </style>
 </head>
-<body class="bg-gray-100">
-    <header class="bg-indigo-600 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-6 flex justify-between items-center">
-            <button onclick="goBack()" class="text-white hover:text-indigo-200 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-            </button>
-            <div class="flex items-center space-x-4">
-                <img src="{% static 'img/CTU-logo-BH.png' %}" alt="Logo" class="h-10 w-10 rounded-full bg-white p-1">
-                <h1 class="text-2xl font-bold">Owner Report</h1>
+<body class="bg-gray-50">
+    <!-- Header with enhanced styling -->
+    <header class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <button onclick="goBack()" class="hover:bg-indigo-700 p-2 rounded-lg transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </button>
+                <div class="flex items-center space-x-4">
+                    <img src="{% static 'img/CTU-logo-BH.png' %}" alt="Logo" class="h-12 w-12 rounded-full bg-white p-1 shadow-md">
+                    <h1 class="text-3xl font-bold">Owner Report</h1>
+                </div>
+                <div class="w-6"></div> <!-- Spacer for alignment -->
             </div>
-            <button style="visibility: hidden;" onclick="toggleFixedPopup()" class="bg-white text-indigo-600 px-4 py-2 rounded-full hover:bg-indigo-100 transition">
-                Fixed Items
-            </button>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Total Reports</h3>
+                <p class="text-3xl font-bold text-gray-800 mt-2" id="totalReports">0</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Unfixed Issues</h3>
+                <p class="text-3xl font-bold text-red-600 mt-2" id="unfixedCount">0</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Fixed Issues</h3>
+                <p class="text-3xl font-bold text-green-600 mt-2" id="fixedCount">0</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-gray-500 text-sm font-medium">Response Rate</h3>
+                <p class="text-3xl font-bold text-indigo-600 mt-2" id="responseRate">0%</p>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                <div class="flex space-x-4">
+                    <button onclick="filterFeedback('all')" class="filter-button active px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-indigo-50">
+                        All Reports
+                    </button>
+                    <button onclick="filterFeedback('unfixed')" class="filter-button px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-indigo-50">
+                        Unfixed
+                    </button>
+                    <button onclick="filterFeedback('fixed')" class="filter-button px-6 py-2 rounded-lg text-sm font-medium transition-all hover:bg-indigo-50">
+                        Fixed
+                    </button>
+                </div>
+                <div class="relative">
+                    <input type="text" placeholder="Search reports..." class="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" onkeyup="searchFeedback(this.value)">
+                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Grid -->
         <div id="feedbackGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Loop through feedback_data and create feedback cards -->
             {% if feedback_data %}
                 {% for feedback in feedback_data %}
-                    <div class="feedback-card bg-white rounded-lg shadow-md overflow-hidden" id="feedback_{{ feedback.key }}">
+                    <div class="feedback-card bg-white rounded-xl shadow-sm overflow-hidden" 
+                         id="feedback_{{ feedback.key }}" 
+                         data-status="{{ feedback.status }}">
                         <div class="p-6">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
                                     <h2 class="text-xl font-semibold text-gray-800">{{ feedback.name }}</h2>
                                     <p class="text-sm text-gray-600">{{ feedback.email }}</p>
                                 </div>
-                                <span class="text-sm text-indigo-600 font-medium">{{ feedback.date_of_report }}</span> <!-- Use date_of_report instead of date -->
+                                <span class="text-sm text-indigo-600 font-medium">{{ feedback.date_of_report }}</span>
+                            </div>
+                            <div class="flex items-center mb-4">
+                                <span class="status-badge px-3 py-1 rounded-full text-sm font-medium 
+                                    {% if feedback.status == 'unfixed' %}
+                                        bg-red-100 text-red-800
+                                    {% else %}
+                                        bg-green-100 text-green-800
+                                    {% endif %}">
+                                    {{ feedback.status|title }}
+                                </span>
                             </div>
                             <p class="text-gray-700 mb-4">{{ feedback.message }}</p>
                             
                             {% if feedback.status == "unfixed" %}
-                            <form method="POST">
+                            <form method="POST" class="mt-4">
                                 {% csrf_token %}
-                                <input type="hidden" name="report_key" value="{{ feedback.key }}"> <!-- Corrected from report.key to feedback.key -->
-                                <input type="hidden" name="email" value="{{ feedback.email }}"> <!-- Corrected from report.email to feedback.email -->
-                                <button onclick="fixItem('feedback_{{ feedback.key }}', '{{ feedback.email }}')" type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition">Fix Report</button>
+                                <input type="hidden" name="report_key" value="{{ feedback.key }}">
+                                <input type="hidden" name="email" value="{{ feedback.email }}">
+                                <button onclick="fixItem('feedback_{{ feedback.key }}', '{{ feedback.email }}')" 
+                                        type="submit" 
+                                        class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-all focus:ring-4 focus:ring-indigo-200">
+                                    Mark as Fixed
+                                </button>
                             </form>
                             {% endif %}
                         </div>
                     </div>
                 {% endfor %}
             {% else %} 
-                <p>No feedback available.</p>
+                <div class="col-span-full text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No feedback available</h3>
+                    <p class="mt-1 text-sm text-gray-500">No reports have been submitted yet.</p>
+                </div>
             {% endif %}
         </div>
     </main>
-     
 
     <script>
-        const fixedItems = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
 
-         function fixItem(id, email) {
-    const itemToFix = document.getElementById(id);
-    if (itemToFix) {
-        // Update fixed items in the database via AJAX
-        fetch("{% url 'owner_report' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": '{{ csrf_token }}',  // Assuming CSRF is enabled in Django
-            },
-            body: JSON.stringify({
-                reportId: email,  // Sending email to identify the report
-                email: email
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Move item to fixedItems and remove from the feedback grid
-                fixedItems.push(itemToFix.cloneNode(true)); // Clone the item for fixedItems
-                itemToFix.remove(); // Remove the fixed item from the grid
-                renderFixedItems();
-            } else {
-                console.log("Error updating status.");
+        function updateStats() {
+            const cards = document.querySelectorAll('.feedback-card');
+            const totalReports = cards.length;
+            const unfixedCount = Array.from(cards).filter(card => card.dataset.status === 'unfixed').length;
+            const fixedCount = totalReports - unfixedCount;
+            const responseRate = totalReports > 0 ? Math.round((fixedCount / totalReports) * 100) : 0;
+
+            document.getElementById('totalReports').textContent = totalReports;
+            document.getElementById('unfixedCount').textContent = unfixedCount;
+            document.getElementById('fixedCount').textContent = fixedCount;
+            document.getElementById('responseRate').textContent = `${responseRate}%`;
+        }
+
+        function filterFeedback(status) {
+            currentFilter = status;
+            const cards = document.querySelectorAll('.feedback-card');
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            cards.forEach(card => {
+                const cardStatus = card.dataset.status;
+                const matchesSearch = card.textContent.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchesFilter = status === 'all' || cardStatus === status;
+                
+                card.style.display = matchesFilter && matchesSearch ? 'block' : 'none';
+            });
+        }
+
+        function searchFeedback(query) {
+            searchQuery = query;
+            const cards = document.querySelectorAll('.feedback-card');
+            
+            cards.forEach(card => {
+                const matchesSearch = card.textContent.toLowerCase().includes(query.toLowerCase());
+                const matchesFilter = currentFilter === 'all' || card.dataset.status === currentFilter;
+                
+                card.style.display = matchesSearch && matchesFilter ? 'block' : 'none';
+            });
+        }
+
+        function fixItem(id, email) {
+            const itemToFix = document.getElementById(id);
+            if (itemToFix) {
+                fetch("{% url 'owner_report' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        reportId: email,
+                        email: email
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        itemToFix.dataset.status = 'fixed';
+                        itemToFix.querySelector('.status-badge').className = 'status-badge px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800';
+                        itemToFix.querySelector('.status-badge').textContent = 'Fixed';
+                        itemToFix.querySelector('form')?.remove();
+                        updateStats();
+                        filterFeedback(currentFilter);
+                    }
+                })
+                .catch(error => console.log("AJAX request failed: ", error));
             }
-        })
-        .catch(error => console.log("AJAX request failed: ", error));
-    }
-}
-
-function renderFixedItems() {
-    const fixedList = document.getElementById('fixedItemsList');
-    fixedList.innerHTML = '';
-
-    if (fixedItems.length === 0) {
-        fixedList.innerHTML = '<p class="text-gray-500 italic">No fixed items yet.</p>';
-        return;
-    }
-
-    fixedItems.forEach(item => {
-        const fixedItem = document.createElement('div');
-        fixedItem.className = 'bg-gray-100 p-4 rounded';
-        fixedItem.innerHTML = item.innerHTML;  // Copy content
-        fixedList.appendChild(fixedItem);
-    });
-}
-
-
-        
-
-        function toggleFixedPopup() {
-            const popup = document.getElementById('fixedPopup');
-            popup.classList.toggle('hidden');
-            popup.classList.toggle('flex');
         }
 
         function goBack() {
-            window.location.href="{% url 'sao_feedback' %}"
+            window.location.href = "{% url 'sao_feedback' %}";
         }
+
+        // Initialize stats on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+        });
     </script>
 </body>
 </html>

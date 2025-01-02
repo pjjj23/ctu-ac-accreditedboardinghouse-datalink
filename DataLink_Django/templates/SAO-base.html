@@ -520,7 +520,7 @@
 }
 
 .nav-item .undoTheActionOfSAO-dropdown-menu-undo li {
-    padding: 10px;
+    padding: 15px;
 } 
 
 .nav-item .undoTheActionOfSAO-dropdown-menu-undo li a {
@@ -581,7 +581,7 @@
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link undoTheActionOfSAO-dropdown-toggle {% if active_page == 'undo' %}active{% endif %}" href="#" id="undoTheActionOfSAO-undoActionsDropdown" role="button">
-                                <i class="fas fa-undo"></i> Undo Users Action <span style="font-size: 0.7em; color: #fff; font-weight:900; font-family: Impact;"> ﹀</span>
+                                <i class="fas fa-undo"></i> Undo Users Action  
                             </a>
                             <ul class="undoTheActionOfSAO-dropdown-menu-undo" aria-labelledby="undoTheActionOfSAO-undoActionsDropdown">
                                 <li><h6 class="dropdown-header">Rejected</h6></li>
@@ -691,22 +691,31 @@
                                     </svg>
                                     Chat
                                 </a>
+                                 
                                 <a href="{% url 'owner_report' %}" class="dropdown-item-ctuac" onclick="reportProblem()">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="10"/>
                                         <line x1="12" y1="8" x2="12" y2="12"/>
                                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                                     </svg>
-                                    Owners Report
+                                    Owners Report 
+                                    <span style="display: inline-block; padding: 5px 10px; background-color: red; color: white; font-weight: bold; border-radius: 50px; text-align: center; margin-left: 10px; font-size: 0.8rem;">
+                                        {{ unfixed_owners_count }}
+                                    </span>
                                 </a>
+                                
                                 <a href="{% url 'student_report' %}" class="dropdown-item-ctuac" onclick="reportProblem()">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="10"/>
                                         <line x1="12" y1="8" x2="12" y2="12"/>
                                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                                     </svg>
-                                    Students Report
+                                    Students Report 
+                                    <span style="display: inline-block; padding: 5px 10px; background-color: red; color: white; font-weight: bold; border-radius: 50px; text-align: center; margin-left: 10px; font-size: 0.8rem;">
+                                        {{ unfixed_students_count }}
+                                    </span>
                                 </a>
+                                
                                 <div class="dropdown-divider-ctuac"></div>
                                 <a href="{% url 'saologout' %}" class="dropdown-item-ctuac logout" onclick="hideLogoutModal()">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

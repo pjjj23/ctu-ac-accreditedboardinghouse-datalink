@@ -13,10 +13,246 @@
             background-color: #f0f2f5;
         }
         .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    display: block;
+}
+.address-container {
+        line-height: 1.5;
+    }
+/* Handle small screens */
+@media screen and (max-width: 768px) {
+    .address-container {
+            word-break: break-word;
+            overflow-wrap: break-word;
+            margin: 0.5rem;
         }
+    #disableAccountModal .confirmation-popup-content {
+        width: 95%;
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    #disableReason {
+        font-size: 1rem;
+        padding: 0.875rem;
+    }
+    .confirm-removal-popup .confirmation-popup-content {
+        width: 85%;
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .confirmation-popup-content {
+        width: 95% !important;
+        margin: 1rem auto !important;
+        padding: 1.5rem !important;
+    }
+    
+    #confirmRemovalPopup .confirmation-popup-content {
+        margin: 0 1rem !important;
+    }
+    
+    .confirmation-popup button {
+        padding: 0.75rem !important;
+        font-size: 1rem !important;
+    }
+    /* Fix for course text overflow */
+    td .inline-flex.text-xs {
+        white-space: normal !important; /* Allow text to wrap */
+        display: inline-block !important;
+        width: 100%;
+        text-align: left;
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Make course span wrap properly */
+    tr.hover-trigger td:nth-child(3) span {
+        white-space: normal;
+        display: inline-block;
+        width: 100%;
+        line-height: 1.4;
+        font-size: 0.875rem;
+    }
+
+    table {
+        display: block;
+        width: 100%;
+    }
+
+    thead {
+        display: none; /* Hide headers on mobile */
+    }
+
+    tbody {
+        display: block;
+        width: 100%;
+        background: #f3f4f6; /* Light gray background for tbody */
+        padding: 1rem;
+    }
+
+    /* Style alternating user sections */
+    tr.hover-trigger {
+        display: block;
+        margin-bottom: 0.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Add a colored top border to each user section */
+    tr.hover-trigger::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #4f46e5; /* Indigo color for visual separation */
+    }
+
+    tr.hover-trigger:nth-child(4n + 1)::before {
+        background: #4f46e5; /* Indigo */
+    }
+
+    tr.hover-trigger:nth-child(4n + 2)::before {
+        background: #059669; /* Green */
+    }
+
+    tr.hover-trigger:nth-child(4n + 3)::before {
+        background: #dc2626; /* Red */
+    }
+
+    tr.hover-trigger:nth-child(4n + 4)::before {
+        background: #f59e0b; /* Yellow */
+    }
+
+    tr.hover-trigger td {
+        display: block;
+        text-align: left;
+        padding: 1rem;
+        border: none;
+        position: relative;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    tr.hover-trigger td:last-child {
+        border-bottom: none;
+    }
+
+    /* Enhanced headers before content */
+    tr.hover-trigger td::before {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.75rem;
+        color: #4b5563;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    tr.hover-trigger td:nth-child(1)::before { content: "Owners"; }
+    tr.hover-trigger td:nth-child(2)::before { content: "Contact"; }
+    tr.hover-trigger td:nth-child(3)::before { content: "Course"; }
+    tr.hover-trigger td:nth-child(4)::before { content: "Active Status"; }
+    tr.hover-trigger td:nth-child(5)::before { content: "Actions"; }
+
+    /* Enhanced button styling for mobile */
+    td .flex.space-x-2 {
+        display: flex;
+        justify-content: space-around;
+        padding: 0.5rem 0;
+        gap: 1rem;
+    }
+
+    td .flex.space-x-2 button {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background-color: #f3f4f6;
+        transition: all 0.2s ease;
+        width: 3.5rem;
+        height: 3.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    td .flex.space-x-2 button i {
+        font-size: 1.25rem;
+    }
+
+    /* Button specific colors */
+    td .flex.space-x-2 button:nth-child(1) { /* Edit button */
+        background-color: #e0e7ff;
+        color: #4f46e5;
+    }
+
+    td .flex.space-x-2 button:nth-child(2) { /* Disable button */
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    td .flex.space-x-2 button:nth-child(3) { /* Delete button */
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    /* Style the expanded info section */
+    tr.hover-target {
+        display: block;
+        margin-bottom: 1.5rem;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    tr.hover-target td {
+        display: block;
+        padding: 1rem;
+    }
+
+    /* Adjust the flex layout for student info */
+    td .flex.items-center {
+        gap: 1rem;
+    }
+
+    /* Make profile images larger on mobile */
+    td .flex.items-center .h-10.w-10 {
+        height: 3rem;
+        width: 3rem;
+    }
+
+    /* Style status badges */
+    td .inline-flex {
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Enhanced scrollbar appearance */
+.table-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
         .hover-trigger .hover-target {
             display: none;
         }
@@ -138,62 +374,179 @@
     background-color: #357ABD; /* Darker blue on hover */
 }
 
+/* Fix the confirmation popup positioning */
+ 
 .confirmation-popup {
-    position: fixed; /* Keeps the popup centered relative to the viewport */
+    position: fixed !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+ 
+.confirm-removal-popup {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Darkened overlay */
-    z-index: 1000; /* Ensure it appears above all other content */
+    background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-.confirmation-popup-content {
-    position: absolute; /* Use absolute positioning for explicit centering */
-    top: 50%; /* Center vertically */
-    left: 50%; /* Center horizontally */
-    transform: translate(-50%, -50%); /* Adjust position to center precisely */
+.confirm-removal-popup .confirmation-popup-content {
     background-color: white;
-    padding: 30px;
-    border-radius: 12px; /* Rounded corners */
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Enhanced shadow for depth */
-    max-width: 400px; /* Limit the max width */
-    width: 90%; /* Responsive width */
-    animation: fadeIn 0.3s; /* Smooth fade-in effect */
+    padding: 2rem;
+    border-radius: 0.75rem;
+    width: 90%;
+    max-width: 400px; /* Control maximum width on larger screens */
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
-.confirmation-popup h2 {
-    font-size: 1.5rem; /* Increased font size for the title */
-    margin-bottom: 15px; /* Space below the title */
-    color: #333; /* Darker color */
+.confirm-removal-popup h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
 }
 
-.confirmation-popup p {
-    font-size: 1rem; /* Standard font size */
-    margin-bottom: 20px; /* Space below the paragraph */
-    color: #555; /* Slightly lighter color */
+.confirm-removal-popup p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
 }
 
-.confirmation-close-button {
+.confirm-removal-popup .confirm-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
     cursor: pointer;
-    position: absolute; /* Positioned relative to the .confirmation-popup-content */
-    top: 15px; /* Adjusted position for better spacing */
-    right: 15px; /* Adjusted position for better spacing */
-    background: transparent; /* Transparent background */
-    border: none; /* Remove border */
-    font-size: 1.5rem; /* Increased size for visibility */
-    color: #888; /* Light color */
-    transition: color 0.3s; /* Color change on hover */
+    transition: background-color 0.2s;
 }
 
-.confirmation-close-button:hover {
-    color: #333; /* Darker color on hover */
+.confirm-removal-popup .confirm-button:hover {
+    background-color: #dc2626;
 }
 
-.confirmation-close-button:hover {
-    color: #333; /* Darker color on hover */
+.confirm-removal-popup .confirmation-close-button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0.25rem;
 }
+
+.confirm-removal-popup .confirmation-close-button:hover {
+    color: #1f2937;
+}
+
+
+#disableReason {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: white;  /* Fixed the background color */
+    color: #1f2937;
+    font-size: 0.875rem;
+}
+
+#disableReason:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Enhanced modal styles */
+#disableAccountModal.confirm-removal-popup {
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#disableAccountModal .confirmation-popup-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+#disableAccountModal h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+#disableAccountModal .edit-modal-field {
+    margin-bottom: 1.5rem;
+}
+
+#disableAccountModal .edit-modal-field label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+#disableAccountModal .confirm-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#disableAccountModal .confirm-button:hover {
+    background-color: #dc2626;
+}
+
+#disableAccountModal .confirmation-close-button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0.25rem;
+}
+
+#disableAccountModal .confirmation-close-button:hover {
+    color: #1f2937;
+}
+
 
 .confirmation-popup select,
 .confirmation-popup button {
@@ -214,37 +567,6 @@
 }
 
 .confirmation-popup button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
-}
-
-
-#disableReason {
-    display: block; /* Ensures proper block layout */
-    width: 100%; /* Make the dropdown occupy the full width of the modal content */
-    padding: 10px; /* Add padding for better usability */
-    font-size: 1rem; /* Standard font size for readability */
-    border: 1px solid #ccc; /* Light border */
-    border-radius: 5px; /* Rounded corners */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    margin-bottom: 20px; /* Space below the dropdown */
-}
-
-/* Style the button */
-.confirm-button {
-    display: block; /* Ensure the button is on its own line */
-    width: 100%; /* Full width for consistency */
-    padding: 12px; /* Adequate padding for usability */
-    font-size: 1rem; /* Readable font size */
-    color: #fff; /* White text color */
-    background-color: #007bff; /* Primary button color */
-    border: none; /* Remove border */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s ease; /* Smooth hover effect */
-    margin-top: 10px; /* Add spacing above the button */
-}
-
-.confirm-button:hover {
     background-color: #0056b3; /* Darker shade on hover */
 }
 
@@ -330,37 +652,28 @@
     }
 }
 
-
-/* Centered modal styles */
-#studentsBoardingApplied {
-    display: none; /* Hidden by default */
-    position: fixed;
-    inset: 0;
-    z-index: 1000; /* Ensure it appears on top */
-    backdrop-filter: blur(4px); /* Add a subtle blur effect */
-}
-
-/* Smooth animation for modal appearance */
-#studentsBoardingApplied .bg-white {
-    animation: fadeInUp 0.3s ease-out;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(50px);
+.view-profile-button, .view-students-button {
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.3s ease-in-out;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .view-profile-button {
+        background-color: #3b82f6;
+        color: white;
     }
-}
+    .view-profile-button:hover {
+        background-color: #2563eb;
+    }
+    .view-students-button {
+        background-color: #10b981;
+        color: white;
+    }
+    .view-students-button:hover {
+        background-color: #059669;
+    }
 
-/* Scrollable body styling */
-#studentsList {
-    max-height: 24rem;
-    overflow-y: auto;
-}
     </style>
 </head>
 <body class="bg-gray-100">
@@ -427,7 +740,10 @@
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-gray-900">{{ owner.firstname }} {{ owner.lastname }}</div>
-                                    <div class="text-sm text-gray-500">Address: {{ owner.address }}</div>
+                                    <div class="address-container text-sm text-gray-500">
+                                        Address: {{ owner.address }}
+                                    </div>
+
                                 </div>
                             </div>
                         </td>
@@ -473,17 +789,17 @@
                                 </button>
 
                                 <!-- Confirmation Popup --> 
-                                <div id="confirmationPopup" class="confirmation-popup" style="display: none;">
-                                    <div class="confirmation-popup-content">
-                                        <span class="confirmation-close-button" onclick="closeConfirmationPopup()">&times;</span>
-                                        <h2>Confirm Disable Account</h2>
-                                        <p>Are you sure you want to disable this account?</p>
+                                <div id="confirmationPopup" class="confirmation-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 9999;">
+                                    <div class="confirmation-popup-content" style="background-color: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 400px; position: relative; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin: auto; transform: translateY(-50%); top: 50%;">
+                                        <span class="confirmation-close-button" onclick="closeConfirmationPopup()" style="position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; color: #6b7280; cursor: pointer; border: none; background: transparent; padding: 0.25rem;">&times;</span>
+                                        <h2 style="color: #1f2937; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; text-align: center;">Confirm Disable Account</h2>
+                                        <p style="color: #4b5563; margin-bottom: 1.5rem; text-align: center;">Are you sure you want to disable this account?</p>
+                                        <p id="displayEmail" style="color: #4b5563; margin-bottom: 1.5rem;">Email: <span style="font-weight: bold;">[email]</span></p><br>
                                         <form id="confirmationForm" method="POST" action="{% url 'view_owners' %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="email" id="confirmEmail">
-                                            
-                                            <label for="disableReason">Reason for Disabling:</label>
-                                            <select name="disableReason" id="disableReason" required>
+                                            <label for="disableReason" style="display: block; margin-bottom: 0.5rem; color: #4b5563; font-weight: 500;">Reason for Disabling:</label>
+                                            <select name="disableReason" id="disableReason" required style="width: 100%; padding: 0.75rem; margin: 0.5rem 0 1rem 0; border: 1px solid #d1d5db; border-radius: 0.5rem; background-color: white; color: #1f2937; font-size: 0.875rem;">
                                                 <option value="" selected disabled>Select a reason</option>
                                                 <option value="Terms of Service Violation">Terms of Service Violation</option>
                                                 <option value="Incomplete Information">Incomplete Information</option>
@@ -503,13 +819,14 @@
                                                 <option value="Previous Account Ban">Previous Account Ban</option>
                                                 <option value="Abuse of Platform Rules">Abuse of Platform Rules</option>
                                             </select> 
-                                            <button type="submit" name="disable_account" class="confirm-button">Confirm Disable</button>
+                                            <br><button type="submit" name="disable_account" class="confirm-button" style="width: 100%; padding: 0.75rem; background-color: #ef4444; color: white; border: none; border-radius: 0.5rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s;">Confirm Disable</button>
                                         </form>
                                     </div>
                                 </div>  
-                            <button class="text-red-600 hover:text-red-900" onclick="confirmRemoval('{{ owner.email }}')">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
+                                <button class="text-red-600 hover:text-red-900" onclick="confirmRemoval('{{ owner.email }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                
                         
                             </div>
                         </td>
@@ -524,39 +841,60 @@
                                     <p class="text-sm text-gray-600"><strong>Register Date and Time: </strong>{{ owner.signup_time }}</p>
                                 </div>
                                 <div>
-                                    <button onclick="openProfileModal({{ owner }})" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
-                                        View Full Profile
-                                    </button>
-                                    <button 
-                                        onclick="filterStudentsByOwner('{{ owner.boardinghouseName }}')" 
-                                        class="bg-green-500 hover:bg-darkgreen-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
-                                        View Students Applied Here
-                                    </button>
-
-
-                                    <div id="studentsBoardingApplied" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
-                                        <div class="bg-white rounded-lg w-2/3 p-6 shadow-lg relative">
-                                            <button 
-                                                class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" 
-                                                onclick="closeStudentsBoardingAppliedModal()">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                            
-                                            <h2 id="modalTitle" class="text-xl font-semibold mb-4 text-center">Students Applied in</h2>
-        
-                                            <div id="modalContent" class="overflow-y-auto max-h-96">
-                                                <!-- Dynamic content -->
-                                            </div>
-                                            
-                                            <div class="mt-4 text-right">
-                                                <button 
-                                                    class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg"
-                                                    onclick="closeStudentsBoardingAppliedModal()">
-                                                    Close
-                                                </button>
-                                            </div>
-                                        </div>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;"> 
+                                        <button onclick="openProfileModal({{ owner }})" class="view-profile-button">
+                                            View Full Profile
+                                        </button>
+                                        <button 
+                                            onclick="filterStudentsByOwner('{{ owner.boardinghouseName }}')" 
+                                            class="view-students-button">
+                                            View Students Applied Here
+                                        </button>
                                     </div>
+
+                                    <div 
+    id="studentsBoardingApplied" 
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(31, 41, 55, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none;"
+>
+    <div 
+        class="modal-container" 
+        style="background-color: white; border-radius: 0.5rem; width: 66.6667%; max-width: 700px; padding: 2rem; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); position: relative; overflow-y: auto; max-height: 80vh;"
+    >
+        <button 
+            style="position: absolute; top: 1rem; right: 1rem; color: #6b7280; background: none; border: none; font-size: 1.5rem; cursor: pointer;"
+            onclick="closeStudentsBoardingAppliedModal()"
+        >
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <h2 
+            id="modalTitle" 
+            style="text-align: center; font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;"
+        >
+            Students Applied in
+        </h2>
+
+        <div 
+            id="modalContent" 
+            style="overflow-y: auto; max-height: 60vh; margin-bottom: 1rem;"
+        >
+            <!-- Dynamic content -->
+        </div>
+        
+        <div 
+            style="margin-top: 1rem; text-align: right;"
+        >
+            <button 
+                style="background-color: #ef4444; color: white; font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#dc2626';"
+                onmouseout="this.style.backgroundColor='#ef4444';"
+                onclick="closeStudentsBoardingAppliedModal()"
+            >
+                Close
+            </button>
+        </div>
+    </div>
+</div>
                                     
 
                                 </div>
@@ -595,39 +933,85 @@
         </div>
     </div>
      <!-- Modal to display owner profile -->
-        <div id="profileModal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeProfileModal()">&times;</span>
-                <h2 class="text-2xl font-semibold mb-4">Owner Full Profile</h2>
-                <div class="flex items-center mb-4">
-                    <img id="modalProfilePicture" class="h-16 w-16 rounded-full object-cover mr-4" src="#" alt="Profile Picture">
-                    <div>
-                        <h3 id="modalName" class="text-xl font-bold"></h3>
-                        <p><strong>Email:</strong> <span id="modalEmail"></span></p>
-                        <p><strong>Boarding House:</strong> <span id="modalBoardingHouse"></span></p>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <p><strong>Address:</strong> <span id="modalAddress"></span></p>
-                    <p><strong>Gender:</strong> <span id="modalGender"></span></p>
-                    <p><strong>Phone number:</strong> <span id="modalPhone"></span></p>
-                    <p><strong>Boarding House Status:</strong> <span id="modalBoardingHouseStatus"></span></p>
-                    <p><strong>Account Status:</strong> <span id="modalAccountStatus"></span></p>
-                    <p><strong>Active Status:</strong> <span id="modalActiveStatus"></span></p>
-                    <p><strong>Signup Date:</strong> <span id="modalSignupTime"></span></p>
-                </div> 
-                <form action="{% url 'view_owners_boarding_house' %}" method="post">
-                    <a class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg" onclick="closeProfileModal()" style="margin: 0 10px 0 0; cursor: pointer;">
-                        Close
-                    </a>
-                    {% csrf_token %}
-                    <input type="hidden" name="owner_email" value="{{ owner.email }}">
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg">
-                        View Boarding House
-                    </button>  
-                </form>    
-            </div>
-        </div>
+     <div 
+     id="profileModal" 
+     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(31, 41, 55, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none;"
+ >
+     <div 
+         class="modal-content" 
+         style="background-color: white; border-radius: 0.5rem; width: 70%; max-width: 800px; padding: 2rem; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); position: relative; overflow-y: auto; max-height: 85vh;"
+     >
+         <button 
+             style="position: absolute; top: 1rem; right: 1rem; color: #6b7280; background: none; border: none; font-size: 1.5rem; cursor: pointer;"
+             onclick="closeProfileModal()"
+         >
+             &times;
+         </button>
+ 
+         <h2 
+             style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; text-align: center;"
+         >
+             Owner Full Profile
+         </h2>
+ 
+         <div 
+             style="display: flex; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; text-align: center;"
+         >
+             <img 
+                 id="modalProfilePicture" 
+                 style="height: 4rem; width: 4rem; border-radius: 50%; object-fit: cover; margin-right: 1rem;"
+                 src="#" 
+                 alt="Profile Picture"
+             >
+             <div>
+                 <h3 
+                     id="modalName" 
+                     style="font-size: 1.25rem; font-weight: 700;"
+                 ></h3>
+                 <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                 <p><strong>Boarding House:</strong> <span id="modalBoardingHouse"></span></p>
+             </div>
+         </div>
+ 
+         <div 
+             style="margin-bottom: 1rem;"
+         >
+             <p><strong>Address:</strong> <span id="modalAddress"></span></p>
+             <p><strong>Gender:</strong> <span id="modalGender"></span></p>
+             <p><strong>Phone number:</strong> <span id="modalPhone"></span></p>
+             <p><strong>Boarding House Status:</strong> <span id="modalBoardingHouseStatus"></span></p>
+             <p><strong>Account Status:</strong> <span id="modalAccountStatus"></span></p>
+             <p><strong>Active Status:</strong> <span id="modalActiveStatus"></span></p>
+             <p><strong>Signup Date:</strong> <span id="modalSignupTime"></span></p>
+         </div>
+ 
+         <form 
+             action="{% url 'view_owners_boarding_house' %}" 
+             method="post" 
+             style="display: flex; justify-content: space-between; flex-wrap: wrap;"
+         >
+             <a 
+                 style="background-color: #ef4444; color: white; font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s; text-align: center; flex: 1; margin-right: 10px; text-decoration: none;"
+                 onmouseover="this.style.backgroundColor='#dc2626';"
+                 onmouseout="this.style.backgroundColor='#ef4444';"
+                 onclick="closeProfileModal()"
+             >
+                 Close
+             </a>
+             {% csrf_token %}
+             <input type="hidden" name="owner_email" value="{{ owner.email }}">
+             <button 
+                 type="submit" 
+                 style="background-color: #3b82f6; color: white; font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s; text-align: center; flex: 1;"
+                 onmouseover="this.style.backgroundColor='#2563eb';"
+                 onmouseout="this.style.backgroundColor='#3b82f6';"
+             >
+                 View Boarding House
+             </button>
+         </form>    
+     </div>
+ </div>
+ 
 
 
     <!-- Edit Profile Modal -->
@@ -692,8 +1076,9 @@
     <!-- Removal Modal -->
     <div class="confirm-removal-popup" id="confirmRemovalPopup" style="display: none;">
         <div class="confirmation-popup-content">
-            <button class="confirmation-close-button" onclick="closeConfirmationPopup()">&times;</button>
+            <button class="confirmation-close-button" onclick="closeconfirmRemovalPopup()">&times;</button>
             <h2>Confirm Account Removal</h2>
+            <p id="displayEmailRemoval" style="color: #4b5563; margin-bottom: 1.5rem;">Email: <span style="font-weight: bold;">[email]</span></p><br>
             <p>Are you sure you want to remove this account?</p>
             <form id="confirmationForm" method="POST" action="{% url 'view_owners' %}">
                 {% csrf_token %}
@@ -816,11 +1201,17 @@
         function openConfirmationPopup(email) {
             console.log("Opening confirmation popup for:", email);
             document.getElementById("confirmEmail").value = email;
+            document.getElementById("displayEmail").innerHTML = `Email: <span style="font-weight: bold;">${email}</span>`;
+
             document.getElementById("confirmationPopup").style.display = "block";
         }
     
         function closeConfirmationPopup() {
             document.getElementById("confirmationPopup").style.display = "none";
+        }
+
+        function closeconfirmRemovalPopup() {
+            document.getElementById("confirmRemovalPopup").style.display = "none";
         }
     
         // Make functions globally accessible
@@ -830,11 +1221,14 @@
         window.closeEditModal = closeEditModal;
         window.openConfirmationPopup = openConfirmationPopup;
         window.closeConfirmationPopup = closeConfirmationPopup;
+        window.closeconfirmRemovalPopup = closeconfirmRemovalPopup;
     });
 
     function confirmRemoval(email) {
         console.log('Email for removal:', email);  // Debugging
         document.getElementById('confirmEmail2').value = email;
+        document.getElementById('displayEmailRemoval').innerHTML = `Email: <span style="font-weight: bold;">${email}</span>`;
+
         document.getElementById('confirmRemovalPopup').style.display = 'flex';
     }
 
@@ -928,6 +1322,23 @@ function closeStudentsBoardingAppliedModal() {
 }
 
 
+// Responsive adjustments using JavaScript for mobile
+function adjustModalForScreen() {
+        const modal = document.querySelector('.modal-container');
+        const width = window.innerWidth;
+
+        if (width <= 768) { // Tablet and mobile screens
+            modal.style.width = '90%';
+            modal.style.padding = '1.5rem';
+        }
+
+        if (width <= 480) { // Small mobile screens
+            modal.style.width = '95%';
+        }
+    }
+
+    window.addEventListener('resize', adjustModalForScreen);
+    window.addEventListener('load', adjustModalForScreen);
     </script>
 </body>
 {% endblock %}

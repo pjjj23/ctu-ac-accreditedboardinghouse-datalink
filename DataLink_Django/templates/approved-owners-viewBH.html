@@ -6,6 +6,9 @@
     <title>Cozy Haven Boarding House</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/splidejs/4.1.4/css/splide.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+
     <style>
         :root {
             --primary: #2563eb;
@@ -1029,6 +1032,197 @@
                 justify-content: center;
             }
         }
+
+        .rooms-section {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .splide__arrow {
+        background: white !important;
+        opacity: 1 !important;
+        height: 3.5rem !important;
+        width: 3.5rem !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+    }
+    
+    .splide__arrow svg {
+        height: 1.5rem !important;
+        width: 1.5rem !important;
+        fill: none !important;
+        stroke: #4B5563 !important;
+    }
+    
+    .splide__arrow:hover {
+        background: #F3F4F6 !important;
+    }
+    
+    .splide__arrow:disabled {
+        opacity: 0.5 !important;
+    }
+    
+    .splide__pagination {
+        bottom: -2rem !important;
+    }
+    
+    .splide__pagination__page {
+        background: #D1D5DB !important;
+        margin: 0 6px !important;
+    }
+    
+    .splide__pagination__page.is-active {
+        background: #2563EB !important;
+        transform: scale(1.2) !important;
+    }
+    
+    .room-card {
+        height: 100%;
+        margin: 0.5rem;
+    }
+    
+    @media (min-width: 640px) {
+        .splide__track {
+            padding: 1.5rem 0;
+        }
+    }
+        
+        .modalStarRatingOfBH-container {
+      position: fixed;
+      top: 20px;
+      right: -300px; 
+      width: 180px;
+      background: linear-gradient(135deg, #ffffff, #f6f9ff);
+      border-radius: 16px;
+      box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.08),
+        0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 14px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      opacity: 0;
+      animation: modalStarRatingOfBH-slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      transform-origin: top right;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(10px); /* Slide-in effect */
+      gap: 8px;
+      z-index: 9999; /* Ensure modal appears above other content */
+       
+    }
+
+    .modalStarRatingOfBH-container.visible {
+  opacity: 1; /* Fully visible */
+  right: 20px; /* Slide into view */
+  transform: none; /* Reset transform */
+}
+
+    .modalStarRatingOfBH-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.1),
+        0 3px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    @keyframes modalStarRatingOfBH-slideIn {
+      to {
+        right: 20px;
+        opacity: 1;
+      }
+    }
+
+    .modalStarRatingOfBH-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .modalStarRatingOfBH-title {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+    }
+
+    .modalStarRatingOfBH-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modalStarRatingOfBH-stars {
+      display: flex;
+      gap: 2px;
+    }
+
+    .modalStarRatingOfBH-star {
+      font-size: 13px;
+      color: #d3d3d3;
+      filter: drop-shadow(0 1px 1px rgba(251, 191, 36, 0.2));
+      animation: modalStarRatingOfBH-shine 2s infinite;
+    }
+
+    .modalStarRatingOfBH-star.active {
+        color: #ffcc00; /* Gold color for active stars */
+        }
+    @keyframes modalStarRatingOfBH-shine {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.2); }
+    }
+
+    .modalStarRatingOfBH-rating {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      margin-left: auto;
+    }
+
+    .modalStarRatingOfBH-badge {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+    }
+
+    .modalStarRatingOfBH-badge::before {
+      content: '•';
+      display: inline-block;
+      margin-right: 4px;
+      animation: modalStarRatingOfBH-pulse 2s infinite;
+    }
+
+    @keyframes modalStarRatingOfBH-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .modalStarRatingOfBH-subtitle {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .modalStarRatingOfBH-container,
+      .modalStarRatingOfBH-star,
+      .modalStarRatingOfBH-badge::before {
+        animation: none;
+      }
+    }
+
+     
+
     </style>
 </head>
 <body>
@@ -1046,7 +1240,22 @@
             <p>CTU AC Accredited Boarding House</p>
         </div>
     </div>
-
+    <div class="modalStarRatingOfBH-container">
+        <div class="modalStarRatingOfBH-header">
+          <span class="modalStarRatingOfBH-title">Rating</span>
+          <span class="modalStarRatingOfBH-badge">Live</span>
+        </div>
+        <div class="modalStarRatingOfBH-content">
+            <div class="modalStarRatingOfBH-stars">
+                {% for i in star_range %}
+                  <span class="modalStarRatingOfBH-star {% if i <= boardinghouse_data.averageRating %}active{% endif %}">★</span>
+                {% endfor %}
+              </div>
+              <div class="modalStarRatingOfBH-rating">{{ boardinghouse_data.averageRating }}</div>
+              </div>
+              <div class="modalStarRatingOfBH-subtitle">{{ boardinghouse_data.totalReviews }} verified reviews</div>
+              
+      </div>
      <!-- Modal -->
      <div class="modal" id="imageModal">
         <div class="modal-content">
@@ -1222,11 +1431,107 @@
         </div>
     </div>
     
+    <div class="rooms-section container mx-auto px-4 py-8">
+        <h3 class="text-2xl font-bold mb-8 text-center">Available Rooms</h3>
+        
+        <!-- Main Carousel Container -->
+        <div class="splide w-full max-w-7xl mx-auto" id="rooms-carousel">
+            <div class="splide__track">
+                <ul class="splide__list">
+                    {% for room in boardinghouse_data.rooms %}
+                    <li class="splide__slide px-2">
+                        <div class="room-card bg-white rounded-lg shadow-lg overflow-hidden transition-transform hover:scale-[1.02] h-full">
+                            <!-- Room Image Placeholder -->
+                            <div class="h-56 bg-gray-200 relative"> 
+                                {% if room.images %}
+                                {% for image in room.images %}
+                                    <img src="{{ image }}" alt="{{ room.roomName }}" class="w-full h-full object-cover">
+                                {% endfor %}
+                            {% else %}
+                                <div class="flex items-center justify-center h-full bg-gray-100">
+                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                </div>
+                            {% endif %}
+
+                                
+                                <!-- Availability Badge -->
+                                <div class="absolute top-4 right-4">
+                                    <span class="px-3 py-1 text-sm font-semibold rounded-full {% if room.availabilityStatus == 'AVAILABLE' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ room.availabilityStatus }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Room Details -->
+                            <div class="p-6">
+                                <h4 class="text-xl font-semibold mb-4">{{ room.roomName }}</h4>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center text-gray-700">
+                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="font-medium">₱{{ room.price }}</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-gray-700">
+                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        <span>{{ room.aircon }}</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-gray-700">
+                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                        <span>{{ room.numberStayingIn }}/{{ room.capacity }} Occupants</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- View Details Button -->
+                                <button class="mt-6 w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                                    Room is {{ room.status|default:"Shown" }} to students
+                                </button>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="splide__slide">
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <p class="text-gray-500 text-lg">No rooms available at the moment.</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- Add custom navigation arrows -->
+            <div class="splide__arrows">
+                <button class="splide__arrow splide__arrow--prev">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                                      
+                </button>
+                <button class="splide__arrow splide__arrow--next">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+            
+             
 
     <button onclick="backbtn()" class="back-button">
         <i class="fas fa-arrow-left"></i> Back
     </button>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/splidejs/4.1.4/js/splide.min.js"></script>
     <script>
         function openApproveDialog() {
             document.getElementById('approveDialog').style.display = 'flex';
@@ -1321,6 +1626,27 @@
 
         // Add new carousel functionality
         document.addEventListener('DOMContentLoaded', function() {
+            new Splide('#rooms-carousel', {
+            type: 'slide',
+            perPage: 3,
+            perMove: 1,
+            gap: '1rem',
+            padding: '2rem',
+            breakpoints: {
+                1024: {
+                    perPage: 2,
+                },
+                640: {
+                    perPage: 1,
+                }
+            },
+            arrows: true,
+            pagination: true,
+            autoplay: false,
+            interval: 3000,
+            pauseOnHover: true,
+        }).mount();
+        
     const carousel = document.querySelector('.carousel-inner');
     const items = document.querySelectorAll('.carousel-item');
     const prevBtn = document.querySelector('.prev');
@@ -1589,6 +1915,33 @@ function viewImage(imageUrl) {
         item.style.opacity = '0';
         item.style.animation = `fadeIn 0.5s ease ${index * 0.1}s forwards`;
     });
+
+    // Select the modal container
+const starRatingModalBH = document.querySelector('.modalStarRatingOfBH-container');
+
+// Initially hide the modal
+function hideModal() {
+  starRatingModalBH.style.opacity = '0'; // Completely hidden
+  starRatingModalBH.style.right = '-300px'; // Offscreen
+  starRatingModalBH.style.transform = 'translateY(10px)'; // Apply exit animation
+}
+
+// Show the modal
+function showModal() {
+  starRatingModalBH.style.opacity = '1'; // Fully visible
+  starRatingModalBH.style.right = '20px'; // Slide into view
+  starRatingModalBH.style.transform = 'none'; // Reset transform
+}
+
+// Trigger the modal appearance after 2 seconds
+setTimeout(() => {
+  showModal();
+}, 2000); // Modal appears after 2 seconds
+
+// Optionally, ensure it's hidden at the start
+hideModal();
+
+
     </script>
 </body>
 </html>
