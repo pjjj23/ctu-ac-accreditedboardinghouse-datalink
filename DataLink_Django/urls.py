@@ -28,7 +28,8 @@ urlpatterns=[
     path('sao/saohomepage/message_sao_owner/delete_conversation_by_sao_owner/<str:owner_email>/', views.delete_conversation_by_sao_owner, name='delete_conversation_by_sao_owner'),
      
     path('update_days_login_sao/', views.update_days_login_sao, name='update_days_login_sao'),
-
+    path('sao/usermonitoring', views.usermonitoring, name='usermonitoring'), 
+    
     path('sao/sao_feedback/', views.sao_feedback, name='sao_feedback'),
     path('sao/sao_settings/', views.sao_settings, name='sao_settings'),
     path('sao/saohomepage/pendingreq/', views.pendingreq, name='pendingreq'),

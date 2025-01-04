@@ -24,30 +24,90 @@ from django.core.mail import EmailMessage
 from django.utils.html import strip_tags
 from django.views import View
 from collections import Counter
+import pytz
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 # Create your views here.
 
-def log_ip_and_url(ip_address, current_url, url_description):
-    valid_ip_address = ip_address.replace('.', '_')
-    if valid_ip_address:
-        existing_data = db.child("fetchedusersIPaddress").child(valid_ip_address).get()
-        if existing_data.val():
-            urls_visited = existing_data.val().get("urls_visited", [])
-            urls_visited.append(url_description)  # Save descriptive URL instead of raw path
-            
-            # Keep only the latest 5 URLs
-            urls_visited = urls_visited[-5:]  # Retain only the last 5 URLs
-        else:
-            urls_visited = [url_description]
+def log_ip_and_url(ip_address, current_url, url_description, user_email=None, user_status=None, user_role=None):
+    """
+    Logs the user's IP address, the URL they visited, and additional metadata.
+    Adds the logged-in user's email as "identity", "active_status", and "role" if provided.
+    Also calculates the active status based on last visited time and updates accordingly.
+    """
 
-        db.child("fetchedusersIPaddress").child(valid_ip_address).set({
-            "ip": ip_address,
-            "urls_visited": urls_visited,
-            "last_visited": str(datetime.now()),  # Optional: Timestamp of the last visit
-        })
-        print(f"Saved data for IP {valid_ip_address}: {urls_visited}")
+    valid_ip_address = ip_address.replace('.', '_')  # Firebase-safe key
+
+    if valid_ip_address:
+        # Retrieve existing data for the IP address
+        existing_data_response = db.child("fetchedusersIPaddress").child(valid_ip_address).get()
+
+        # Check if data exists in the response
+        existing_data = existing_data_response.val() if existing_data_response.val() else {}
+
+        # Initialize if no data exists
+        if not existing_data:
+            existing_data = {
+                "ip": ip_address,
+                "urls_visited": [],
+                "last_visited": str(datetime.now(pytz.timezone('Asia/Manila'))),  # Set the timezone correctly
+                "active_status": "Inactive",  # Default to Inactive
+            }
+
+        # Fetch existing URLs and append the new description if the URL has changed
+        urls_visited = existing_data.get("urls_visited", [])
+        current_time = datetime.now(pytz.timezone('Asia/Manila'))
+
+        # Update `last_visited` and `active_status` if a new URL is visited
+        if not urls_visited or urls_visited[-1] != url_description:
+            urls_visited.append(url_description)  # Save descriptive URL instead of raw path
+            urls_visited = urls_visited[-5:]  # Retain only the last 5 URLs
+            existing_data["urls_visited"] = urls_visited
+            existing_data["last_visited"] = str(current_time)  # Update last visited timestamp
+            existing_data["active_status"] = "Active"  # Mark as active on new activity
+
+        # Function to check for inactivity and update status
+        def check_inactivity():
+            try:
+                last_visited_time = datetime.fromisoformat(existing_data["last_visited"])
+            except ValueError:
+                print("Error parsing last_visited time. Resetting to current time.")
+                last_visited_time = current_time  # Use current time as fallback
+
+            time_difference = datetime.now(pytz.timezone('Asia/Manila')) - last_visited_time
+
+            # Debugging print to check time difference
+            print(f"Time difference: {time_difference}")
+
+            # If no new activity, update status to "Inactive"
+            if time_difference > timedelta(seconds=2):
+                existing_data["active_status"] = "Inactive"
+                db.child("fetchedusersIPaddress").child(valid_ip_address).set(existing_data)
+                print(f"Updated active_status to 'Inactive' for IP {valid_ip_address}")
+            else:
+                print(f"User is still active for IP {valid_ip_address}")
+
+        # Update additional fields if provided (identity and role)
+        if user_email:
+            existing_data["identity"] = user_email
+        if user_role:
+            existing_data["role"] = user_role
+
+        # Save data to Firebase
+        db.child("fetchedusersIPaddress").child(valid_ip_address).set(existing_data)
+        print(f"Saved data for IP {valid_ip_address}: {existing_data}")
+
+        # Start a timer to check inactivity after 2 seconds
+        threading.Timer(3, check_inactivity).start()
+
+        return existing_data["active_status"]
+
+
+
+
+
+
 
 def home(request: HttpRequest):
     # Get the user's IP address
@@ -1276,8 +1336,7 @@ def sao_login(request):
 
 def sao_verify_otp(request):
     ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
-    current_url = request.path
-    log_ip_and_url(ip_address, current_url, "sao/sao_login/sao_verify_otp/")
+    current_url = request.path 
 
     if request.method == 'POST':
         # Collect OTP digits from separate inputs
@@ -1326,6 +1385,10 @@ def sao_verify_otp(request):
                         "daysLogin": new_days_login  # Update the daysLogin field
                     })
 
+                    # Log the IP and URL with additional user data
+                    user_role = user_info.val().get("role", "unknown")  # Fetch role safely
+                    log_ip_and_url(ip_address, current_url, "sao/sao_login/sao_verify_otp/", user_email=email, user_status="online", user_role=user_role)
+                    
                     # Redirect to the homepage or any protected page 
                     messages.success(request, f'Successfully logged in as {name}.')
                     return redirect('saohomepage')  # Redirect to the desired page after OTP verification
@@ -1336,7 +1399,11 @@ def sao_verify_otp(request):
         else:
             messages.error(request, 'OTP verification failed.')
 
+    # Log IP and URL in case of GET or failed POST
+    log_ip_and_url(ip_address, current_url, "sao/sao_login/sao_verify_otp/")
+
     return render(request, 'sao_otplogin.html')
+
 
 
 def demoAddStudent(request):
@@ -1355,6 +1422,51 @@ def demoAddSAO(request):
         messages.error(request, 'Email not found in session. Please log in again.')
         return redirect('sao_login')  # Redirect to login page if email is missing
     return render(request, 'demoForAddSAO.html', context)
+
+
+def usermonitoring(request):
+    context = get_sao_context(request)
+
+    if context is None:  # Check if email was not found
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('sao_login')  # Redirect to login page if email is missing
+
+    # Fetch data from 'fetchedusersIPaddress' path in Firebase
+    users_data = db.child('fetchedusersIPaddress').get()
+
+    users = []
+    if users_data and users_data.each():
+        for item in users_data.each():
+            user_info = item.val()
+            user = {
+                'ip': user_info.get('ip'),
+                'last_visited': user_info.get('last_visited'),
+                'urls_visited': user_info.get('urls_visited', []),
+                'identity': user_info.get('identity', 'Unknown'),
+                'active_status': user_info.get('active_status', 'Unknown'),
+                'role': user_info.get('role', 'Unknown'),
+            }
+            users.append(user)
+
+    print("Fetched Users:", users)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # Return the user data as JSON for AJAX requests
+        return JsonResponse({'users': users})
+
+    # Add users to the context to be used in the template for regular rendering
+    context['user_data_list'] = users
+    return render(request, 'usersMonitor.html', context)
+
+
+
+
+
+
+
+
+
+
 
 
 def sao_forgotpassword(request):
@@ -1917,24 +2029,8 @@ def sao_message(request):
 
     if students_data and students_data.each():
         for item in students_data.each():
-            student_email = item.val().get('email', 'No Email')
-            sanitized_student_email = sanitize_path_part(student_email)
-            sanitized_superadmin_email = sanitize_path_part(superadmin_context['email'])
-
-            # Check for unread messages
-            path_1 = f'messages/{sanitized_superadmin_email}-{sanitized_student_email}'
-            path_2 = f'messages/{sanitized_student_email}-{sanitized_superadmin_email}'
-            unread_message = False
-
-            for path in [path_1, path_2]:
-                messages_data = db.child(path).order_by_child('seen').equal_to(False).get()
-                if messages_data and messages_data.each():
-                    unread_message = True
-                    break
-
-            # Build student info with unread_message flag
             student_info = {
-                'email': student_email,
+                'email': item.val().get('email', 'No Email'),
                 'username': item.val().get('username', 'No Username'),
                 'student_id': item.val().get('student_id', 'No Student ID'),
                 'profile_picture': item.val().get(
@@ -1942,7 +2038,6 @@ def sao_message(request):
                     'https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2Fprofile-default.png?alt=media&token=aef7b39e-480c-4f18-989a-fc13c5f242f4'
                 ),
                 'active_status': item.val().get('active_status', 'offline'),
-                'unread_message': unread_message,  # Add this flag
             }
             student_list.append(student_info)
 
@@ -4320,6 +4415,25 @@ def owner_login(request):
                 # Store email in session
                 request.session['email'] = email
                 
+                # Fetch role and active_status
+                user_role = owner_data.get('role', 'unknown')
+                user_active_status = owner_data.get('active_status', 'offline')
+
+                # Call the log_ip_and_url function to log the login details
+                ip_address = request.META.get('REMOTE_ADDR', '')  # Get the IP address of the request
+                current_url = request.build_absolute_uri()  # Get the current URL
+                log_ip_and_url(ip_address, current_url, "owner/owner_login/", user_email=email, user_status="online", user_role=user_role)
+
+                # Save user info in Firebase for monitoring
+                user_info = {
+                    'identity': email,
+                    'active_status': user_active_status,
+                    'role': user_role
+                }
+
+                # Save user info to Firebase for monitoring
+                db.child("fetchedusersIPaddress").child(user_id).update(user_info)
+
                 # Check if the role is 'owner'
                 if owner_data.get('role') == 'owner':
                     # Update the active_status to 'online'
@@ -4338,7 +4452,6 @@ def owner_login(request):
                     except Exception as e:
                         print(f"Failed to update timeLoggedOut: {str(e)}")
 
- 
                     messages.success(request, f'Successfully logged in as {request.session["first_name"]}.')
                     return redirect('ownerhomepage')  # Redirect to the owner's dashboard
                 else:
@@ -6607,7 +6720,6 @@ def send_otp_email(email, otp):
 def student_login(request):
     ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
     current_url = request.path
-    log_ip_and_url(ip_address, current_url, "student/student_login/")
     email = ""  # Initialize email variable
 
     if request.method == 'POST':
@@ -6659,6 +6771,9 @@ def student_login(request):
                 "daysLogin": user_data.get("daysLogin", 0) + 1  # Increment login days
             })
 
+            # Log IP and URL with identity
+            log_ip_and_url(ip_address, current_url, "student/student_login/", user_email=email, user_status="online", user_role=user_data.get("role"))
+
             # Reset failed attempts on successful login
             login_attempts[email] = {'failed_attempts': 0, 'delay': 0, 'locked_until': None}
 
@@ -6687,7 +6802,11 @@ def student_login(request):
 
             return render(request, 'StudentLOGIN.html', {'email': email})
 
+    # Log the IP address and URL without identity for GET requests
+    log_ip_and_url(ip_address, current_url, "student/student_login/")
+
     return render(request, 'StudentLOGIN.html', {'email': email})
+
 
 
 
@@ -7167,6 +7286,10 @@ def student_homeReport(request):
 
 
 def student_apply_now(request):
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+    current_url = request.path
+    log_ip_and_url(ip_address, current_url, "student/student_apply_now/")
+
     context = get_student_context(request)
 
     if context is None or 'email' not in context:
@@ -7334,6 +7457,9 @@ def student_apply_now(request):
 
  
 def studentapplication(request):
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+    current_url = request.path
+    log_ip_and_url(ip_address, current_url, "student/studentapplication/")
     # Retrieve the student context
     context = get_student_context(request)
 
@@ -8286,7 +8412,7 @@ def studentlogout(request):
     if email:
         email_key = email.replace('.', '_').replace('@', '_at_')
         
-        # Update active_status to offline
+        # Update active_status to offline in the students table
         db.child("students").child(email_key).update({"active_status": "offline"})
         
         # Start counting offline time in a separate thread
@@ -8312,6 +8438,7 @@ def studentlogout(request):
     request.session.flush()  # Clear the session
     messages.success(request, "You have been logged out successfully.")
     return redirect('student_login')
+
 
 
  

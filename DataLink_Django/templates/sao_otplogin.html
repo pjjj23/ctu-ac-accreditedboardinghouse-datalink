@@ -5,256 +5,343 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Superadmin OTP Verification</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #1a237e;
-            --secondary-color: #3f51b5;
-            --accent-color: #ff4081;
-            --background-color: #6c6767;
-            --text-color: #333;
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary-color: #3b82f6;
+            --accent-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --success-color: #10b981;
+            --border-color: #e5e7eb;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('{% static "img/CTU-logo-BH.png" %}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
         }
 
         .otp-container {
-            background-color: #fff;
-            padding: 90px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             text-align: center;
-            max-width: 400px;
+            max-width: 440px;
             width: 100%;
+            margin: 1rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .otp-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
 
         .logo {
-            width: 80px;
-            height: 80px;
-            background-color: var(--primary-color);
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 auto 20px;
+            margin: 0 auto 2rem;
+            padding: 0.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 3px solid var(--primary-color);
         }
 
-        .logo-text {
-            color: #fff;
-            font-size: 24px;
-            font-weight: bold;
+        .logo img {
+            max-width: 90%;
+            height: auto;
+            border-radius: 50%;
+            object-fit: contain;
         }
 
         h1 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         p {
-            color: #666;
-            margin-bottom: 30px;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            font-size: 1rem;
+            line-height: 1.6;
         }
 
         .otp-input {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 2.5rem;
         }
 
         .otp-input input {
-            width: 50px;
-            height: 50px;
+            width: 3.5rem;
+            height: 3.5rem;
             text-align: center;
-            font-size: 24px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            margin: 0 5px;
-            transition: border-color 0.3s;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+            border-radius: 1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        .otp-input input::-webkit-outer-spin-button,
+        .otp-input input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .otp-input input:focus {
-            border-color: var(--secondary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
             outline: none;
+            transform: translateY(-2px);
         }
 
         button {
-            padding: 12px 30px;
+            width: 100%;
+            padding: 1rem;
             border: none;
-            background-color: var(--secondary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: #fff;
-            border-radius: 25px;
+            border-radius: 1rem;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.1s;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         button:hover {
-            background-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
         }
 
         button:active {
-            transform: scale(0.98);
+            transform: translateY(0);
         }
-
-        .error-message {
-            color: var(--accent-color);
-            margin-top: 20px;
-            font-weight: bold;
-        }
-
 
         .successAnderrorMessagesPoppedup {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    max-width: 350px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    z-index: 9999;
-    opacity: 0;
-    transform: translateX(100px);
-    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
-}
-
-.successAnderrorMessagesPoppedup.success {
-    border-left: 4px solid #10B981;
-}
-
-.successAnderrorMessagesPoppedup.error {
-    border-left: 4px solid #EF4444;
-}
-
-.successAnderrorMessagesPoppedup.slideOut {
-    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
-}
-
-.successAnderrorMessagesPoppedup-icon {
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.success .successAnderrorMessagesPoppedup-icon {
-    color: #10B981;
-}
-
-.error .successAnderrorMessagesPoppedup-icon {
-    color: #EF4444;
-}
-
-.successAnderrorMessagesPoppedup-content {
-    color: #374151;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-}
-
-@keyframes successAnderrorMessagesPoppedup-slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes successAnderrorMessagesPoppedup-slideOut {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-}
-
-@media (max-width: 768px) {
-    .otp-container{ 
-        height: 50%;
-        padding: 40px;
-    }
-    .otp-input { 
-            margin-bottom: 110px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 380px;
+            padding: 1.25rem 1.5rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateX(100px);
+            animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
         }
 
-        .otp-input input {
-            width: 25px;
-            height: 25px;
-            text-align: center;
-            font-size: 12px;   
+        .successAnderrorMessagesPoppedup.success {
+            border-left: 4px solid var(--success-color);
         }
-}
 
+        .successAnderrorMessagesPoppedup.error {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .successAnderrorMessagesPoppedup.slideOut {
+            animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+        }
+
+        .successAnderrorMessagesPoppedup-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .success .successAnderrorMessagesPoppedup-icon {
+            color: var(--success-color);
+        }
+
+        .error .successAnderrorMessagesPoppedup-icon {
+            color: var(--accent-color);
+        }
+
+        .successAnderrorMessagesPoppedup-content {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        @keyframes successAnderrorMessagesPoppedup-slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes successAnderrorMessagesPoppedup-slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .otp-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .otp-input {
+                gap: 0.5rem;
+            }
+
+            .otp-input input {
+                width: 2.75rem;
+                height: 2.75rem;
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .otp-container {
+                padding: 1.5rem;
+            }
+
+            .otp-input input {
+                width: 2.25rem;
+                height: 2.25rem;
+                font-size: 1rem;
+            }
+
+            button {
+                padding: 0.875rem;
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                    <div class="successAnderrorMessagesPoppedup-icon">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="successAnderrorMessagesPoppedup-content">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
     <div class="otp-container">
         <div class="logo">
-            <span class="logo-text"><img style="height: 95px; width: 95px;" src="{% static 'img/CTU-logo-BH.png' %}"></span>
+            <img src="{% static 'img/CTU-logo-BH.png' %}" alt="CTU Logo">
         </div>
         <h1>Superadmin Verification</h1>
-        <p>Please enter the OTP sent to proceed logging in. This is for security purposes.</p>
-        <form method="POST" action="{% url 'sao_verify_otp' %}">
+        <p>Please enter the 6-digit OTP sent to proceed with logging in. This is for security purposes.</p>
+        <form method="POST" action="{% url 'sao_verify_otp' %}" id="otpForm">
             {% csrf_token %}
             <div class="otp-input">
-                <input autocomplete="off" type="text" name="otp1" maxlength="1" pattern="\d" required>
-                <input autocomplete="off" type="text" name="otp2" maxlength="1" pattern="\d" required>
-                <input autocomplete="off" type="text" name="otp3" maxlength="1" pattern="\d" required>
-                <input autocomplete="off" type="text" name="otp4" maxlength="1" pattern="\d" required>
-                <input autocomplete="off" type="text" name="otp5" maxlength="1" pattern="\d" required>
-                <input autocomplete="off" type="text" name="otp6" maxlength="1" pattern="\d" required>
+                <input type="number" name="otp1" maxlength="1" pattern="\d" required>
+                <input type="number" name="otp2" maxlength="1" pattern="\d" required>
+                <input type="number" name="otp3" maxlength="1" pattern="\d" required>
+                <input type="number" name="otp4" maxlength="1" pattern="\d" required>
+                <input type="number" name="otp5" maxlength="1" pattern="\d" required>
+                <input type="number" name="otp6" maxlength="1" pattern="\d" required>
             </div>
-            <button type="submit">Verify OTP</button>
+            <button type="submit">
+                <i class="fas fa-shield-alt"></i>
+                Verify OTP
+            </button>
         </form>
-        <div class="messages">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
-                        <div class="successAnderrorMessagesPoppedup-icon">
-                            {% if message.tags == 'success' %}
-                                <i class="fas fa-check-circle"></i>
-                            {% elif message.tags == 'error' %}
-                                <i class="fas fa-exclamation-circle"></i>
-                            {% endif %}
-                        </div>
-                        <div class="successAnderrorMessagesPoppedup-content">
-                            {{ message }}
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    
-    
+         
     </div>
     <script>
         const otpInputs = document.querySelectorAll('.otp-input input');
+        const form = document.getElementById('otpForm');
+
         otpInputs.forEach((input, index) => {
+            // Allow only numbers
             input.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                
                 if (e.target.value.length === 1) {
                     if (index < otpInputs.length - 1) {
                         otpInputs[index + 1].focus();
                     }
+                    
+                    // Check if all inputs are filled
+                    const allFilled = Array.from(otpInputs).every(input => input.value.length === 1);
+                    if (allFilled) {
+                        form.submit();
+                    }
                 }
             });
 
+            // Handle backspace
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !e.target.value) {
                     if (index > 0) {
@@ -262,23 +349,27 @@
                     }
                 }
             });
-        });
-        const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
-    
-    messages.forEach(message => {
-        // Set timeout to remove message after 3 seconds
-        setTimeout(() => {
-            message.classList.add('slideOut');
-            
-            // Remove element after animation completes
-            message.addEventListener('animationend', function(e) {
-                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
-                    message.remove();
+
+            // Prevent e, E, +, - in number input
+            input.addEventListener('keydown', (e) => {
+                if (['e', 'E', '+', '-'].includes(e.key)) {
+                    e.preventDefault();
                 }
             });
-        }, 3000);
-    });
+        });
 
+        // Handle toast messages
+        const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+        messages.forEach(message => {
+            setTimeout(() => {
+                message.classList.add('slideOut');
+                message.addEventListener('animationend', function(e) {
+                    if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                        message.remove();
+                    }
+                });
+            }, 3000);
+        });
     </script>
 </body>
 </html>

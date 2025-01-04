@@ -1,0 +1,761 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Monitoring Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/CTU-logo-BH.png' %}" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            position: relative;
+            width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            padding-left: 3rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-change {
+            color: var(--success);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .users-table-container {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+        }
+
+        .users-table th {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .users-table tr {
+            background: var(--bg-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .users-table tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ip-badge {
+            font-family: 'Monaco', monospace;
+            background: var(--bg-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .url-cell {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--accent-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -100%;  /* Changed from -240px for better reliability */
+                top: 0;
+                bottom: 0;
+                width: 240px;
+                z-index: 999;
+                transition: all 0.3s ease;
+                background: var(--bg-secondary);
+            }
+
+            .sidebar.show {
+                left: 0;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                width: 100%;
+                padding: 1rem;
+                margin-top: 60px;
+            }
+
+            .chart-container {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+ 
+            @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .search-container {
+                width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .users-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 0.75rem;
+                min-width: 120px;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        } 
+        @media (max-width: 480px) {
+    .main-content {
+        padding: 0.5rem;
+    }
+
+    .stat-card {
+        margin: 0 0.5rem;
+    }
+
+    .chart-container {
+        margin: 0.5rem;
+    }
+
+    .users-table-container {
+        margin: 0.5rem;
+    }
+
+    .table-header {
+        padding: 1rem;
+    }
+
+    .search-input {
+        padding: 0.75rem 1rem;
+        padding-left: 2.5rem;
+    }
+
+    .search-icon {
+        left: 0.75rem;
+    }
+}
+
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 101;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1024px) {
+    .menu-toggle {
+        display: block;
+    }
+}
+
+
+.online {
+        font-weight: bold;
+        color: rgb(11, 255, 11);   
+        padding: 5px;
+        border-radius: 5px;  
+    }
+
+    .offline {
+        font-weight: bold;
+        color: rgb(189, 182, 182); 
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    /* Styling for offline status */
+    .unknown {
+        font-weight: bold;
+        color: red; 
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    /* Styling for student role */
+    .student-role { 
+        color: #007bff;
+        padding: 5px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .owner-role { 
+        color: gold;
+        padding: 5px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .sao-role{
+        color: rgb(255, 0, 204);
+        padding: 5px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+    /* Styling for other roles */
+    .other-role {
+        color: red;
+        padding: 5px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body> 
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2v20M2 12h20"></path>
+                </svg>
+                Dashboard
+            </div>
+            <nav class="nav-links">
+                <a href="#" class="nav-link active">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    Overview
+                </a>
+                <a href="#" class="nav-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Users
+                </a>
+                <a href="#" class="nav-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    Analytics
+                </a>
+            </nav>
+        </aside>
+        <button id="menuToggle" class="menu-toggle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <main class="main-content">
+            <div class="header">
+                <h1>User Activity Monitor</h1>
+                <div class="search-container">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Search by IP, location, or URL...">
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Active Users</div>
+                    <div class="stat-value" id="activeUsers">0</div>
+                    <div class="stat-change">↑ 12% from last hour</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Sessions</div>
+                    <div class="stat-value" id="totalSessions">0</div>
+                    <div class="stat-change">↑ 8% from yesterday</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Peak Users Today</div>
+                    <div class="stat-value" id="peakUsers">0</div>
+                    <div class="stat-change">↑ 15% from last week</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="activityChart" height="100"></canvas>
+            </div>
+
+            <div class="users-table-container">
+                <div class="table-header">
+                    <h2>Active Users</h2>
+                </div>
+                <table class="users-table">
+                    <thead>
+                        <tr> 
+                            <th>IP Address</th> 
+                            <th>Current URL</th> 
+                            <th>Identity</th> 
+                            <th>Active Status</th>
+                            <th>Role</th>
+                            <th>Last Activity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for user in user_data_list %}
+                            <tr>
+                                <td>{{ user.ip }}</td>
+                                <td>
+                                    {% if user.urls_visited %}
+                                        <a href="{{ user.urls_visited|last }}" target="_blank">{{ user.urls_visited|last }}</a>
+                                    {% else %}
+                                        No URL visited
+                                    {% endif %}
+                                </td>
+                                <td style="color: {% if user.identity == 'Unknown' %}red{% else %}cyan{% endif %};">
+                                    {{ user.identity }}
+                                </td>     
+                                <td class="{% if user.active_status == 'Active' %}online{% else %}unknown{% endif %}">
+                                    {{ user.active_status }}
+                                </td>                    
+                                <td class="{% if user.role == 'student' %}student-role{% elif user.role == 'owner' %}owner-role{% elif user.role == 'superadmin' %}sao-role{% else %}other-role{% endif %}">
+                                    {{ user.role }}
+                                </td>                            
+                                <td>{{ user.last_visited }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        
+            
+        </main>
+    </div>
+
+    
+
+    <script> 
+
+     // Function to fetch user data via AJAX
+     function fetchUserData() {
+            $.ajax({
+                url: '{% url "usermonitoring" %}',  // Make sure to replace with the correct URL name
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Clear the current table body
+                    $('#userTableBody').empty();
+
+                    // Loop through the fetched users and append them to the table body
+                    data.users.forEach(function(user) {
+                        const row = $('<tr></tr>');
+                        row.append(`<td>${user.ip}</td>`);
+                        row.append(`<td>${user.urls_visited.length > 0 ? `<a href="${user.urls_visited[user.urls_visited.length - 1]}" target="_blank">${user.urls_visited[user.urls_visited.length - 1]}</a>` : 'No URL visited'}</td>`);
+                        row.append(`<td style="color: ${user.identity === 'Unknown' ? 'red' : 'cyan'};">${user.identity}</td>`);
+                        row.append(`<td class="${user.active_status === 'Active' ? 'online' : 'unknown'}">${user.active_status}</td>`);
+                        row.append(`<td class="${user.role === 'student' ? 'student-role' : user.role === 'owner' ? 'owner-role' : user.role === 'superadmin' ? 'sao-role' : 'other-role'}">${user.role}</td>`);
+                        row.append(`<td>${user.last_visited}</td>`);
+
+                        $('#userTableBody').append(row);
+                    });
+                },
+                error: function() {
+                    alert('Error fetching user data');
+                }
+            });
+        }
+
+        // Fetch data every 5 seconds for real-time updates
+        setInterval(fetchUserData, 5000);
+
+        // Fetch initial data when the page loads
+        fetchUserData();
+    
+        let peakUsersCount = 0;
+
+        // Initialize Chart.js
+        const ctx = document.getElementById('activityChart').getContext('2d');
+const activityChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+        datasets: [{
+            label: 'Active Users',
+            data: Array.from({length: 24}, () => Math.floor(Math.random() * 50) + 30),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                    color: '#94a3b8'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: '#94a3b8'
+                }
+            }
+        }
+    }
+});
+
+function updateStats() {
+    const activeUsers = mockUsers.filter(user => user.status === 'active').length;
+    $('#activeUsers').text(activeUsers);
+    $('#totalSessions').text(mockUsers.length);
+    
+    if (activeUsers > peakUsersCount) {
+        peakUsersCount = activeUsers;
+        $('#peakUsers').text(peakUsersCount);
+    }
+
+    // Update chart data
+    const newData = activityChart.data.datasets[0].data;
+    newData.shift();
+    newData.push(Math.floor(Math.random() * 50) + 30);
+    activityChart.update('none');
+}
+ 
+
+// Search functionality
+$('.search-input').on('input', function() {
+    const searchTerm = $(this).val().toLowerCase();
+    const filteredUsers = mockUsers.filter(user => 
+        user.ip.toLowerCase().includes(searchTerm) ||
+        user.location.toLowerCase().includes(searchTerm) ||
+        user.url.toLowerCase().includes(searchTerm) ||
+        user.name.toLowerCase().includes(searchTerm) ||
+        user.id.toLowerCase().includes(searchTerm)
+    );
+    renderUsers(filteredUsers);
+});
+
+// Initial render
+updateStats();
+renderUsers(mockUsers);
+
+// Simulate real-time updates
+setInterval(() => {
+    mockUsers.forEach(user => {
+        if (Math.random() > 0.7) {
+            user.status = user.status === 'active' ? 'inactive' : 'active';
+            user.lastActivity = Math.floor(Math.random() * 20) + ' mins ago';
+        }
+    });
+    updateStats();
+    renderUsers(mockUsers);
+}, 5000);
+
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.querySelector('.sidebar');
+
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+
+    // Close the sidebar when clicking outside of it
+    document.addEventListener('click', (e) => {
+        if (
+            window.innerWidth <= 1024 &&
+            !sidebar.contains(e.target) &&
+            !menuToggle.contains(e.target)
+        ) {
+            sidebar.classList.remove('active');
+        }
+    });
+});
+
+
+
+</script>
+
+</body>
+</html>

@@ -517,7 +517,14 @@
                         <label for="password">
                             <i class="fas fa-lock"></i> Password
                         </label>
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                         
+
+                        <div class="password-field" style="position: relative;"> 
+                            <input type="password" id="password" name="password" placeholder="Enter your password" style="width: 100%;" required> 
+                            <span class="toggle-password" style="position: absolute; right: 10px; top: 35%; transform: translateY(-50%); cursor: pointer;" onclick="togglePasswordVisibility('password')">
+                                <i class="fas fa-eye" id="password-eye"></i>
+                            </span>
+                        </div>
                         <div class="remember-me">
                             <label for="rememberMe">
                                 <input type="checkbox" id="rememberMe" name="rememberMe">
@@ -592,7 +599,15 @@ const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
         }, 3000);
     });
 
-
+    function togglePasswordVisibility(id) {
+            const field = document.getElementById(id);
+            const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+            field.setAttribute('type', type);
+            const icon = field.nextElementSibling.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+    
     </script>
 </body>
 </html>
