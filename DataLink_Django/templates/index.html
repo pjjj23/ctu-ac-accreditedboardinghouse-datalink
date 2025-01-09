@@ -168,7 +168,20 @@
             z-index: 9999;
             opacity: 1;
             transition: opacity 0.5s ease-out;
+            animation: pulse 1.5s ease-in-out infinite;
         }
+
+@keyframes pulse {
+  0% {
+        scale: 1.4;
+    }
+    50% {
+      scale: 1.1;
+    }
+    100% {
+      scale: 1.3;
+    }
+}
 
         .loading-overlay.hidden {
             opacity: 0;
@@ -853,8 +866,7 @@
     currentStep: 0,
 
     init() {
-        this.addEventListeners();
-        this.show();
+        this.addEventListeners(); 
     },
 
     addEventListeners() {

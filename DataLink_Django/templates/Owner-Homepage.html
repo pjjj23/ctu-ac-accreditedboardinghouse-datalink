@@ -77,11 +77,14 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title"><i class="fas fa-map-marker-alt"></i> Manage your Boarding House</h5>
-                    <div id="map" style="height: 200px; background-color: #eee;"> 
+                    <div id="map" style="height: 200px; background-color: #eee;">
+                        <!-- The map will be rendered here -->
                     </div>
-                    <a href="ownerSignUpSecondStep"><button class="btn btn-success btn-block mt-3">
-                        <i class="fas fa-edit"></i> Manage
-                    </button></a>   
+                    <a href="ownerSignUpSecondStep">
+                        <button class="btn btn-success btn-block mt-3">
+                            <i class="fas fa-edit"></i> Manage
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -867,7 +870,43 @@ document.addEventListener("DOMContentLoaded", function() {
 {% endblock %}
 
 {% block extra_js %}
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2z-IxhB9cO0mLaNHwBAnRe0pOT0DQl4Y&callback=initMap">
+</script>
 <script>
+    // Initialize the map
+    function initMap() {
+        // Fetched location data (replace with dynamic data passed from Django)
+        const locationData = {
+            latitude: {{ location_data.latitude|default:"null" }},
+            longitude: {{ location_data.longitude|default:"null" }}
+        };
+
+        // Check if location data exists
+        if (locationData.latitude && locationData.longitude) {
+            const location = {
+                lat: parseFloat(locationData.latitude),
+                lng: parseFloat(locationData.longitude)
+            };
+
+            // Create the map centered on the location
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: location,
+                zoom: 15
+            });
+
+            // Add a marker at the location
+            const marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                title: "Your Boarding House Location"
+            });
+        } else {
+            // Display an error if location data is unavailable
+            document.getElementById("map").innerHTML = "<p style='color:red;'>No location data available.</p>";
+        }
+    }
+    
     const messageList = document.querySelector('.message-list');
 
 

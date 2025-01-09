@@ -568,9 +568,10 @@ input[type="date"]:disabled {
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title" id="removeConfirmationModalLabel">Confirm Removal</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" aria-label="Close" onclick="closeModalAndBackdrop('removeConfirmationModal')">
                         <span aria-hidden="true">&times;</span>
                     </button>
+                    
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to remove this application?</p>
@@ -590,7 +591,7 @@ input[type="date"]:disabled {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="closeModalAndBackdrop('removeConfirmationModal')">Cancel</a>
                     <button type="submit" name="remove_application" class="btn btn-danger">Confirm Remove</button>
                 </div>
             </form>
@@ -1289,6 +1290,48 @@ const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
             });
         }, 3000);
     });
+
+
+// Open the modal
+function openModal() {
+    document.getElementById('removeConfirmationModal').style.display = 'flex';
+}
+
+// Close the modal
+function closeModal() {
+    document.getElementById('removeConfirmationModal').style.display = 'none';
+}
+
+// Add event listener to close modal when clicking outside of modal content
+window.onclick = function(event) {
+    var modal = document.getElementById('removeConfirmationModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+};
+
+
+function closeModalAndBackdrop(modalId) {
+    // Close the modal
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        modal.style.display = 'none'; // Ensure the modal is completely hidden
+    }
+
+    // Remove the backdrop
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+        backdrop.classList.remove('show');
+        backdrop.remove(); // Completely remove the backdrop from DOM
+    }
+
+    // Optionally reset any form inside the modal (e.g., input fields)
+    const form = modal.querySelector('form');
+    if (form) {
+        form.reset(); // Reset the form fields if necessary
+    }
+}
 
 </script>
 {% endblock %}

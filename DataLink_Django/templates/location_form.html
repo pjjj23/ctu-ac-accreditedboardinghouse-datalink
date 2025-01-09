@@ -1,0 +1,611 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/CTU-logo-BH.png' %}" />
+  <title>Setup Location</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #1e1b4b;
+      --accent: #7c3aed;
+      --background: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --success: #059669;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .back-nav {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      opacity: 0.7;
+    }
+
+    .back-nav:hover {
+      opacity: 1;
+    }
+
+    .back-button {
+      background: transparent;
+      border: 1px solid var(--text);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background: var(--text);
+      color: var(--background);
+      transform: translateX(-5px);
+    }
+
+    .map-section {
+      position: relative;
+      height: calc(100vh - 4rem);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+
+    #getLocation {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+      z-index: 10;
+    }
+
+    #getLocation:hover {
+      transform: translateX(-50%) translateY(-5px);
+      box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
+    }
+
+    .form-section {
+      padding: 3rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .coordinates-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .input-group:nth-child(1) { animation-delay: 0.1s; }
+    .input-group:nth-child(2) { animation-delay: 0.2s; }
+    .input-group:nth-child(3) { animation-delay: 0.3s; }
+    .input-group:nth-child(4) { animation-delay: 0.4s; }
+
+    .floating-label {
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      pointer-events: none;
+      transform-origin: left;
+    }
+
+    .input-container {
+      position: relative;
+      margin-top: 1.5rem;
+    }
+
+    input {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem 1rem 0.75rem;
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+
+    input:focus + .floating-label,
+    input:not(:placeholder-shown) + .floating-label {
+      transform: translateY(-1rem) scale(0.85);
+      color: var(--accent);
+    }
+
+    #saveLocation {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Disabled button style */
+  #saveLocation:disabled {
+    opacity: 0.5;
+    background-color: #d3d3d3; /* Ash gray */
+    color: white; /* White font */
+    cursor: not-allowed;
+  }
+
+    #saveLocation::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #saveLocation:hover::before {
+      opacity: 1;
+    }
+
+    #saveLocation span {
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes slideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .map-section {
+        height: 400px;
+      }
+
+      .form-section {
+        padding: 2rem 1rem;
+      }
+
+      .title {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .coordinates-group {
+        grid-template-columns: 1fr;
+      }
+
+      .back-nav {
+        top: 1rem;
+        left: 1rem;
+      }
+    }
+
+    
+    .successAnderrorMessagesPoppedup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100px);
+    animation: successAnderrorMessagesPoppedup-slideIn 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup.success {
+    border-left: 4px solid #10B981;
+}
+
+.successAnderrorMessagesPoppedup.error {
+    border-left: 4px solid #EF4444;
+}
+
+.successAnderrorMessagesPoppedup.slideOut {
+    animation: successAnderrorMessagesPoppedup-slideOut 0.3s ease forwards;
+}
+
+.successAnderrorMessagesPoppedup-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.success .successAnderrorMessagesPoppedup-icon {
+    color: #10B981;
+}
+
+.error .successAnderrorMessagesPoppedup-icon {
+    color: #EF4444;
+}
+
+.successAnderrorMessagesPoppedup-content {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes successAnderrorMessagesPoppedup-slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
+
+  </style>
+</head>
+<body>
+  <div class="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                <div class="successAnderrorMessagesPoppedup-icon">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="successAnderrorMessagesPoppedup-content">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+  
+
+  <div class="back-nav">
+    <button class="back-button" onclick="ownerhome()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <span>Back</span>
+  </div>
+
+  <div class="container">
+    <div class="map-section">
+      <div id="map"></div>
+      <button id="getLocation">
+        <span>Detect My Location</span>
+      </button>
+    </div>
+
+    <div class="form-section">
+      <h1 class="title">Location Details</h1>
+
+      <form id="locationForm">
+        <div class="coordinates-group">
+          <div class="input-group">
+            <div class="input-container">
+              <input type="text" id="latitude" name="latitude" readonly placeholder=" "/>
+              <label class="floating-label">Latitude</label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-container">
+              <input type="text" id="longitude" name="longitude" readonly placeholder=" "/>
+              <label class="floating-label">Longitude</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-container">
+            <input type="text" id="country" name="country" readonly placeholder=" "/>
+            <label class="floating-label">Country</label>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-container">
+            <input type="text" id="province" name="province" readonly placeholder=" "/>
+            <label class="floating-label">Province</label>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-container">
+            <input type="text" id="road" name="road" readonly placeholder=" "/>
+            <label class="floating-label">Road</label>
+          </div>
+        </div>
+
+        <button type="button" id="saveLocation">
+          <span>Save Location</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let map; // Declare map globally
+let marker; // Declare marker globally
+let userLocation = null; // To store user's location
+
+// Initialize the map
+function initMap() {
+  const defaultLocation = { lat: 0, lng: 0 }; // Default center
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: defaultLocation,
+    zoom: 2, // Zoom level to show the entire world initially
+  });
+
+  // Create the marker on the map
+  marker = new google.maps.Marker({
+    position: defaultLocation,
+    map: map,
+    title: "User's Location",
+  });
+
+  // Disable the "Save Location" button initially
+  checkInputs();
+}
+
+// Reverse-geocode to get detailed address
+function getAddress(lat, lng) {
+  const geocoder = new google.maps.Geocoder();
+  const latlng = { lat, lng };
+
+  geocoder.geocode({ location: latlng }, (results, status) => {
+    if (status === "OK") {
+      if (results[0]) {
+        const addressComponents = results[0].address_components;
+
+        // Extract details
+        let country = "";
+        let province = "";
+        let road = "";
+
+        addressComponents.forEach((component) => {
+          if (component.types.includes("country")) {
+            country = component.long_name;
+          } else if (component.types.includes("administrative_area_level_1")) {
+            province = component.long_name;
+          } else if (component.types.includes("route")) {
+            road = component.long_name;
+          }
+        });
+
+        // Populate form fields
+        document.getElementById("latitude").value = lat;
+        document.getElementById("longitude").value = lng;
+        document.getElementById("country").value = country || "N/A";
+        document.getElementById("province").value = province || "N/A";
+        document.getElementById("road").value = road || "N/A";
+
+        // Check inputs and update button state
+        checkInputs();
+      } else {
+        alert("No address found for this location.");
+      }
+    } else {
+      console.error("Geocoder failed due to: " + status);
+      alert("Failed to fetch address.");
+    }
+  });
+}
+
+// Check if all input fields are filled
+function checkInputs() {
+  const latitude = document.getElementById("latitude").value.trim();
+  const longitude = document.getElementById("longitude").value.trim();
+  const country = document.getElementById("country").value.trim();
+  const province = document.getElementById("province").value.trim();
+  const road = document.getElementById("road").value.trim();
+  const saveLocationButton = document.getElementById("saveLocation");
+
+  if (latitude && longitude && country && province && road) {
+    saveLocationButton.disabled = false; // Enable button
+  } else {
+    saveLocationButton.disabled = true; // Disable button
+  }
+}
+
+// Event listener for "Get My Location" button
+document.getElementById("getLocation").addEventListener("click", () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        userLocation = { lat: latitude, lng: longitude };
+
+        // Update map center and marker position
+        map.setCenter(userLocation);
+        map.setZoom(18); // Zoom in to the street level
+        marker.setPosition(userLocation);
+
+        // Get and display the address
+        getAddress(latitude, longitude);
+      },
+      (error) => {
+        console.error("Error getting location", error);
+        alert("Failed to get your location. Please allow location access.");
+      }
+    );
+  } else {
+    alert("Geolocation is not supported by your browser.");
+  }
+});
+
+// Save location to Django backend
+document.getElementById("saveLocation").addEventListener("click", () => {
+  const latitude = document.getElementById("latitude").value;
+  const longitude = document.getElementById("longitude").value;
+  const country = document.getElementById("country").value;
+  const province = document.getElementById("province").value;
+  const road = document.getElementById("road").value;
+
+  fetch("/save-location/", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-CSRFToken": "{{ csrf_token }}",
+  },
+  body: JSON.stringify({
+    latitude,
+    longitude,
+    country,
+    province,
+    road,
+  }),
+})
+  .then((response) => response.json())
+  .then((data) => {
+    if (data.reload) {
+      // Reload the page to display Django messages
+      window.location.reload();
+    }
+  })
+  .catch((error) => {
+    console.error("Error saving location:", error);
+  });
+
+
+});
+
+// Initialize map on page load
+window.initMap = initMap;
+
+
+        
+const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+
+    function ownerhome(){
+      window.location.href="{% url 'ownerSignUpSecondStep' %}"
+    }
+  </script>
+
+  <!-- Google Maps API --> 
+
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2z-IxhB9cO0mLaNHwBAnRe0pOT0DQl4Y&callback=initMap"
+    async
+    defer
+  ></script>
+</body>
+</html>

@@ -10,14 +10,18 @@
     <style>
         :root {
             --primary-color: #2A9134;
+            --primary-dark: #1e7228;
             --secondary-color: #5BBA6F;
-            --background-color: #e0e0e0;
+            --background-color: #f8fafc;
             --text-color: #333;
-            --border-color: #ddd;
+            --border-color: #e5e7eb;
             --card-background: #fff;
             --hover-color: #1e7228;
             --error-color: #e74c3c;
-        } 
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 30px -3px rgb(0 0 0 / 0.1);
+        }
 
         * {
             box-sizing: border-box;
@@ -26,40 +30,104 @@
         }
 
         body {
-            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 40px 20px;
-            min-height: 100vh;
-        }
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 2rem;
+    min-height: 100vh;
+}
 
-        .container {
-            background-color: var(--card-background);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 3rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+.container {
+    background-color: var(--card-background);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+}
 
         h1, h2 {
-            color: var(--primary-color);
+            color: #2563eb;
             text-align: center;
             margin-bottom: 2rem;
             font-weight: 700;
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
+            color: #2563eb;
+    font-size: 2.5rem; 
+    text-align: center;
+    margin-bottom: 2.5rem;
+    font-weight: 800;
+    position: relative;
+    padding-bottom: 1rem;
+}
 
-        h2 {
-            font-size: 1.8rem;
-            margin-top: 3rem;
-        }
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+h2 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin: 2.5rem 0 1.5rem;
+    font-weight: 700;
+}
+
+/* CSV Section Styles */
+.csv-upload, .csv-download {
+    background: var(--surface-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.csv-upload h2, .csv-download h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--background-color);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+input[type="file"]:hover {
+    border-color: var(--primary-color);
+}
+
 
         .dashboard {
             display: grid;
@@ -84,7 +152,7 @@
         .stat-card h3 {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
-            color: var(--primary-color);
+            color: #2563eb;
         }
 
         .stat-card p {
@@ -139,7 +207,7 @@
             position: absolute;
             top: 2.4rem;
             left: 0.8rem;
-            color: var(--primary-color);
+            color: #4299e1;
             font-size: 1rem;
         }
 
@@ -166,7 +234,11 @@
         }
 
         .btn-primary { 
-            color: #2A9134;
+            color: #656d66;
+        }
+
+        .btn-primary1 { 
+            color: #5fdc70;
         }
 
         .btn-secondary {
@@ -842,7 +914,29 @@
             </div>
             
         </div>
- 
+
+        <div class="csv-upload">
+            <h2>Import Students via CSV</h2>
+            <p style="text-align: center; opacity: 0.7; font-style: italic;">Once you're done editing data in excel you can upload the file here to save in database.</p>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="csvFile">Upload CSV File</label>
+                    <input type="file" id="csvFile" name="csv_file" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+            </form>
+
+            <div class="csv-download">
+                <h2>Download Students Data as CSV</h2>
+                <p style="text-align: center; opacity: 0.7; font-style: italic;">Edit your file in csv excel file, after you edit you can upload the excel file to add to the database.</p>
+                <a href="{% url 'download_csv' %}" class="btn btn-primary1">
+                    <i class="fas fa-download"></i> Download CSV
+                </a>
+            </div>
+        </div> 
 
         <form id="studentForm" method="post" action="{% url 'add_student' %}">
             {% csrf_token %}
@@ -1643,16 +1737,54 @@ pinForm.addEventListener('submit', function(e) {
         
         updateField.value = studentId;
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+    // Select DOM elements
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    const minimizeIcon = document.getElementById('minimizeIcon');
+    const tableBody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('searchInput');
+    const studentsTable = document.getElementById('studentsTable');
+
+    // Check if elements exist
+    if (!minimizeBtn || !minimizeIcon || !tableBody || !searchInput || !studentsTable) {
+        console.error('One or more required DOM elements are missing.');
+        return;
+    }
+
+    // Minimize Button Event
+    minimizeBtn.addEventListener('click', function () {
+        console.log('Minimize button clicked');
+        tableBody.classList.toggle('minimized');
+
+        if (tableBody.classList.contains('minimized')) {
+            minimizeIcon.classList.remove('fa-chevron-up');
+            minimizeIcon.classList.add('fa-chevron-down');
+        } else {
+            minimizeIcon.classList.remove('fa-chevron-down');
+            minimizeIcon.classList.add('fa-chevron-up');
+        }
+    });
+
+    // Search Input Event
+    searchInput.addEventListener('input', function () {
+        console.log('Search input value:', searchInput.value);
+        const searchTerm = this.value.toLowerCase();
+        const rows = studentsTable.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+});
+
+
         document.addEventListener('DOMContentLoaded', function() {
             const popupOverlay = document.getElementById('popupOverlay');
             const closePopupBtn = document.getElementById('closePopup');
             const countdownElement = document.getElementById('countdown');
-            const tableContainer = document.getElementById('tableContainer');
-            const minimizeBtn = document.getElementById('minimizeBtn');
-            const minimizeIcon = document.getElementById('minimizeIcon');
-            const tableBody = document.getElementById('tableBody');
-            const searchInput = document.getElementById('searchInput');
-            const studentsTable = document.getElementById('studentsTable');
+            const tableContainer = document.getElementById('tableContainer');  
             const studentForm = document.getElementById('studentForm');
 
             
@@ -1674,8 +1806,17 @@ pinForm.addEventListener('submit', function(e) {
                 tableContainer.classList.add('visible');
             }, 500);
 
+             // Check if elements exist to avoid errors
+            if (!minimizeBtn || !minimizeIcon || !tableBody || !searchInput || !studentsTable) {
+                console.error("One or more required elements are missing.");
+                return;
+            }
+
+            // Minimize button functionality
             minimizeBtn.addEventListener('click', function() {
                 tableBody.classList.toggle('minimized');
+                
+                // Toggle icon based on minimized state
                 if (tableBody.classList.contains('minimized')) {
                     minimizeIcon.classList.remove('fa-chevron-up');
                     minimizeIcon.classList.add('fa-chevron-down');
@@ -1683,6 +1824,17 @@ pinForm.addEventListener('submit', function(e) {
                     minimizeIcon.classList.remove('fa-chevron-down');
                     minimizeIcon.classList.add('fa-chevron-up');
                 }
+            });
+
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = studentsTable.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
             });
 
             searchInput.addEventListener('input', function() {

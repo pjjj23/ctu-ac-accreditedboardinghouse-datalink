@@ -1,0 +1,570 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTU AC Accredited Boarding Houses Owner Report</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/CTU-logo-BH.png' %}" />
+    <style>
+        /* Modern Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f6fa;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Professional Header Styling */
+        h1 {
+            color: #2c3e50;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        /* Excel-like Table Styling */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            word-wrap: break-word;
+        }
+
+        td {
+            padding: 0.875rem 1rem;
+            border: 1px solid #e9ecef;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Modern Button Styling */
+        .actions {
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #3651d4;
+        }
+
+        /* List Styling */
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            padding: 0.25rem 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem auto;
+            }
+
+            th, td {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+                word-wrap: break-word;
+            }
+        }
+
+        /* Print Styles */
+@media print {
+    /* Hide elements that should not be included in the print */
+    .no-print {
+        display: none;
+    }
+
+    /* Adjust container for better page fitting */
+    .container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        page-break-before: auto;
+    }
+
+    /* Make sure the table fits well within the page and prevent it from overflowing */
+    table {
+        width: 100%;
+        table-layout: auto; /* Let the table adjust to the content */
+        page-break-inside: avoid;  /* Avoid page breaks inside the table */
+    }
+
+    th, td {
+        padding: 0.5rem;
+        word-wrap: break-word;
+        word-break: break-word; /* Ensure long words wrap properly */
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    /* Handle page breaks for long tables */
+    .table-container {
+        page-break-before: auto;
+        page-break-inside: auto;
+    }
+
+    /* Make sure the status pill doesn't take up too much space */
+    .status-pill {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem; /* Smaller font size for print */
+    }
+
+    /* Adjust font size and spacing for headings */
+    h1 {
+        font-size: 1.5rem; /* Adjust heading size */
+        margin-bottom: 1rem;
+    }
+
+    /* Hide buttons and other non-relevant items for print */
+    .btn {
+        display: none;
+    }
+
+    /* Ensures that no content fades or gets cut off */
+    body {
+        background: white;
+        margin: 0;
+    }
+
+    /* Ensure the content fits better without spilling over */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Reduce spacing between rows and tighten the layout to fit all content */
+    table,
+    th,
+    td {
+        border: 1px solid #e9ecef;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    /* Ensure content doesn't get pushed to the next page */
+    @page {
+        size: A4 portrait; /* Force portrait orientation */
+        margin: 20mm; /* Reduce margins to fit more content */
+    }
+
+    /* Adjust page breaks, so the table doesn't get pushed to the second page */
+    tr {
+        page-break-inside: avoid;
+    }
+}
+
+
+        /* Status Pill */
+        .status-pill {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        /* Status Pill Styles */
+        .status-active {
+            background: #e6f4ea;
+            color: #1e7e34;
+        }
+
+        .status-pending {
+            background: #ffecb3;  /* Adjusted color for pending */
+            color: #f57c00;  /* Darker color for text */
+        }
+
+        .status-rejected {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .status-removed {
+            background: #e0e0e0;
+            color: #757575;
+        }
+
+        .status-disabled {
+            background: #e0e0e0;
+            color: #bdbdbd;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .modal-container {
+            position: fixed;
+            top: 20px;
+            left: -650px;
+            max-width: 650px;
+            width: 90%;
+            background: #f0f7ff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);
+            padding: 1.5rem;
+            z-index: 1000;
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid #2563eb;
+        }
+
+        .modal-container.show {
+            left: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: #1e40af;
+        }
+
+        .info-icon {
+            background: #dbeafe;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-title {
+            color: #1e40af;
+            font-size: 1.125rem;
+            font-weight: 600;
+            flex-grow: 1;
+        }
+
+        .close-button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #6b7280;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .close-button:hover {
+            color: #1e40af;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            color: #4b5563;
+            font-size: 0.9375rem;
+            border: 1px solid #dbeafe;
+        }
+
+        .info-list {
+            list-style: none;
+            margin-top: 0.75rem;
+        }
+
+        .info-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .info-list li svg {
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .button {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .primary-button {
+            background: #2563eb;
+            color: white;
+        }
+
+        .primary-button:hover {
+            background: #1e40af;
+        }
+
+        .secondary-button {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .secondary-button:hover {
+            background: #bfdbfe;
+        }
+
+        @media (max-width: 480px) {
+            .modal-container {
+                top: 10px;
+                max-width: calc(100% - 20px);
+            }
+
+            .modal-container.show {
+                left: 10px;
+            }
+
+            .modal-title {
+                font-size: 1rem;
+            }
+
+            .info-list li {
+                font-size: 0.8125rem;
+            }
+        }
+    </style>
+</head>
+<body>  
+    <div id="infoModal" class="modal-container">
+        <div class="modal-header">
+            <div class="info-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title">Important Information</h3>
+            <button class="close-button" onclick="closeModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18"></path>
+                    <path d="M6 6L18 18"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-content">
+            <p>Welcome to CTU AC BH portal, you can generate here reports:</p>
+            <ul class="info-list">
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    In status column, it will show if the boardinghouse is still pending, approved, rejected, or removed by the Superadmins which are the CTUAC SAO.
+                </li>
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Filter your choice to generate a report.
+                </li> 
+            </ul>
+        </div>
+        <div class="modal-actions"> 
+            <button class="button primary-button" onclick="closeModal()">Got it!</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>CTU AC Accredited Boarding Houses</h1>
+
+        <div class="actions no-print">
+            <button onclick="window.print()" class="btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9L6 2L18 2L18 9"></path>
+                    <path d="M6 18H4C3.46957 18 2.96086 17.7893 2.58579 17.4142C2.21071 17.0391 2 16.5304 2 16V11C2 10.4696 2.21071 9.96086 2.58579 9.58579C2.96086 9.21071 3.46957 9 4 9H20C20.5304 9 21.0391 9.21071 21.4142 9.58579C21.7893 9.96086 22 10.4696 22 11V16C22 16.5304 21.7893 17.0391 21.4142 17.4142C21.0391 17.7893 20.5304 18 20 18H18"></path>
+                    <path d="M18 14H6V22H18V14Z"></path>
+                </svg>
+                Download PDF
+            </button> 
+            &nbsp;&nbsp;<label for="statusFilter">Filter by Status: </label>
+                <select id="statusFilter" class="btn" style="padding: 0.5rem; font-size: 1rem;" onchange="filterTable()">
+                    <option value="all">All</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="disabled">Disabled</option>
+                    <option value="removed">Removed</option>
+                </select>  
+                &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;
+               <a href="{% url 'saohomepage' %}" style="display: inline-block; background-color: #8d8f96; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 500; text-decoration: none; text-align: center; transition: background 0.3s ease; cursor: pointer;">
+                    Back to Dashboard
+                </a>
+               <button onclick="studentReport()" class="btn">
+                    Generate Report for students
+                </button> 
+        </div>
+
+        <div class="table-container">
+            <table id="reportTable">
+                <thead>
+                    <tr>
+                        <th>Boarding House Name</th>
+                        <th>Status</th>
+                        <th>Owner Name</th>
+                        <th>Owner Email</th>
+                        <th>Type of Rental</th>
+                        <th>Applied Students</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr data-status="{{ report.boardinghouseStatus | lower }}">
+                        <td>{{ report.boardinghouseName }}</td>
+                        <td>
+                            <span class="status-pill {% if report.boardinghouseStatus == 'approved' %}status-active{% elif report.boardinghouseStatus == 'pending' %}status-pending{% elif report.boardinghouseStatus == 'rejected' %}status-rejected{% elif report.boardinghouseStatus == 'disabled' %}status-disabled{% else %}status-removed{% endif %}">
+                                {{ report.boardinghouseStatus }}
+                            </span>
+                        </td>
+                        <td>{{ report.ownerName }}</td>
+                        <td>{{ report.ownerEmail }}</td>
+                        <td>
+                            <ul>
+                                {% for rental in report.typeOfRental %}
+                                <li>{{ rental }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            <ul>
+                                {% for student in report.appliedStudents %}
+                                <li>
+                                    <strong>Username:</strong> {{ student.username }}<br>
+                                    <strong>Email:</strong> {{ student.email }}<br>
+                                    <strong>Student ID:</strong> {{ student.student_id }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">No reports available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function filterTable() {
+            const filter = document.getElementById("statusFilter").value.toLowerCase();
+            const rows = document.querySelectorAll("#reportTable tbody tr");
+    
+            rows.forEach(row => {
+                const status = row.getAttribute("data-status");
+                
+                if (status) {
+                    const statusLower = status.toLowerCase();
+                    if (filter === "all" || statusLower === filter) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                } else {
+                    row.style.display = "none";  // Hide rows with no 'data-status'
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+    // Check if modal has been shown before using localStorage
+    if (!localStorage.getItem('modalShown')) {
+        setTimeout(function() {
+            document.getElementById('infoModal').classList.add('show');
+        }, 500);
+        
+        // Mark modal as shown in localStorage
+        localStorage.setItem('modalShown', 'true');
+    }
+});
+
+function closeModal() {
+    const modal = document.getElementById('infoModal');
+    modal.classList.remove('show');
+    setTimeout(function() {
+        modal.style.display = 'none';
+    }, 400);
+}
+
+
+function studentReport(){
+    window.location.href="{% url 'generateStudentReports' %}"
+}
+
+    </script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,9 @@
     <title>Cozy Haven Boarding House</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/splidejs/4.1.4/css/splide.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/CTU-logo-BH.png' %}" />
     <style>
         :root {
             --primary: #2563eb;
@@ -1028,7 +1032,57 @@
                 width: 100%;
                 justify-content: center;
             }
+            .splide__track {
+            padding: 1.5rem 0;
         }
+        }
+        .rooms-section {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .splide__arrow {
+        background: white !important;
+        opacity: 1 !important;
+        height: 3.5rem !important;
+        width: 3.5rem !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+    }
+    
+    .splide__arrow svg {
+        height: 1.5rem !important;
+        width: 1.5rem !important;
+        fill: none !important;
+        stroke: #4B5563 !important;
+    }
+    
+    .splide__arrow:hover {
+        background: #F3F4F6 !important;
+    }
+    
+    .splide__arrow:disabled {
+        opacity: 0.5 !important;
+    }
+    
+    .splide__pagination {
+        bottom: -2rem !important;
+    }
+    
+    .splide__pagination__page {
+        background: #D1D5DB !important;
+        margin: 0 6px !important;
+    }
+    
+    .splide__pagination__page.is-active {
+        background: #2563EB !important;
+        transform: scale(1.2) !important;
+    }
+    
+    .room-card {
+        height: 100%;
+        margin: 0.5rem;
+    } 
     </style>
 </head>
 <body>
@@ -1284,10 +1338,107 @@
         </div>
     </div>
 
+
+    <div class="rooms-section container mx-auto px-4 py-8">
+        <h3 class="text-2xl font-bold mb-8 text-center">Available Rooms</h3>
+        
+        <!-- Main Carousel Container -->
+        <div class="splide w-full max-w-7xl mx-auto" id="rooms-carousel">
+            <div class="splide__track">
+                <ul class="splide__list">
+                    {% for room in owner_data.rooms %}
+                    <li class="splide__slide px-2">
+                        <div class="room-card bg-white rounded-lg shadow-lg overflow-hidden transition-transform hover:scale-[1.02] h-full">
+                            <!-- Room Image Placeholder -->
+                            <div class="h-56 bg-gray-200 relative"> 
+                                {% if room.images %}
+                                {% for image in room.images %}
+                                    <img src="{{ image }}" alt="{{ room.roomName }}" class="w-full h-full object-cover">
+                                {% endfor %}
+                            {% else %}
+                                <div class="flex items-center justify-center h-full bg-gray-100">
+                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                </div>
+                            {% endif %}
+
+                                
+                                <!-- Availability Badge -->
+                                <div class="absolute top-4 right-4">
+                                    <span class="px-3 py-1 text-sm font-semibold rounded-full {% if room.availabilityStatus == 'AVAILABLE' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ room.availabilityStatus }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Room Details -->
+                            <div class="p-6">
+                                <h4 class="text-xl font-semibold mb-4">{{ room.roomName }}</h4>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center text-gray-700">
+                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="font-medium">₱{{ room.price }}</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-gray-700">
+                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        <span>{{ room.aircon }}</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-gray-700">
+                                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                        <span>{{ room.numberStayingIn }}/{{ room.capacity }} Occupants</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- View Details Button -->
+                                <button class="mt-6 w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                                    Room is {{ room.status|default:"Shown" }} to students
+                                </button>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="splide__slide">
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <p class="text-gray-500 text-lg">No rooms available at the moment.</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- Add custom navigation arrows -->
+            <div class="splide__arrows">
+                <button class="splide__arrow splide__arrow--prev">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                                      
+                </button>
+                <button class="splide__arrow splide__arrow--next">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <button onclick="backbtn()" class="back-button">
         <i class="fas fa-arrow-left"></i> Back
     </button>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/splidejs/4.1.4/js/splide.min.js"></script>
     <script>
         function openApproveDialog() {
             document.getElementById('approveDialog').style.display = 'flex';
@@ -1382,6 +1533,27 @@
 
         // Add new carousel functionality
         document.addEventListener('DOMContentLoaded', function() {
+            new Splide('#rooms-carousel', {
+            type: 'slide',
+            perPage: 3,
+            perMove: 1,
+            gap: '1rem',
+            padding: '2rem',
+            breakpoints: {
+                1024: {
+                    perPage: 2,
+                },
+                640: {
+                    perPage: 1,
+                }
+            },
+            arrows: true,
+            pagination: true,
+            autoplay: false,
+            interval: 3000,
+            pauseOnHover: true,
+        }).mount();
+
     const carousel = document.querySelector('.carousel-inner');
     const items = document.querySelectorAll('.carousel-item');
     const prevBtn = document.querySelector('.prev');

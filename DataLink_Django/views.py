@@ -25,6 +25,8 @@ from django.utils.html import strip_tags
 from django.views import View
 from collections import Counter
 import pytz
+import csv
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -765,6 +767,44 @@ def removeowners(request):
     return render(request, 'sao-RemovedOwners.html', context)
 
 
+def removesao(request): 
+    # Get the SAO context
+    context = get_sao_context(request)
+    
+    if context is None:  # Check if email was not found
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('sao_login')  # Redirect to login page if email is missing
+
+    
+
+    # Fetch all superadmin data from Firebase
+    superadmin_data = db.child("saoaccounts").child("datas").child("superadmin").get().val()
+    
+    # Filter students with 'accountStatus' set to 'removed' and extract specified fields
+    removed_sao = []
+    if superadmin_data:
+        for superadmin_key, superadmin_info in superadmin_data.items():
+            if superadmin_info.get('accountStatus') == 'removed':
+                # Build the student dictionary with only the needed fields
+                sao = {
+                    "email": superadmin_key.replace('_at_', '@').replace('_', '.'),
+                    "name": superadmin_info.get("name", ""),
+                    "birthday": superadmin_info.get("birthday", ""),
+                    "daysLogin": superadmin_info.get("daysLogin", ""),
+                    "accountStatus": superadmin_info.get("accountStatus", ""),
+                }
+                removed_sao.append(sao)
+    
+    # Add the list of removed students to context
+    context['removed_sao'] = removed_sao
+    context['active_page'] = 'undo'
+    summary_counts = get_summary_counts()
+    context.update({ 
+        'summary_counts': get_summary_counts,
+    }) 
+    
+    # Pass the context to the template
+    return render(request, 'sao-RemovedSAO.html', context)
 
 
 
@@ -777,6 +817,7 @@ def get_summary_counts():
         "rejected_owners": 0,
         "removed_students": 0,
         "removed_owners": 0,
+        "removed_sao": 0,  # Added for removed SAO accounts
     }
 
     try:
@@ -801,6 +842,13 @@ def get_summary_counts():
                     counts["rejected_owners"] += 1
                 elif owner_info.get("accountStatus") == "removed":
                     counts["removed_owners"] += 1
+
+        # Fetch and process SAO data (superadmins)
+        superadmin_data = db.child("saoaccounts").child("datas").child("superadmin").get().val()
+        if isinstance(superadmin_data, dict):
+            for superadmin_info in superadmin_data.values():
+                if superadmin_info.get("accountStatus") == "removed":
+                    counts["removed_sao"] += 1  # Count removed SAOs
 
     except Exception as e:
         print(f"Error fetching summary counts: {str(e)}")
@@ -875,6 +923,51 @@ def add_student(request):
         except Exception as e:
             messages.error(request, f"Error deleting student: {str(e)}")
         return redirect('add_student')  # Redirect back to the add_student page
+
+    # Handle CSV upload for bulk importing students 
+    elif request.method == "POST" and "csv_file" in request.FILES:
+        csv_file = request.FILES['csv_file']
+
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, "Please upload a valid CSV file.")
+            return redirect('add_student')
+
+        try:
+            # Read and decode the CSV file
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            reader = csv.DictReader(decoded_file)
+
+            for row in reader:
+                student_id = row.get('student_id')
+                birthday = row.get('birthday')
+                course = row.get('course')
+
+                # Ensure that student_id is valid
+                if not student_id:
+                    messages.error(request, f"Row skipped: Missing student_id - {row}")
+                    continue
+
+                # Prepare the student data
+                student_data = {
+                    'student_id': student_id,
+                    'birthday': birthday,
+                    'course': course,
+                }
+
+                # Add or update the student in the database
+                try:
+                    db.child("studentdatabase").child("datas").child(student_id).update(student_data)
+                except Exception as e:
+                    messages.error(request, f"Error saving row: {row}. Error: {str(e)}")
+
+            messages.success(request, "CSV file uploaded and processed successfully.")
+        except Exception as e:
+            messages.error(request, f"Error processing CSV file: {str(e)}")
+
+        return redirect('add_student')
+
+
+
 
     # Handle adding a new student or updating an existing one
     elif request.method == "POST" and "student_id" in request.POST:
@@ -974,6 +1067,28 @@ def add_student(request):
     return render(request, 'add_student.html', context)
 
 
+
+def download_csv(request):
+    # Retrieve all student data
+    students = db.child("studentdatabase").child("datas").get().val()
+
+    if not students:
+        messages.error(request, "No data available to download.")
+        return redirect('add_student')
+
+    # Prepare CSV data
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="students_data.csv"'
+
+    writer = csv.writer(response)
+    # Write the header
+    writer.writerow(['student_id', 'birthday', 'course'])
+
+    # Write student data
+    for student_id, student_data in students.items():
+        writer.writerow([student_data.get('student_id'), student_data.get('birthday'), student_data.get('course')])
+
+    return response
 
 
 def addsuperadmin(request):
@@ -1140,7 +1255,8 @@ def addsuperadmin(request):
                         <p>Your Add Superadmin PIN is: <strong>{addsuperadminPin}</strong></p>
                     </div>
                     <div class="footer">
-                        <p>Thank you for using our service!</p>
+                        <p>Thank you for using our service!</p> 
+                        <p>The Datalink Team</p> 
                     </div>
                 </div>
             </body>
@@ -1435,6 +1551,13 @@ def usermonitoring(request):
     users_data = db.child('fetchedusersIPaddress').get()
 
     users = []
+    active_users_count = 0  # Counter for active users
+    inactive_users_count = 0  # Counter for inactive users
+    student_count = 0  # Counter for students
+    superadmin_count = 0  # Counter for superadmins
+    owner_count = 0  # Counter for owners
+    unknown_count = 0  # Counter for unknown users
+    
     if users_data and users_data.each():
         for item in users_data.each():
             user_info = item.val()
@@ -1448,15 +1571,49 @@ def usermonitoring(request):
             }
             users.append(user)
 
+            # Increment the counters based on the active status
+            if user_info.get('active_status') == "Active":
+                active_users_count += 1
+            elif user_info.get('active_status') == "Inactive":
+                inactive_users_count += 1
+
+            # Count users based on their role
+            role = user_info.get('role', 'Unknown')
+            if role == "student":
+                student_count += 1
+            elif role == "superadmin":
+                superadmin_count += 1
+            elif role == "owner":
+                owner_count += 1
+            elif role == "Unknown":
+                unknown_count += 1
+
     print("Fetched Users:", users)
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Return the user data as JSON for AJAX requests
-        return JsonResponse({'users': users})
+        # Return the user data and counts as JSON for AJAX requests
+        return JsonResponse({
+            'users': users,
+            'active_users_count': active_users_count,
+            'inactive_users_count': inactive_users_count,
+            'student_count': student_count,
+            'superadmin_count': superadmin_count,
+            'owner_count': owner_count,
+            'unknown_count': unknown_count,
+        })
 
-    # Add users to the context to be used in the template for regular rendering
+    # Add all counts to the context
     context['user_data_list'] = users
+    context['active_users_count'] = active_users_count
+    context['inactive_users_count'] = inactive_users_count
+    context['student_count'] = student_count
+    context['superadmin_count'] = superadmin_count
+    context['owner_count'] = owner_count
+    context['unknown_count'] = unknown_count
+
     return render(request, 'usersMonitor.html', context)
+
+
 
 
 
@@ -1728,14 +1885,14 @@ def saohomepage(request):
     if request.method == 'POST' and 'student_pincode' in request.POST:
         entered_pincode = request.POST.get('student_pincode', '')
         
-        # Fetch lockout data from the session or database
+        # Fetch lockout data from the session or initialize it
         lockout_data = request.session.get(f'lockout_data_{email}_student', {
             'attempts': 0,
             'lockout_until': None,
             'lockout_time': INITIAL_LOCKOUT_TIME
         })
         
-        # Check if the user is currently locked out
+        # Check if the user is locked out
         if lockout_data['lockout_until']:
             lockout_until = datetime.fromisoformat(lockout_data['lockout_until'])
             if datetime.now() < lockout_until:
@@ -1748,41 +1905,39 @@ def saohomepage(request):
             superadmin_data = db.child('saoaccounts/datas/superadmin').order_by_child('email').equal_to(email).get()
 
             if superadmin_data.each():
-                user_data = superadmin_data.each()[0].val()  # Get the first matching superadmin data
+                user_data = superadmin_data.each()[0].val()
 
                 # Get stored student PIN from the database
                 stored_pincode = str(user_data.get('studentdatabasePin', ''))
 
                 if entered_pincode == stored_pincode:
-                    # Reset incorrect attempts and lockout
+                    # Reset lockout data
                     lockout_data['attempts'] = 0
-                    lockout_data['lockout_time'] = INITIAL_LOCKOUT_TIME  # Reset to the initial lockout time
+                    lockout_data['lockout_time'] = INITIAL_LOCKOUT_TIME
+                    lockout_data['lockout_until'] = None
                     request.session[f'lockout_data_{email}_student'] = lockout_data
 
                     # Set session variable for PIN verification
-                    request.session['pincode_verified'] = True
+                    request.session['sao_pincode_verified'] = True  # Use the consistent name
                     messages.success(request, 'Correct PIN entered!')
-                    return redirect('add_student')  # Redirect to add_student if the PIN is correct
+                    return redirect('add_student')
                 else:
-                    # Increment attempts
+                    # Handle incorrect PIN
                     lockout_data['attempts'] += 1
                     if lockout_data['attempts'] >= MAX_ATTEMPTS:
-                        # Lock out the user
                         lockout_data['lockout_until'] = (datetime.now() + timedelta(minutes=lockout_data['lockout_time'])).isoformat()
-                        lockout_data['lockout_time'] += LOCKOUT_INCREMENT  # Increase lockout time for next lockout
+                        lockout_data['lockout_time'] += LOCKOUT_INCREMENT
                         messages.error(request, f'Incorrect PIN. You are locked out for {lockout_data["lockout_time"] - LOCKOUT_INCREMENT} minutes.')
                     else:
                         messages.error(request, f'Incorrect PIN. You have {MAX_ATTEMPTS - lockout_data["attempts"]} attempts left.')
-                    
-                    # Save lockout data in session
-                    request.session[f'lockout_data_{email}_student'] = lockout_data
 
+                    request.session[f'lockout_data_{email}_student'] = lockout_data
             else:
                 messages.error(request, "No data found in the database.")
-
         except Exception as e:
             print(f"Error fetching data: {str(e)}")
             messages.error(request, f"Error fetching data: {str(e)}")
+
 
     # Handle SAO PIN submission
     if request.method == 'POST' and 'superadmin_pincode' in request.POST:
@@ -2868,10 +3023,12 @@ def view_students(request):
                             <p>Hello,</p>
                             <p>Your account has been disabled for the following reason:</p>
                             <p><strong>{disable_reason}</strong></p>
-                            <p>If you believe this action was taken in error, please contact support for further assistance.</p>
+                            <p>If you believe this action was taken in error, please contact support for further assistance. To raise your concern please click the link below.</p>
+                            <a href="https://abadddy.pythonanywhere.com/student/student_login/student_report_problem">Raise your concern</a>
                         </div>
                         <div class="footer">
                             <p>Thank you for your understanding!</p>
+                            <p>The Datalink Team</p>
                         </div>
                     </div>
                 </body>
@@ -2965,10 +3122,11 @@ def view_students(request):
                             <p>Hello,</p>
                             <p>We regret to inform you that your account has been removed from our system.</p>
                             <p>If you believe this was done in error or if you have any questions, please contact our support team for assistance.</p>
-                            <p>Thank you for your understanding.</p>
+                            <p>Thank you for your understanding. To raise your concern please report it by clicking the link below.</p>
+                            <a href="https://abadddy.pythonanywhere.com/student/student_login/student_report_problem">Raise your concern</a>
                         </div>
-                        <div class="footer">
-                            <p>Best regards,<br>CTU-ARGAO Student Accommodation Finder Team</p>
+                        <div class="footer"> 
+                            <p>Best regards,<br> The Datalink Team.</p>
                         </div>
                     </div>
                 </body>
@@ -3087,8 +3245,10 @@ def view_students(request):
                                 <li><strong>Birthday:</strong> {birthday}</li>
                             </ul>
                         </div>
+                        <a href="https://abadddy.pythonanywhere.com/student/studentsettings/">Check changes in your profile</a>
                         <div class="footer">
                             <p>Thank you for using our service!</p>
+                            <p>The Datalink Team</p>
                         </div>
                     </div>
                 </body>
@@ -3517,10 +3677,11 @@ def pendingreq(request):
                         <center><img src="https://firebasestorage.googleapis.com/v0/b/ctuacaccreditedboardinghouse.appspot.com/o/default_profileimg%2FCTU-logo-BH.png?alt=media&token=23bd87f5-9483-4c77-910b-a3d3838e07d9" alt="CTU Logo"></center>
                         <div class="content">
                             <p>Hello Student,</p>
-                            <p>Your account has now been approved. You can now apply for boarding houses.</p>
+                            <p>Your account has now been approved. You can now apply for boarding houses. <a href="https://abadddy.pythonanywhere.com/student/student_login/">Take me to Login page</a></p>
                         </div>
                         <div class="footer">
                             <p>Thank you for using our service!</p>
+                            <p>The Datalink Team</p>
                         </div>
                     </div>
                 </body>
@@ -3606,7 +3767,8 @@ def pendingreq(request):
                             <p>Hello Student,</p>
                             <p>Sorry to inform you, but your account has been rejected due to the following reason:</p>
                             <p><strong>{reject_reason}</strong></p>
-                            <p>Please contact support for further assistance. To raise your concerns, go to our Login page and below click report a problem.</p>
+                            <p>Please contact support for further assistance. To raise your concerns, go to our Login page and below click report a problem. Or open this link below.</p>
+                            <a href="https://abadddy.pythonanywhere.com/student/student_login/student_report_problem">Raise your concern</a>
                         </div>
                         <div class="footer">
                             <p>Thank you for your understanding!</p>
@@ -3975,9 +4137,11 @@ def boardinghouseAction(request):
                                         <li><strong>Phone</strong> {owner_phone}</li>
                                     </ul>
                                 </div>
+                                <a href="https://abadddy.pythonanywhere.com/owner/owner_login/">Take me to Login page</a>
                             </div>
                             <div class="footer">
                                 <p>Thank you for choosing our service! We look forward to helping you connect with students.</p>
+                                <p>The Datalink Team</p> 
                             </div>
                         </div>
                     </div>
@@ -4260,9 +4424,12 @@ def boardinghouseAction(request):
                                         <li><strong>Phone</strong> {owner_phone}</li>
                                     </ul>
                                 </div>
+                                <p>Thank you for your interest in our service. Please reach out to us if you have any questions by clicking the link below.</p>
+                                <a href="https://abadddy.pythonanywhere.com/owner/owner_login/owner_report_problem">Raise your concern</a>
                             </div>
                             <div class="footer">
-                                <p>Thank you for your interest in our service. Please reach out to us if you have any questions.</p>
+                                <p>Best regards, </p>
+                                <p>The Datalink Team</p> 
                             </div>
                         </div>
                     </div>
@@ -4297,11 +4464,17 @@ def boardinghouseAction(request):
 
     try:
         # Fetch the owner's boarding house data
-        owner_data = db.child('ownersBoardingHouse').child(email_key).get().val() 
+        owner_data = db.child('ownersBoardingHouse').child(email_key).get().val()
+        
+        # If owner data is None, initialize it as an empty dictionary
         if owner_data is None:
             owner_data = {}
+        else:
+            # Retrieve the rooms data, defaulting to an empty list if not present
+            rooms = owner_data.get('rooms', [])
+            owner_data['rooms'] = rooms
 
-        # Render the template with owner data
+        # Render the template with owner data and rooms
         return render(request, 'boardinghouseAction.html', {'owner_data': owner_data})
     except Exception as e:
         print(f"Error fetching boarding house data: {str(e)}")
@@ -4309,6 +4482,91 @@ def boardinghouseAction(request):
         return redirect('pendingreq')  # Redirecting to pending requests
 
 
+
+def generatingReports(request):
+    context = get_sao_context(request)
+    if context is None:
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('sao_login')
+
+    try:
+        # Fetch boarding house data
+        boarding_houses = db.child('ownersBoardingHouse').get().val() or {}
+        students = db.child('students').get().val() or {}
+
+        reports = []
+
+        for owner_email, data in boarding_houses.items():
+            boardinghouse_name = data.get('boardinghouseName', 'N/A')
+            boardinghouse_status = data.get('boardinghouseStatus', 'N/A')
+            owner_name = data.get('name', 'N/A')
+            owner_email = data.get('email', 'N/A')
+            type_of_rental = data.get('typeOfRental', [])
+
+            # Find students who applied
+            applied_students = [
+                {
+                    'username': student_data.get('username', 'N/A'),
+                    'email': student_data.get('email', 'N/A'),
+                    'student_id': student_data.get('student_id', 'N/A'),
+                }
+                for student_email, student_data in students.items()
+                if student_data.get('boardinghouseName') == boardinghouse_name
+            ]
+
+            reports.append({
+                'boardinghouseName': boardinghouse_name,
+                'boardinghouseStatus': boardinghouse_status,
+                'ownerName': owner_name,
+                'ownerEmail': owner_email,
+                'typeOfRental': type_of_rental,
+                'appliedStudents': applied_students,
+            })
+
+        return render(request, 'generateReports.html', {'reports': reports})
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        messages.error(request, 'An error occurred while generating reports.')
+        return redirect('generatingReports')
+
+
+def generateStudentReports(request):
+    context = get_sao_context(request)
+    if context is None:
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('sao_login')
+
+    try:
+        # Fetch student data
+        students_data = db.child('students').get().val() or {}
+        reports = []
+
+        for student_email, student_info in students_data.items():
+            # Extract the required fields
+            username = student_info.get('username', 'N/A')
+            student_id = student_info.get('student_id', 'N/A')
+            course = student_info.get('course', 'N/A')
+            email = student_info.get('email', 'N/A')
+            account_status = student_info.get('accountStatus', 'N/A')
+            boardinghouse_name = student_info.get('boardinghouseName', 'N/A')
+
+            # Append to reports
+            reports.append({
+                'username': username,
+                'student_id': student_id,
+                'course': course,
+                'email': email,
+                'accountStatus': account_status,
+                'boardinghouseName': boardinghouse_name,
+            })
+
+        return render(request, 'generateReportsStudent.html', {'reports': reports})
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        messages.error(request, 'An error occurred while generating student reports.')
+        return redirect('generateStudentReports')
 
 
 
@@ -4522,6 +4780,7 @@ def owner_forgotpassword(request):
             return render(request, 'owner_forgotpassword.html', {'error_message': error_message})
 
     return render(request, 'owner_forgotpassword.html')
+
 
 
 
@@ -4862,12 +5121,153 @@ def ownerSignUpSecondStep(request):
         # Fetch the saved data to include in the context
         saved_owner_data = db.child('ownersBoardingHouse').child(email_key).get().val()
         messages.success(request, 'Owner details saved successfully!')
-
+        
     # Render the template with both context and saved_owner_data
     return render(request, 'BHOwnerSignUp-SecondStep.html', {
         'context': context,
         'saved_owner_data': saved_owner_data
     })
+
+
+
+
+# View to handle form rendering
+def location_form(request):
+    context = get_owner_context(request)
+
+    if context is None:
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('owner_login')
+
+    return render(request, "location_form.html", context)
+
+@csrf_exempt
+def save_location(request):
+    if request.method == "POST":
+        try:
+            # Get the logged-in owner's email from the session via context
+            context = get_owner_context(request)
+            if context is None:
+                messages.error(request, "Owner not logged in.")
+                return JsonResponse({"error": "Owner not logged in."}, status=400)
+
+            owner_email = context['email']
+            owner_email_key = owner_email.replace('.', '_').replace('@', '_at_')
+
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            latitude = data.get("latitude")
+            longitude = data.get("longitude")
+            country = data.get("country")
+            province = data.get("province")
+            road = data.get("road")
+
+            # Check if all required fields are present
+            if not all([latitude, longitude, country, province, road]):
+                messages.error(request, "All fields are required.")
+                return JsonResponse({"error": "All fields are required."}, status=400)
+
+            # Save data to Firebase under "user_locations/owner_email_key/details"
+            location_ref = db.child("user_locations").child(owner_email_key).child("details")
+            location_ref.set({
+                "latitude": latitude,
+                "longitude": longitude,
+                "country": country,
+                "province": province,
+                "road": road,
+            })
+
+            # Add success message
+            messages.success(request, "Location saved successfully!")
+            return JsonResponse({"message": "Location saved successfully!"}, status=200)
+
+        except Exception as e:
+            # Add error message
+            messages.error(request, f"An error occurred: {str(e)}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+    elif request.method == "GET":
+        try:
+            context = get_owner_context(request)
+            print("Context:", context)
+            if context is None:
+                print("Context is None. Owner not logged in.")
+                messages.error(request, "Owner not logged in.")
+                return JsonResponse({"error": "Owner not logged in."}, status=400)
+
+            owner_email = context['email']
+            print("Owner Email:", owner_email)
+
+            owner_email_key = owner_email.replace('.', '_').replace('@', '_at_')
+            print("Owner Email Key:", owner_email_key)
+
+            location_ref = db.child("user_locations").child(owner_email_key).child("details")
+            print("Firebase Reference Path:", location_ref.path)
+
+            location_data = location_ref.get()
+            print("Raw Fetched Data:", location_data)
+
+            if location_data.exists():
+                print("Fetched Location Data:", location_data.val())
+                return JsonResponse(location_data.val(), status=200)
+            else:
+                print("No location data found for the user.")
+                return JsonResponse({"message": "No location data found."}, status=404)
+
+        except Exception as e:
+            print("Error while fetching location data:", str(e))
+            messages.error(request, f"An error occurred: {str(e)}")
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+
+
+
+
+
+def view_images(request):
+    context = get_owner_context(request)
+
+    if context is None:
+        messages.error(request, 'Email not found in session. Please log in again.')
+        return redirect('owner_login')
+    
+    # Extract email key from the session
+    email = request.session.get("email")
+    if not email:
+        return render(request, "error.html", {"message": "Session email not found."})
+
+    email_key = email.replace(".", "_").replace("@", "_at_")
+
+    # Fetch amenities and documents from Firebase
+    owner_data = db.child("ownersBoardingHouse").child(email_key).get().val() or {}
+    amenities = owner_data.get("amenities", [])
+    documents = owner_data.get("documents", [])
+
+    # Handle image removal if there is an image URL passed in the request
+    image_url_to_remove = request.GET.get('remove_image')
+    if image_url_to_remove:
+        # Remove the image from amenities or documents
+        if image_url_to_remove in amenities:
+            db.child("ownersBoardingHouse").child(email_key).update({
+                'amenities': [image for image in amenities if image != image_url_to_remove]
+            })
+        elif image_url_to_remove in documents:
+            db.child("ownersBoardingHouse").child(email_key).update({
+                'documents': [image for image in documents if image != image_url_to_remove]
+            })
+        # Optionally show a success message
+        messages.success(request, "Image has been removed successfully.")
+        return redirect('view_images')  # Redirect to the same page to see the updated list
+
+    # Prepare context to pass to the template
+    context = {
+        "amenities": amenities,
+        "documents": documents,
+        **context,
+    }
+
+    return render(request, "view_images.html", context)
 
 
 
@@ -4983,13 +5383,14 @@ def ownersRoomManagement(request):
                                 # Iterate through the list
                                 for room_index, room_data in enumerate(boarding_house_rooms):
                                     if room_data.get('roomName') == room_name:
-                                        current_staying = room_data.get('numberStayingIn', 0)
+                                        # Ensure current_staying is an integer
+                                        current_staying = int(room_data.get('numberStayingIn', 0))  # Convert to int if not already
                                         updated_staying = max(current_staying - 1, 0)  # Ensure it doesn't go below 0
 
                                         updates = {'numberStayingIn': updated_staying}
 
-                                        # Check if the room is now available
-                                        capacity = room_data.get('capacity', 0)
+                                        # Ensure capacity is an integer
+                                        capacity = int(room_data.get('capacity', 0))  # Convert to int if not already
                                         if updated_staying < capacity:
                                             updates['availabilityStatus'] = "AVAILABLE"
 
@@ -5000,15 +5401,20 @@ def ownersRoomManagement(request):
                                 # Iterate through the dictionary
                                 for room_key, room_data in boarding_house_rooms.items():
                                     if room_data.get('roomName') == room_name:
-                                        current_staying = room_data.get('numberStayingIn', 0)
+                                        # Ensure current_staying is an integer
+                                        current_staying = int(room_data.get('numberStayingIn', 0))  # Convert to int if not already
                                         updated_staying = max(current_staying - 1, 0)  # Ensure it doesn't go below 0
 
                                         updates = {'numberStayingIn': updated_staying}
 
-                                        # Check if the room is now available
-                                        capacity = room_data.get('capacity', 0)
+                                        # Ensure capacity is an integer
+                                        capacity = int(room_data.get('capacity', 0))  # Convert to int if not already
                                         if updated_staying < capacity:
                                             updates['availabilityStatus'] = "AVAILABLE"
+                                        
+                                        # Update the room
+                                        db.child(rooms_path).child(room_key).update(updates)
+
 
                                         # Update the room
                                         db.child(rooms_path).child(room_key).update(updates)
@@ -5302,13 +5708,11 @@ def update_room(request):
 
 
 def ownersTenantsManagement(request):
-    # Get owner context
     context = get_owner_context(request)
     if context is None:
         messages.error(request, 'Email not found in session. Please log in again.')
         return redirect('owner_login')
 
-    # Get owner email from context and generate Firebase-compatible email key
     owner_email = context.get('email')
     owner_email_key = owner_email.replace('.', '_').replace('@', '_at_') if owner_email else None
 
@@ -5316,7 +5720,6 @@ def ownersTenantsManagement(request):
         messages.error(request, 'Owner email not found in session. Please log in again.')
         return redirect('owner_login')
 
-    # Fetch the owner's boardinghouseName
     owner_path = f"ownersBoardingHouse/{owner_email_key}"
     owner_data = db.child(owner_path).get().val()
     owner_boardinghouse_name = owner_data.get('boardinghouseName') if owner_data else None
@@ -5325,119 +5728,245 @@ def ownersTenantsManagement(request):
         messages.error(request, 'Your boarding house name is not set up. Please update your profile.')
         return redirect('ownersProfileSetup')
 
+    # Fetch rejected students
+    students_applied_path = f"{owner_path}/studentsapplied"
+    students_applied_data = db.child(students_applied_path).get().val()
+
+    print(f"Fetched Data: {students_applied_data}")  # Debugging
+
+    rejected_students = []
+
+    if students_applied_data:
+        for student_email_key, rooms in students_applied_data.items():
+            # Check if 'rooms' is a dictionary
+            if isinstance(rooms, dict):
+                for room_key, student_info in rooms.items():  # Iterate through nested room keys
+                    print(f"Checking student: {student_email_key} -> Room: {room_key} -> {student_info}")  # Debugging
+                    if isinstance(student_info, dict) and student_info.get('status') == 'rejected':  # Ensure student_info is a dictionary
+                        rejected_students.append({
+                            'email_key': student_email_key,
+                            'roomName': student_info.get('roomName'),
+                            'status': student_info.get('status'),
+                            'username': student_info.get('username'),
+                            'profile_picture': student_info.get('profile_picture'),
+                            'rejection_reason': student_info.get('rejection_reason', 'N/A'),  # Optional reason
+                        })
+            else:
+                print(f"Invalid room data for student {student_email_key}: {rooms}")  # Debugging invalid structure
+
+    print(f"Rejected Students: {rejected_students}")  # Debugging
+
+    context['rejected_students'] = rejected_students
+    context['rejected_students_count'] = len(rejected_students)
+ 
+
+
+
     if request.method == "POST":
-        print(request.POST)
-        # Handle the student removal logic
         student_id = request.POST.get("student_id")
         email = request.POST.get("email")
         removal_reason = request.POST.get("removalReason")
-        print("Student ID:", student_id)
-        print("Email:", email)
-        print("Removal Reason:", removal_reason)
+
         if not student_id or not email or not removal_reason:
             messages.error(request, "Student ID, email, or removal reason is missing.")
         else:
             try:
-                # Generate Firebase-compatible email key
                 email_key = email.replace('.', '_').replace('@', '_at_')
-
-                # Path to the student's data in Firebase
                 student_path = f"students/{email_key}"
-
-                # Get the student's data
                 student_data = db.child(student_path).get().val()
 
                 if not student_data:
                     messages.error(request, "Student not found.")
                 else:
-                    # Fetch the roomName from the student's data
                     room_name = student_data.get("roomName", "")
-
-                    # Remove specific fields and save the reason for removal
                     fields_to_remove = ["boardinghouseName", "roomName", "schedule_date", "appliedRoomStatus"]
-                    for field in fields_to_remove:
-                        if field in student_data:
-                            db.child(f"{student_path}/{field}").remove()
 
-                    # Add removalReason and removalDate to the student's data
+                    # Remove specific fields
+                    for field in fields_to_remove:
+                        db.child(f"{student_path}/{field}").remove()
+
+                    # Add removal details
                     db.child(student_path).update({
                         "removalReason": removal_reason,
                         "removalDate": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     })
 
-                    # Path to the student's applied data in the owner's node
+                    # Remove application status
                     student_applied_path = f"ownersBoardingHouse/{owner_email_key}/studentsapplied/{email_key}"
-                    student_applied_data = db.child(student_applied_path).get().val()
+                    db.child(f"{student_applied_path}/applyStatus").remove()
 
-                    if student_applied_data and 'applyStatus' in student_applied_data:
-                        # Remove applyStatus from the applied data
-                        db.child(f"{student_applied_path}/applyStatus").remove()
-
-                    # --- Update numberStayingIn ---
+                    # Update room information
                     rooms_path = f"ownersBoardingHouse/{owner_email_key}/rooms"
                     boarding_house_rooms = db.child(rooms_path).get().val()
 
                     if boarding_house_rooms:
-                        if isinstance(boarding_house_rooms, list):
-                            # Handle rooms stored as a list
-                            for room_index, room_data in enumerate(boarding_house_rooms):
-                                if room_data.get("roomName") == room_name:
-                                    current_staying = room_data.get("numberStayingIn", 0)
-                                    updated_staying = max(current_staying - 1, 0)  # Ensure it doesn't go below 0
+                        for room_key, room_data in (boarding_house_rooms.items() if isinstance(boarding_house_rooms, dict) else enumerate(boarding_house_rooms)):
+                            if room_data.get("roomName") == room_name:
+                                # Ensure 'numberStayingIn' is an integer
+                                number_staying_in = int(room_data.get("numberStayingIn", 0))  # Convert to integer
+                                updated_staying = max(number_staying_in - 1, 0)
 
-                                    updates = {"numberStayingIn": updated_staying}
+                                # Ensure 'capacity' is an integer
+                                capacity = int(room_data.get("capacity", 0))  # Convert to integer
+                                
+                                updates = {"numberStayingIn": updated_staying}
+                                if updated_staying < capacity:
+                                    updates["availabilityStatus"] = "AVAILABLE"
+                                
+                                db.child(rooms_path).child(room_key).update(updates)
 
-                                    # Update availabilityStatus if necessary
-                                    capacity = room_data.get("capacity", 0)
-                                    if updated_staying < capacity:
-                                        updates["availabilityStatus"] = "AVAILABLE"
-
-                                    # Update the room in Firebase
-                                    db.child(rooms_path).child(str(room_index)).update(updates)
-
-                        elif isinstance(boarding_house_rooms, dict):
-                            # Handle rooms stored as a dictionary
-                            for room_key, room_data in boarding_house_rooms.items():
-                                if room_data.get("roomName") == room_name:
-                                    current_staying = room_data.get("numberStayingIn", 0)
-                                    updated_staying = max(current_staying - 1, 0)  # Ensure it doesn't go below 0
-
-                                    updates = {"numberStayingIn": updated_staying}
-
-                                    # Update availabilityStatus if necessary
-                                    capacity = room_data.get("capacity", 0)
-                                    if updated_staying < capacity:
-                                        updates["availabilityStatus"] = "AVAILABLE"
-
-                                    # Update the room in Firebase
-                                    db.child(rooms_path).child(room_key).update(updates)
-
-                    # --- Notification Logic ---
-                    # Add a notification under the student's data
+                    # Add notification
                     notifications = db.child("students").child(email_key).child("notifications").get().val() or {}
                     notification_count = len(notifications) + 1
-
-                    # Create the notification message
                     notification_message = (
                         f"You have been removed from {owner_boardinghouse_name} due to: {removal_reason}. "
                         "For more details, contact the management. Thank you."
                     )
-
-                    # Format the current date and time
-                    time_of_notification = datetime.now().strftime("%B %d, %Y %I:%M %p")
-
-                    # Add new notification with both message and timestamp
                     db.child("students").child(email_key).child("notifications").child(f"notification{notification_count}").set({
                         "message": notification_message,
-                        "time_of_notification": time_of_notification
+                        "time_of_notification": datetime.now().strftime("%B %d, %Y %I:%M %p")
                     })
 
-                    messages.success(request, f"Student {email} has been removed. Notification sent to the student.")
+                    # Send email notification
+                    email_subject = "Notice of Removal from Boarding House"
+                    email_body = f"""
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+                        <style>
+                            body {{
+                                font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+                                background-color: #f8d7da;
+                                margin: 0;
+                                padding: 40px 20px;
+                                color: #721c24;
+                                line-height: 1.6;
+                            }}
+                            .envelope {{
+                                max-width: 600px;
+                                margin: 0 auto;
+                                background: linear-gradient(145deg, #ffffff 0%, #f3f4f6 100%);
+                                border-radius: 16px;
+                                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                                overflow: hidden;
+                                position: relative;
+                            }}
+                            .envelope::before {{
+                                content: '';
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                height: 6px;
+                                background: linear-gradient(90deg, #d9534f, #c9302c);
+                            }}
+                            .header {{
+                                background: linear-gradient(135deg, #d9534f, #c9302c);
+                                color: white;
+                                padding: 2rem;
+                                text-align: center;
+                            }}
+                            .header h2 {{
+                                margin: 0;
+                                font-size: 1.75rem;
+                                font-weight: 700;
+                            }}
+                            .content {{
+                                padding: 2rem;
+                            }}
+                            .removal-badge {{
+                                background: linear-gradient(135deg, #c9302c, #ac2925);
+                                color: white;
+                                font-size: 1.5rem;
+                                font-weight: 700;
+                                padding: 0.75rem 2rem;
+                                border-radius: 999px;
+                                display: inline-block;
+                                margin: 1rem 0;
+                                text-transform: uppercase;
+                            }}
+                            .removal-message {{
+                                margin: 1rem 0;
+                                font-size: 1.25rem;
+                                font-weight: 600;
+                                color: #d9534f;
+                                text-align: center;
+                            }}
+                            .details-section {{
+                                background-color: #f8d7da;
+                                border-radius: 12px;
+                                padding: 1.5rem;
+                                margin: 1.5rem 0;
+                                border: 1px solid #f5c6cb;
+                            }}
+                            .details-list {{
+                                list-style: none;
+                                padding: 0;
+                            }}
+                            .details-list li {{
+                                margin-bottom: 1rem;
+                            }}
+                            .footer {{
+                                text-align: center;
+                                padding: 2rem;
+                                background: linear-gradient(180deg, #f5c6cb 0%, #f1b0b7 100%);
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="envelope">
+                            <div class="header">
+                                <h2>Notice of Removal</h2>
+                            </div>
+                            <div class="content">
+                                <center>
+                                    <div class="removal-badge">Removed</div>
+                                </center>
+                                <div class="removal-message">
+                                    You have been removed from: <strong>{owner_boardinghouse_name}</strong>
+                                </div>
+                                <p>Dear {student_data.get('username', 'Student')},</p>
+                                <p>We regret to inform you that your association with the boarding house has been terminated due to the following reason:</p>
+                                <p><strong>{removal_reason}</strong></p>
+                                <div class="details-section">
+                                    <h3>Details</h3>
+                                    <ul class="details-list">
+                                        <li><strong>Boarding House Name:</strong> {owner_boardinghouse_name}</li>
+                                        <li><strong>Room:</strong> {student_data.get('roomName', 'N/A')}</li>
+                                    </ul>
+                                </div>
+                                <p>If you have any questions or require further clarification, please do not hesitate to contact the boarding house management.</p>
+                            </div>
+                            <div class="footer">
+                                <p>Best regards,</p>
+                                <p>{owner_boardinghouse_name} Owner</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+                    try:
+                        send_mail(
+                            email_subject,
+                            email_body,
+                            settings.DEFAULT_FROM_EMAIL,
+                            [email],
+                            fail_silently=False,
+                            html_message=email_body
+                        )
+                        messages.success(request, f"Student {email} has been removed. Notification sent via email and system.")
+                    except Exception as email_error:
+                        print(f"Error sending email: {email_error}")
+                        messages.warning(request, f"Student {email} has been removed, but the email notification could not be sent.")
+
             except Exception as e:
                 print(f"Error removing student: {e}")
-                messages.error(request, "An error occurred while removing the student.")
+                messages.error(request, f"An error occurred while removing the student: {str(e)}")
 
-    # Fetch students from the "students" node
     students_path = "students"
     all_students = db.child(students_path).get().val()
     matched_students = []
@@ -5454,11 +5983,11 @@ def ownersTenantsManagement(request):
                     'email': student_data.get('email')
                 })
 
-    # Add matched students to context
     context['matched_students'] = matched_students
     context['student_count'] = len(matched_students)
-    
+
     return render(request, 'Owner-TenantsManagement.html', context)
+
 
 
 def delete_conversationOwner(request, superadmin_email):
@@ -5764,6 +6293,21 @@ def ownerhomepage(request):
     # Fetch cover photo URL
     cover_photo_url = saved_owner_data.get('coverPhoto') if saved_owner_data else None
 
+    # Fetch the location data
+    try:
+        location_ref = db.child("user_locations").child(email_key).child("details")
+        location_data = location_ref.get().val()
+
+        if location_data:
+            print("Fetched location data:", location_data)  # Debug: Log the fetched location data
+            context['location_data'] = location_data
+        else:
+            print("No location data found for the user.")
+            context['location_data'] = None
+    except Exception as e:
+        print(f"Error fetching location data: {str(e)}")
+        context['location_data'] = None
+
     # Add data to context
     context['total_displayed_rooms'] = total_displayed_rooms
     context['available_rooms'] = available_rooms
@@ -5774,6 +6318,7 @@ def ownerhomepage(request):
     print(f"Context passed to template: {context}")
 
     return render(request, 'Owner-Homepage.html', context)
+
 
 
 
@@ -5928,14 +6473,13 @@ def ownerlodger(request):
                                             for room_index, room_data in enumerate(boarding_house_rooms):
                                                 # Check if the roomName matches the approved room
                                                 if room_data.get("roomName") == room_name:
-                                                    # Increment the numberStayingIn
-                                                    current_number_staying_in = room_data.get("numberStayingIn", 0)
+                                                    # Ensure current_number_staying_in is an integer
+                                                    current_number_staying_in = int(room_data.get("numberStayingIn", 0))  # Convert to int if not already
                                                     updated_number_staying_in = current_number_staying_in + 1
 
-                                                    # Check if the room has a capacity field
-                                                    room_capacity = room_data.get("capacity", 0)
+                                                    # Ensure room_capacity is an integer
+                                                    room_capacity = int(room_data.get("capacity", 0))  # Convert to int if not already
 
-                                                    # Update numberStayingIn
                                                     updates = {"numberStayingIn": updated_number_staying_in}
 
                                                     # Check if the room is full
@@ -5945,30 +6489,26 @@ def ownerlodger(request):
                                                     # Update the room's numberStayingIn and possibly availabilityStatus
                                                     db.child('ownersBoardingHouse').child(email_key).child('rooms').child(str(room_index)).update(updates)
 
-                                        elif isinstance(boarding_house_rooms, dict):
-                                            # Iterate through the dictionary
+                                        if isinstance(boarding_house_rooms, dict):
                                             for room_key, room_data in boarding_house_rooms.items():
-                                                # Check if the roomName matches the approved room
-                                                if room_data.get("roomName") == room_name:
-                                                    # Increment the numberStayingIn
-                                                    current_number_staying_in = room_data.get("numberStayingIn", 0)
-                                                    updated_number_staying_in = current_number_staying_in + 1
+                                                # Ensure current_number_staying_in is an integer
+                                                current_number_staying_in = int(room_data.get("numberStayingIn", 0))  # Convert to int if not already
+                                                updated_number_staying_in = current_number_staying_in + 1
+                                                
+                                                # Ensure room_capacity is an integer
+                                                room_capacity = int(room_data.get("capacity", 0))  # Convert to int if not already
 
-                                                    # Check if the room has a capacity field
-                                                    room_capacity = room_data.get("capacity", 0)
+                                                updates = {"numberStayingIn": updated_number_staying_in}
 
-                                                    # Update numberStayingIn
-                                                    updates = {"numberStayingIn": updated_number_staying_in}
+                                                # Check if the room is full
+                                                if updated_number_staying_in >= room_capacity:
+                                                    updates["availabilityStatus"] = "ROOM FULL"
 
-                                                    # Check if the room is full
-                                                    if updated_number_staying_in >= room_capacity:
-                                                        updates["availabilityStatus"] = "ROOM FULL"
-
-                                                    # Update the room's numberStayingIn and possibly availabilityStatus
-                                                    db.child('ownersBoardingHouse').child(email_key).child('rooms').child(room_key).update(updates)
+                                                db.child('ownersBoardingHouse').child(email_key).child('rooms').child(room_key).update(updates)
 
                                     else:
                                         print("No rooms found for this boarding house.")
+
 
 
 
@@ -6114,7 +6654,7 @@ def ownerlodger(request):
                                                 </div>
                                                 <div class="footer">
                                                     <p>Best regards,</p>
-                                                    <p>Owner Team</p>
+                                                    <p>Boarding House Owner</p>
                                                 </div>
                                             </div>
                                         </body>
@@ -7141,7 +7681,7 @@ def studenthomepage(request):
     if student_email:
         email_key = student_email.replace('.', '_').replace('@', '_at_')
         notifications = db.child("students").child(email_key).child("notifications").get().val()
-        
+
         if notifications:
             current_notification_count = len(notifications)
             last_notification_count = request.session.get('last_notification_count', 0)
@@ -7154,8 +7694,12 @@ def studenthomepage(request):
             # Set last_notification_count to 0 if there are no notifications
             request.session['last_notification_count'] = 0
 
-    # Fetch and prepare boarding house data
+    # Fetch and prepare boarding house data with filters
     try:
+        # Get selected filter from the request (GET or POST based on your form setup)
+        selected_filter = request.GET.get('filter', 'all')  # Default to 'all' if no filter is selected
+        selected_rating = request.GET.get('rating', None)
+
         # Fetch all entries under 'ownersBoardingHouse' and filter for approved boarding houses
         firebase_data = db.child('ownersBoardingHouse').get().val()
         approved_data = {}
@@ -7163,6 +7707,32 @@ def studenthomepage(request):
         if firebase_data:
             for owner_key, owner_data in firebase_data.items():
                 if owner_data.get('boardinghouseStatus') == 'approved':
+                    if selected_filter != "all" and selected_filter:
+                        # Apply filter based on typeOfRental
+                        type_of_rental = owner_data.get('typeOfRental', [])
+                        if selected_filter not in type_of_rental:
+                            continue  # Skip this boarding house if it doesn't match the filter
+                    
+                    # Apply rating filter
+                    if selected_rating:
+                        ratings = owner_data.get('ratings', {})
+                        average_rating = 0
+                        if ratings:
+                            total_rating = sum(rating['rating'] for rating in ratings.values())
+                            average_rating = total_rating / len(ratings) if len(ratings) > 0 else 0
+                        
+                        # Handle different rating conditions
+                        if selected_rating == "2_below" and average_rating > 2:
+                            continue  # Skip if average rating is above 2
+                        if selected_rating == "5" and average_rating < 5:
+                            continue  # Skip if average rating is below 5
+                        if selected_rating == "4" and average_rating < 4:
+                            continue  # Skip if average rating is below 4
+                        if selected_rating == "3" and average_rating < 3:
+                            continue  # Skip if average rating is below 3
+                        if selected_rating == "2" and average_rating < 2:
+                            continue  # Skip if average rating is below 2
+
                     rooms = owner_data.get('rooms', [])
                     
                     # Extract prices and calculate highest and lowest
@@ -7206,8 +7776,15 @@ def studenthomepage(request):
         print(f"Error fetching boardinghouse data: {e}")
         context['approved_boardinghouses'] = {}
 
+    # Pass the selected filter back to the template for highlighting the active filter
+    context['selected_filter'] = selected_filter
+    context['selected_rating'] = selected_rating
+
     # Render the homepage with context containing only approved boarding houses
     return render(request, 'Student-Homepage.html', context)
+
+
+
 
 
 
@@ -7452,6 +8029,39 @@ def student_apply_now(request):
     context['room_is_pending'] = {room_name: (status == "pending") for room_name, status in room_statuses.items()}
 
     return render(request, 'student_apply_now.html', context)
+
+
+def trackLocation(request):
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+    current_url = request.path
+    log_ip_and_url(ip_address, current_url, "student/studenthomepage/student_apply_now/trackLocation")
+
+    # Retrieve the student context
+    context = get_student_context(request)
+
+    if context is None or 'email' not in context:
+        return redirect('student_login')  # Redirect if email not found
+
+    # Get owner_email from POST data
+    owner_email = request.POST.get('ownerEmail')
+
+    if not owner_email:
+        return JsonResponse({"error": "Owner email is required."}, status=400)
+
+    try:
+        # Fetch the owner's location from the database
+        owner_email_key = owner_email.replace('.', '_').replace('@', '_at_')
+        owner_location_ref = db.child("user_locations").child(owner_email_key).child("details")
+        owner_location = owner_location_ref.get().val()
+
+        # Add owner's location to context
+        context['owner_location'] = owner_location
+
+    except Exception as e:
+        context['error'] = str(e)
+
+    return render(request, 'trackLocation.html', context)
+
 
 
 

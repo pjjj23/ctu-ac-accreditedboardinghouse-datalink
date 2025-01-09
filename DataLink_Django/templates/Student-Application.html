@@ -1122,6 +1122,7 @@ hr {
     background-color: #f7fafc;
     color: #4a5568;
     border: 1px solid #e2e8f0;
+    text-decoration: none;
 }
 
 .boardinghouseRemove-modal-cancel:hover {
@@ -1388,15 +1389,15 @@ hr {
                     <option value="relocation">Relocation</option>
                 </select>
             </div>
-            <div class="boardinghouseRemove-modal-footer">
-                <button class="boardinghouseRemove-modal-cancel" onclick="closeBoardinghouseRemoveModal()">Cancel</button> 
+            <div class="boardinghouseRemove-modal-footer"> 
+                <a href="javascript:void(0);" class="boardinghouseRemove-modal-cancel" onclick="closeBoardinghouseRemoveModals()">Cancel</a>
                     <input type="hidden" name="action_type" value="request_removal">
                     <input type="hidden" name="roomName" value="{{ application.roomName }}">
                     <input type="hidden" name="ownerEmail" value="{{ application.boardinghouseOwnerEmail }}">    
                 <button type="submit" class="boardinghouseRemove-modal-submit">Submit</button> 
+            </form> 
             </div>
-        </div>
-    </form>
+        </div> 
     </div>
 {% elif appliedRoomStatus == "request for removal is pending" %}
     <div class="boardinghouseApprovedOnly-sticky-card">
@@ -2185,5 +2186,9 @@ document.addEventListener("keydown", function(e) {
         closeBoardinghouseRemoveModal();
     }
 });
+
+function closeBoardinghouseRemoveModals() {
+        document.getElementById("boardinghouseRemoveModal").style.display = "none";
+    }
 </script>
 {% endblock %}

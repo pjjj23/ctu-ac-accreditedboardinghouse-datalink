@@ -44,8 +44,11 @@ urlpatterns=[
     path('sao/saohomepage/view_owners/view_owners_boarding_house', views.view_owners_boarding_house, name='view_owners_boarding_house'),
     path('sao/sao_forgotpassword/', views.sao_forgotpassword, name='sao_forgotpassword'),
     path('sao/sao_login/sao_verify_otp/', views.sao_verify_otp, name='sao_verify_otp'),
-    path('saologout/', views.saologout, name='saologout'),
+    path('sao/generatingReports/', views.generatingReports, name='generatingReports'),
+    path('sao/generateStudentReports/', views.generateStudentReports, name='generateStudentReports'), 
      
+    path('saologout/', views.saologout, name='saologout'),
+    path('download_csv/', views.download_csv, name='download_csv'),
     
     path('undoactions/rejectstudents', views.rejectstudents, name='rejectstudents'),
     path('undoactions/rejectowners', views.rejectowners, name='rejectowners'),
@@ -53,7 +56,8 @@ urlpatterns=[
     path('undoactions/disableowners', views.disableowners, name='disableowners'),
     path('undoactions/removestudents', views.removestudents, name='removestudents'),
     path('undoactions/removeowners', views.removeowners, name='removeowners'),
- 
+    path('undoactions/removesao', views.removesao, name='removesao'),
+     
      
     #This is for Owner
     path('owner/owner_login/', views.owner_login, name='owner_login'),
@@ -66,7 +70,14 @@ urlpatterns=[
     path('owner/ownerhomepage/message_owner/delete_conversationOwner/<str:superadmin_email>/', views.delete_conversationOwner, name='delete_conversationOwner'),
     path('owner/ownerhomepage/owner_message_students', views.owner_message_students, name='owner_message_students'),
     path('owner/ownerhomepage/owner_message_students/delete_conversation_by_owner_student/<str:student_email>/', views.delete_conversation_by_owner_student, name='delete_conversation_by_owner_student'),
-     
+    
+    path("owner/ownerhomepage/ownerSignUpSecondStep/view_images/", views.view_images, name="view_images"),
+    
+
+    path("owner/ownerhomepage/ownerSignUpSecondStep/location/", views.location_form, name="location_form"),
+    path("save-location/", views.save_location, name="save_location"),
+
+
     path('owner/ownerhomepage/ownersRoomManagement', views.ownersRoomManagement, name='ownersRoomManagement'),
     path('owner/ownerhomepage/ownersTenantsManagement', views.ownersTenantsManagement, name='ownersTenantsManagement'),
     path('owner/ownerlodger/', views.ownerlodger, name='ownerlodger'),
@@ -87,6 +98,7 @@ urlpatterns=[
     path('studentbase/', views.studentbase, name='studentbase'),
     path('student/studenthomepage/', views.studenthomepage, name='studenthomepage'),
     path('student/studenthomepage/student_apply_now', views.student_apply_now, name='student_apply_now'),
+    path('student/studenthomepage/student_apply_now/trackLocation', views.trackLocation, name='trackLocation'),
     path('student/studenthomepage/student_message', views.student_message, name='student_message'),
     path('student/studenthomepage/student_message/delete_conversation/<str:superadmin_email>/', views.delete_conversation, name='delete_conversation'),
     path('student/studenthomepage/owner_message', views.owner_message, name='owner_message'),

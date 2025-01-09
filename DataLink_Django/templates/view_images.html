@@ -1,0 +1,390 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Images</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/CTU-logo-BH.png' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Modern Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            padding: 2rem;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 2rem;
+            text-align: center;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #4a5568;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Container Styles */
+        div {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        /* Image Card Styles */
+        .image-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        /* Button & Link Styles */
+        a {
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn {
+            background: #fff;
+            color: #e53e3e;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .remove-btn:hover {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #4299e1;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(66, 153, 225, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:before {
+            content: '←';
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #3182ce;
+            transform: translateX(2px);
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
+        }
+
+        .back-btn:hover:before {
+            transform: translateX(-4px);
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                top: 15px;
+                left: 15px;
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 8px 14px;
+            }
+
+            /* Adjust main content padding to prevent overlap */
+            body {
+                padding-top: 60px;
+            }
+        }
+
+        /* Empty State Styles */
+        p {
+            text-align: center;
+            color: #718096;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px dashed #e2e8f0;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            div {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            div {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .successAnderrorMessagesPoppedup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 380px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateX(100px) translateY(-10px);
+            animation: successAnderrorMessagesPoppedup-slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        .successAnderrorMessagesPoppedup.success {
+            border-left: 5px solid #10B981;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05), rgba(255, 255, 255, 0.95));
+        }
+
+        .successAnderrorMessagesPoppedup.error {
+            border-left: 5px solid #EF4444;
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.05), rgba(255, 255, 255, 0.95));
+        }
+
+        .successAnderrorMessagesPoppedup.slideOut {
+            animation: successAnderrorMessagesPoppedup-slideOut 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        .successAnderrorMessagesPoppedup-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .successAnderrorMessagesPoppedup:hover .successAnderrorMessagesPoppedup-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .success .successAnderrorMessagesPoppedup-icon {
+            color: #10B981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .error .successAnderrorMessagesPoppedup-icon {
+            color: #EF4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .successAnderrorMessagesPoppedup-content {
+            color: #1F2937;
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.5;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .successAnderrorMessagesPoppedup::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: inherit;
+            filter: blur(4px);
+            opacity: 0.3;
+            border-radius: 50%;
+        }
+
+        @keyframes successAnderrorMessagesPoppedup-slideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(100px) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-10px) translateY(0);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        @keyframes successAnderrorMessagesPoppedup-slideOut {
+            0% {
+                opacity: 1;
+                transform: translateX(0) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(100px) translateY(-10px);
+            }
+        }
+        .successAnderrorMessagesPoppedup + .successAnderrorMessagesPoppedup {
+            margin-top: 15px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="successAnderrorMessagesPoppedup {% if message.tags %}{{ message.tags }}{% endif %}">
+                    <div class="successAnderrorMessagesPoppedup-icon">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="successAnderrorMessagesPoppedup-content">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <h1>Images of Amenities and Documents</h1> 
+    <h2>Amenities</h2>
+{% if amenities %}
+    <div>
+        {% for amenity in amenities %}
+            <div class="image-card">
+                <img src="{{ amenity }}" alt="Amenity Image">
+                <a href="?remove_image={{ amenity|urlencode }}" class="remove-btn">Remove</a>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No amenities available.</p>
+{% endif %}
+
+<h2>Documents</h2>
+{% if documents %}
+    <div>
+        {% for document in documents %}
+            <div class="image-card">
+                <img src="{{ document }}" alt="Document Image">
+                <a href="?remove_image={{ document|urlencode }}" class="remove-btn">Remove</a>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No documents available.</p>
+{% endif %}
+
+    <a href="{% url 'ownerSignUpSecondStep' %}" class="back-btn">Back to Home</a>
+
+    <script>
+        const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
+    
+    messages.forEach(message => {
+        // Set timeout to remove message after 3 seconds
+        setTimeout(() => {
+            message.classList.add('slideOut');
+            
+            // Remove element after animation completes
+            message.addEventListener('animationend', function(e) {
+                if (e.animationName === 'successAnderrorMessagesPoppedup-slideOut') {
+                    message.remove();
+                }
+            });
+        }, 3000);
+    });
+    </script>
+</body>
+</html>
