@@ -1814,6 +1814,45 @@ def update_days_login_sao(request):
 
 
 
+
+def trackingLocation(request):
+    ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
+    current_url = request.path
+    log_ip_and_url(ip_address, current_url, "sao/saohomepage/view_owners/view_owners_boarding_house/trackingLocation")
+
+    # Retrieve the student context
+    context = get_sao_context(request)
+
+    if context is None or 'email' not in context:
+        return redirect('sao_login')  # Redirect if email not found
+
+    # Get owner_email from POST data
+    owner_email = request.POST.get('ownerEmail')
+
+    if not owner_email:
+        return JsonResponse({"error": "Owner email is required."}, status=400)
+
+    try:
+        # Fetch the owner's location from the database
+        owner_email_key = owner_email.replace('.', '_').replace('@', '_at_')
+        owner_location_ref = db.child("user_locations").child(owner_email_key).child("details")
+        owner_location = owner_location_ref.get().val()
+
+        # Add owner's location to context
+        context['owner_location'] = owner_location
+
+    except Exception as e:
+        context['error'] = str(e)
+
+    return render(request, 'trackingLocation.html', context)
+
+
+
+
+
+
+
+
 def saohomepage(request):
     ip_address = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR')
     current_url = request.path
@@ -5139,7 +5178,28 @@ def location_form(request):
         messages.error(request, 'Email not found in session. Please log in again.')
         return redirect('owner_login')
 
+    try:
+        owner_email = context['email']
+        owner_email_key = owner_email.replace('.', '_').replace('@', '_at_')
+
+        # Fetch the location data from Firebase
+        location_ref = db.child("user_locations").child(owner_email_key).child("details")
+        location_data = location_ref.get()
+
+        # Check if location data exists
+        if location_data.val():  # Ensure you call `.val()` on the PyreResponse object
+            context["location_data"] = location_data.val()
+        else:
+            context["location_data"] = None
+
+    except Exception as e:
+        messages.error(request, f"Error fetching location data: {str(e)}")
+        context["location_data"] = None
+
     return render(request, "location_form.html", context)
+
+
+
 
 @csrf_exempt
 def save_location(request):
@@ -5178,7 +5238,7 @@ def save_location(request):
             })
 
             # Add success message
-            messages.success(request, "Location saved successfully!")
+            messages.success(request, "Location saved successfully!") 
             return JsonResponse({"message": "Location saved successfully!"}, status=200)
 
         except Exception as e:
@@ -5221,7 +5281,8 @@ def save_location(request):
 
 
 
-
+def meetTheDevs(request):
+    return render(request, "meetTheDevs.html")
 
 
 
@@ -8061,6 +8122,15 @@ def trackLocation(request):
         context['error'] = str(e)
 
     return render(request, 'trackLocation.html', context)
+
+
+
+
+
+
+
+
+
 
 
 

@@ -427,6 +427,9 @@
       </form>
     </div>
   </div>
+  <script type="application/json" id="location-data">
+    {{ location_data|safe }}
+</script>
 
   <script>
     let map; // Declare map globally
@@ -547,32 +550,35 @@ document.getElementById("saveLocation").addEventListener("click", () => {
   const road = document.getElementById("road").value;
 
   fetch("/save-location/", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "X-CSRFToken": "{{ csrf_token }}",
-  },
-  body: JSON.stringify({
-    latitude,
-    longitude,
-    country,
-    province,
-    road,
-  }),
-})
-  .then((response) => response.json())
-  .then((data) => {
-    if (data.reload) {
-      // Reload the page to display Django messages
-      window.location.reload();
-    }
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": "{{ csrf_token }}",
+    },
+    body: JSON.stringify({
+      latitude,
+      longitude,
+      country,
+      province,
+      road,
+    }),
   })
-  .catch((error) => {
-    console.error("Error saving location:", error);
-  });
-
-
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message === "Location saved successfully!") {
+        // Redirect to a new page after successful save
+        window.location.href = "{% url 'ownerSignUpSecondStep' %}"; // Replace "/dashboard/" with your target URL
+      } else {
+        console.error("Save failed:", data);
+        alert(data.error || "An error occurred while saving the location.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving location:", error);
+      alert("Failed to save location. Please try again.");
+    });
 });
+
 
 // Initialize map on page load
 window.initMap = initMap;
@@ -598,6 +604,30 @@ const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
     function ownerhome(){
       window.location.href="{% url 'ownerSignUpSecondStep' %}"
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+  const locationDataElement = document.getElementById("location-data");
+  const locationData = locationDataElement ? JSON.parse(locationDataElement.textContent) : null;
+
+  if (locationData) {
+    const { latitude, longitude, country, province, road } = locationData;
+
+    // Populate input fields
+    document.getElementById("latitude").value = latitude;
+    document.getElementById("longitude").value = longitude;
+    document.getElementById("country").value = country;
+    document.getElementById("province").value = province;
+    document.getElementById("road").value = road;
+
+    // Update map
+    const userLocation = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
+    map.setCenter(userLocation);
+    map.setZoom(18); // Zoom to street level
+    marker.setPosition(userLocation);
+  }
+});
+
+
   </script>
 
   <!-- Google Maps API --> 

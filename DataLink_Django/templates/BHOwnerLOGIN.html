@@ -484,6 +484,409 @@
                 height: 16px;
             }
         }
+
+        
+.termsConditionsModal-trigger {
+            text-decoration: none; 
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s ease;
+        }
+
+        .termsConditionsModal-trigger:hover {
+            color: var(--hover-color);
+        }
+
+        .termsConditionsModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .termsConditionsModal.termsConditionsModal-active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .termsConditionsModal-content {
+            background-color: #ffffff;
+            margin: auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .termsConditionsModal.termsConditionsModal-active .termsConditionsModal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .termsConditionsModal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .termsConditionsModal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .termsConditionsModal-closeButton {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+            transition: color 0.2s ease;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .termsConditionsModal-closeButton:hover {
+            color: #2d3748;
+        }
+
+        .termsConditionsModal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .termsConditionsModal-footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .termsConditionsModal-button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .termsConditionsModal-acceptButton {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+        }
+
+        .termsConditionsModal-acceptButton:hover {
+            background-color: #3182ce;
+        }
+
+        .termsConditionsModal-declineButton {
+            background-color: transparent;
+            color: #718096;
+            border: 1px solid #cbd5e0;
+        }
+
+        .termsConditionsModal-declineButton:hover {
+            background-color: #f7fafc;
+            color: #2d3748;
+        }
+
+        .termsConditionsModal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .termsConditionsModal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .termsConditionsModal-body::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .termsConditionsModal-body::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+
+        .privacyPolicyModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .privacyPolicyModal.privacyPolicyModal-active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .privacyPolicyModal-content {
+            background-color: #ffffff;
+            margin: auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .privacyPolicyModal.privacyPolicyModal-active .privacyPolicyModal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .privacyPolicyModal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .privacyPolicyModal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .privacyPolicyModal-closeButton {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+            transition: color 0.2s ease;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .privacyPolicyModal-closeButton:hover {
+            color: #2d3748;
+        }
+
+        .privacyPolicyModal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .privacyPolicyModal-footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .privacyPolicyModal-button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .privacyPolicyModal-acceptButton {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+        }
+
+        .privacyPolicyModal-acceptButton:hover {
+            background-color: #3182ce;
+        }
+
+        .privacyPolicyModal-declineButton {
+            background-color: transparent;
+            color: #718096;
+            border: 1px solid #cbd5e0;
+        }
+
+        .privacyPolicyModal-declineButton:hover {
+            background-color: #f7fafc;
+            color: #2d3748;
+        }
+
+        .privacyPolicyModal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .privacyPolicyModal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .privacyPolicyModal-body::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .privacyPolicyModal-body::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        .helpModal-trigger {
+            text-decoration: none; 
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s ease;
+        }
+
+        .helpModal-trigger:hover {
+            color: var(--hover-color);
+        }
+
+        .helpModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .helpModal.helpModal-active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .helpModal-content {
+            background-color: #ffffff;
+            margin: auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .helpModal.helpModal-active .helpModal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .helpModal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .helpModal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .helpModal-closeButton {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+            transition: color 0.2s ease;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .helpModal-closeButton:hover {
+            color: #2d3748;
+        }
+
+        .helpModal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .helpModal-section {
+            margin-bottom: 24px;
+        }
+
+        .helpModal-sectionTitle {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .helpModal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .helpModal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .helpModal-body::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .helpModal-body::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+
     </style>
 </head>
 <body>
@@ -531,9 +934,11 @@
                                     Remember me
                             </label>
                         </div>
-                        <button type="submit">
+                        <button type="submit" id="loginButton" onclick="disableButton(event)">
                             <i class="fas fa-sign-in-alt"></i> Login
-                        </button>
+                        </button> 
+
+
                         <div class="links">
                             <a href="{% url 'owner_forgotpassword' %}"><i class="fas fa-question-circle"></i> Forgot Password?</a>
                             <a href="{% url 'ownerSignUpFirstStep' %}"><i class="fas fa-user-plus"></i> Sign Up</a>
@@ -546,13 +951,126 @@
             </div>
         </main>
         <footer>
-            <a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
-            <a href="#"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+            
+<a href="#" class="privacyPolicyModal-trigger" onclick="privacyPolicyModal_open(); return false;">
+    <i class="fas fa-shield-alt"></i> Privacy Policy
+</a>
+<a href="#" class="termsConditionsModal-trigger" onclick="termsConditionsModal_open(); return false;">
+    <i class="fas fa-file-contract"></i> Terms & Conditions
+</a>
             <a href="{% url 'aboutus' %}"><i class="fa-solid fa-info"></i></i></i> About Us</a>
-            <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+            <a href="#" class="helpModal-trigger" onclick="helpModal_open(); return false;">
+                <i class="fas fa-question-circle"></i> Help
+            </a>
             <a href="{% url 'owner_report_problem' %}"><i class="fa-solid fa-bug"></i></i> Report a Problem</a>
         </footer> 
     </div> 
+
+
+
+    
+    <div class="privacyPolicyModal" id="privacyPolicyModal">
+        <div class="privacyPolicyModal-content">
+            <div class="privacyPolicyModal-header">
+                <h2 class="privacyPolicyModal-title">Privacy Policy</h2> 
+            </div>
+            <div class="privacyPolicyModal-body">
+                <div class="tab-pane fade" id="v-pills-terms" role="tabpanel" aria-labelledby="v-pills-terms-tab">
+                    <div class="col-12 text-center mb-4">
+                        <h2 style="font-weight: bold; color: #007bff;">CTU-ARGAO Student Accommodation Finder</h2>
+                        <p style="font-size: 1.2rem; color: #6c757d;">Your trusted platform for finding student accommodations near campus</p>
+                    </div>
+                    <div class="card shadow-sm border-light p-4" style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0;">
+                      <h4 style="font-weight: bold; color: #007bff;">Terms and Conditions</h4>
+                      <p style="color: #6c757d;">Please read the following terms and conditions carefully before using the platform.</p>
+                      <hr style="border-top: 1px solid #e0e0e0;">
+                      <h5 style="color: #007bff;">General Terms</h5>
+                      <p style="color: #6c757d;">By using our platform, you agree to abide by the terms and conditions outlined in this document. If you do not agree with these terms, please refrain from using our services.</p>
+                      <h5 style="color: #007bff;">Account Creation</h5>
+                      <p style="color: #6c757d;">Users must be verified students of CTU-ARGAO. Providing false information or unauthorized account access may result in the termination of your account.</p>
+                      <h5 style="color: #007bff;">Use of Services</h5>
+                      <p style="color: #6c757d;">You may use our platform to find accommodation options, but must adhere to our guidelines. You are responsible for maintaining the confidentiality of your account details.</p>
+                      <h5 style="color: #007bff;">Liability</h5>
+                      <p style="color: #6c757d;">CTU-ARGAO Student Accommodation Finder is not responsible for disputes between students and property owners. Always review the terms and agreements with the property owners directly.</p>
+                  </div>
+                  </div>
+            </div>
+            <div class="privacyPolicyModal-footer">
+                <button class="privacyPolicyModal-button privacyPolicyModal-declineButton" onclick="privacyPolicyModal_close()">Close</button> 
+            </div>
+        </div>
+    </div>
+
+    <div class="termsConditionsModal" id="termsConditionsModal">
+        <div class="termsConditionsModal-content">
+            <div class="termsConditionsModal-header">
+                <h2 class="termsConditionsModal-title">Terms & Conditions</h2> 
+            </div>
+            <div class="termsConditionsModal-body">
+                <div class="tab-pane fade" id="v-pills-terms" role="tabpanel" aria-labelledby="v-pills-terms-tab">
+                    <div class="col-12 text-center mb-4">
+                        <h2 style="font-weight: bold; color: #007bff;">CTU-ARGAO Student Accommodation Finder</h2>
+                        <p style="font-size: 1.2rem; color: #6c757d;">Your trusted platform for finding student accommodations near campus</p>
+                    </div>
+                    <div class="card shadow-sm border-light p-4" style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0;">
+                      <h4 style="font-weight: bold; color: #007bff;">Terms and Conditions</h4>
+                      <p style="color: #6c757d;">Please read the following terms and conditions carefully before using the platform.</p>
+                      <hr style="border-top: 1px solid #e0e0e0;">
+                      <h5 style="color: #007bff;">General Terms</h5>
+                      <p style="color: #6c757d;">By using our platform, you agree to abide by the terms and conditions outlined in this document. If you do not agree with these terms, please refrain from using our services.</p>
+                      <h5 style="color: #007bff;">Account Creation</h5>
+                      <p style="color: #6c757d;">Users must be verified students of CTU-ARGAO. Providing false information or unauthorized account access may result in the termination of your account.</p>
+                      <h5 style="color: #007bff;">Use of Services</h5>
+                      <p style="color: #6c757d;">You may use our platform to find accommodation options, but must adhere to our guidelines. You are responsible for maintaining the confidentiality of your account details.</p>
+                      <h5 style="color: #007bff;">Liability</h5>
+                      <p style="color: #6c757d;">CTU-ARGAO Student Accommodation Finder is not responsible for disputes between students and property owners. Always review the terms and agreements with the property owners directly.</p>
+                  </div>
+                  </div>
+            </div>
+            <div class="termsConditionsModal-footer">
+                <button class="termsConditionsModal-button termsConditionsModal-declineButton" onclick="termsConditionsModal_close()">Close</button> 
+            </div>
+        </div>
+    </div>
+
+    <div class="helpModal" id="helpModal">
+        <div class="helpModal-content">
+            <div class="helpModal-header">
+                <h2 class="helpModal-title">
+                    <i class="fas fa-question-circle"></i>
+                    Help Center
+                </h2> 
+            </div>
+            <div class="helpModal-body">
+                <div class="helpModal-section">
+                    <h3 class="helpModal-sectionTitle">
+                        <i class="fas fa-book"></i>
+                        Getting Started
+                    </h3>
+                    <p>Welcome to our help center! If you think we have not answered your question, please contact us. Cheers! </p>
+                </div>
+
+                <div class="helpModal-section">
+                    <h3 class="helpModal-sectionTitle">
+                        <i class="fas fa-tools"></i>
+                        Common Problem
+                    </h3>
+                    <h6 style="color: #007bff;">How do I create an account?</h6>
+                    <p style="color: #6c757d;">To create an account, go to this link. Take note: You will be logged out if you click the link. <a href="https://abadddy.pythonanywhere.com/owner/owner_login/ownerSignUpFirstStep/">Click me to redirect to Creating Account</a></p>
+                    <br><h6 style="color: #007bff;">I forgot my password, how to retrieve account?</h6>
+                    <p style="color: #6c757d;">If you forgot your password, please direct go to forgot password. Enter information needed to clarify that it's you. You can click the link to redirect <a href="https://abadddy.pythonanywhere.com/owner/owner_forgotpassword/">Click me to redirect to Forgot Password</a></p>
+                    <br><h6 style="color: #007bff;">I can't login, it says "Your account has been banned. To contact the administrator, click Report below.".</h6>
+                    <p style="color: #6c757d;">If you experience this case, you're banned by the superadmins. Banned accounts are not prohibited to login to the system. If you think it is a mistake please report it immediately. Click report a problem from below or click the link <a href="https://abadddy.pythonanywhere.com/owner/owner_login/owner_report_problem">Report a problem</a></p>
+                     
+                </div>  
+            </div>
+            <div class="termsConditionsModal-footer">
+                <button class="termsConditionsModal-button termsConditionsModal-declineButton" onclick="help_close()">Close</button> 
+            </div>
+        </div>
+    </div>
+
+
 
     <div class="messages">
         {% if messages %}
@@ -608,6 +1126,117 @@ const messages = document.querySelectorAll('.successAnderrorMessagesPoppedup');
             icon.classList.toggle('fa-eye-slash');
         }
     
+
+        
+
+
+        const privacyPolicyModal = document.getElementById('privacyPolicyModal');
+
+        function privacyPolicyModal_open() {
+            privacyPolicyModal.classList.add('privacyPolicyModal-active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function privacyPolicyModal_close() {
+            privacyPolicyModal.classList.remove('privacyPolicyModal-active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function privacyPolicyModal_accept() {
+            // Add your accept policy logic here
+            console.log('Privacy policy accepted');
+            privacyPolicyModal_close();
+        }
+
+        // Close modal when clicking outside
+        privacyPolicyModal.addEventListener('click', (e) => {
+            if (e.target === privacyPolicyModal) {
+                privacyPolicyModal_close();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && privacyPolicyModal.classList.contains('privacyPolicyModal-active')) {
+                privacyPolicyModal_close();
+            }
+        });
+
+        const termsConditionsModal = document.getElementById('termsConditionsModal');
+
+        function termsConditionsModal_open() {
+            termsConditionsModal.classList.add('termsConditionsModal-active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function termsConditionsModal_close() {
+            termsConditionsModal.classList.remove('termsConditionsModal-active');
+            document.body.style.overflow = 'auto';
+        }
+
+        const helpModald = document.getElementById('helpModal');
+        function help_close() {
+            helpModald.classList.remove('helpModal-active');
+            document.body.style.overflow = 'auto';
+        } 
+
+        function termsConditionsModal_accept() {
+            // Add your accept terms logic here
+            console.log('Terms and conditions accepted');
+            termsConditionsModal_close();
+        }
+
+        // Close modal when clicking outside
+        termsConditionsModal.addEventListener('click', (e) => {
+            if (e.target === termsConditionsModal) {
+                termsConditionsModal_close();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && termsConditionsModal.classList.contains('termsConditionsModal-active')) {
+                termsConditionsModal_close();
+            }
+        });
+
+        const helpModal = document.getElementById('helpModal');
+
+        function helpModal_open() {
+            helpModal.classList.add('helpModal-active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function helpModal_close() {
+            helpModal.classList.remove('helpModal-active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        helpModal.addEventListener('click', (e) => {
+            if (e.target === helpModal) {
+                helpModal_close();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && helpModal.classList.contains('helpModal-active')) {
+                helpModal_close();
+            }
+        });
+
+        function disableButton(event) {
+        // Prevent double submission
+        const button = document.getElementById('loginButton');
+        button.disabled = true; // Disable the button
+        button.style.opacity = 0.6; // Add opacity
+        button.innerHTML = 'Logging in...'; // Show spinner and message
+
+        // Ensure form submits after disabling button
+        const form = document.getElementById('loginForm');
+        form.submit(); // Submit the form manually
+    }
     </script>
 </body>
 </html>

@@ -6,6 +6,8 @@ from django.conf import settings
 urlpatterns=[
     path('', views.home, name='home'),
     path('aboutus/', views.aboutus, name='aboutus'),
+    path('aboutus/meetTheDevs/', views.meetTheDevs, name='meetTheDevs'),
+     
     path('bonbon/<str:user_id>/', views.pp, name='pp'),
     path('ownersRoomManagement/update/', views.update_room, name='update_room'),
     #Messages/Chats 
@@ -49,6 +51,7 @@ urlpatterns=[
      
     path('saologout/', views.saologout, name='saologout'),
     path('download_csv/', views.download_csv, name='download_csv'),
+    path('sao/saohomepage/view_owners/view_owners_boarding_house/trackingLocation', views.trackingLocation, name='trackingLocation'),
     
     path('undoactions/rejectstudents', views.rejectstudents, name='rejectstudents'),
     path('undoactions/rejectowners', views.rejectowners, name='rejectowners'),
